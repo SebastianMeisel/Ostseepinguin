@@ -29,11 +29,11 @@ S_COLORS=never
 ** CPU
 *** Utilization 
 ***** vmstat
-~vmstat~, when called without further option shows information on the CPU usage.
+~vmstat~, when called without further options shows information on the CPU usage.
 We are interested in the 13th, 14th and 17th column:
-- US: user time - time CPU time consumed by user processes.
-- SY: system time - time CPU time consumed by system processes.
-- st: stolen time  - time time the virtual machine process are waiting on the physical CPU for their CPU time.
+- US: user time -  CPU time consumed by user processes.
+- SY: system time -  CPU time consumed by system processes.
+- st: stolen time  -  time the virtual machine process are waiting on the physical CPU for their CPU time.
 
 #+BEGIN_SRC bash 
   vmstat 1 3 | awk '{ print  $13 " " $14 " " $17}' | column -tc3
@@ -51,7 +51,7 @@ In the snippet I used awk to only print the columns I need, separated be a space
 
 **** sar
 For permanent monitor ~sasd~ from the ~sysstat~ package can be used. ~sar~ is used, to read the collected data.
-Without the option ~-u~ (or without, as it is the default) you get information on the CPU. We are interested in all columns but ~%idle~ and ~%iowait~.
+With the option ~-u~ (or without, as it is the default) you get information on the CPU. We are interested in all columns but ~%idle~ and ~%iowait~.
 You can choose a time period of time with ~-s~ (start) and ~-e~(end)
 
 #+BEGIN_SRC bash
@@ -82,7 +82,7 @@ sar -P 1,3 -s 10:00 -e 10:20 | awk 'NR > 1 {print $1 " " $2 " " $3 " " $4 " " $6
 | Durchschnitt: |   1 | 2,42  | 0,00  | 0,05    |
 | Durchschnitt: |   3 | 2,34  | 0,00  | 0,04    |
 
-In the I printed only the date (4th column) from the first line of the output: ~NR == 1 {print $4}~.
+In the snippet I printed only the date (4th column) from the first line of the output: ~NR == 1 {print $4}~.
 For the following lines I printed all but the 5th and 7th column: ~NR > 1 { print ...}~.
 
 **** ps (top | htop)
