@@ -1,0 +1,16 @@
+# add search pattern to man
+
+manual=$(which man)
+
+function man () {
+    section="" # man sections 
+    pattern="" # search patterns
+
+    # check if section is given
+    (( $1 > 0 && $1 <=9 )) && sec=$1 && shift
+
+    # check if search pattern is given
+    [[ -n $2 ]] && pattern="-p $2"
+
+    $manual $sec $1 | less $pattern
+}
