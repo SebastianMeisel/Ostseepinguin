@@ -1,0 +1,1599 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-03-27 Sa 10:10 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Sebastian Meisel" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga83b1cb">1. USE Method</a>
+<ul>
+<li><a href="#org8b9ed8b">1.1. CPU</a>
+<ul>
+<li><a href="#org7a6becc">1.1.1. Utilization</a></li>
+<li><a href="#org932686f">1.1.2. Saturation</a></li>
+<li><a href="#org6a13d66">1.1.3. Errors</a></li>
+</ul>
+</li>
+<li><a href="#org65b3645">1.2. Memory</a>
+<ul>
+<li><a href="#org2bfbcad">1.2.1. Utilization</a></li>
+<li><a href="#orge003729">1.2.2. Saturation</a></li>
+<li><a href="#org4996a54">1.2.3. Error</a></li>
+</ul>
+</li>
+<li><a href="#org8a3867a">1.3. Network</a>
+<ul>
+<li><a href="#orgd5bf7d2">1.3.1. Utilization</a></li>
+<li><a href="#orga67d0cd">1.3.2. Saturation</a></li>
+<li><a href="#orge3e67a9">1.3.3. Error</a></li>
+</ul>
+</li>
+<li><a href="#org26ded26">1.4. Storage</a>
+<ul>
+<li><a href="#org6d76077">1.4.1. I/O</a></li>
+<li><a href="#orgf3b316a">1.4.2. Capacity</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga83b1cb" class="outline-2">
+<h2 id="orga83b1cb"><span class="section-number-2">1</span> USE Method</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+To troubleshoot performance issues on a system it is important to use a systematic approach.
+The USE Method by Greeg Brendan is such and approach. 
+</p>
+
+<p>
+Look at <a href="https://brendangregg.com/usemethod.html">https://brendangregg.com/usemethod.html</a> (http only) for details. 
+</p>
+
+<p>
+For that we want to evaluate
+</p>
+
+<p>
+1 Utilization
+2 Saturation
+3 Errors
+</p>
+
+<p>
+for all system elements.  
+</p>
+
+<p>
+In this file I go through the main system resources and show tools check on this three topics. I loosly follow Gregg Brendan checklist: <a href="https://brendangregg.com/USEmethod/use-linux.html">https://brendangregg.com/USEmethod/use-linux.html</a>.
+</p>
+
+
+<p>
+Before I start, I have to set my locals to English (instead of German, that I normally use) for the commands in this file.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #f78fe7;">export</span> <span style="color: #00d3d0;">LC_ALL</span>=en_US.utf8
+<span style="color: #00d3d0;">S_COLORS</span>=never
+</pre>
+</div>
+
+<pre class="example">
+bash: bind: Warnung: Zeileneditierung ist nicht aktiviert.
+bash: bind: Warnung: Zeileneditierung ist nicht aktiviert.
+bash: bind: Warnung: Zeileneditierung ist nicht aktiviert.
+bash: bind: Warnung: Zeileneditierung ist nicht aktiviert.
+bash: bind: Warnung: Zeileneditierung ist nicht aktiviert.
+unsetopt: Befehl nicht gefunden.
+unsetopt: Befehl nicht gefunden.
+unsetopt: Befehl nicht gefunden.
+whence: Befehl nicht gefunden.
+whence: Befehl nicht gefunden.
+</pre>
+</div>
+
+<div id="outline-container-org8b9ed8b" class="outline-3">
+<h3 id="org8b9ed8b"><span class="section-number-3">1.1</span> CPU</h3>
+<div class="outline-text-3" id="text-1-1">
+</div>
+<div id="outline-container-org7a6becc" class="outline-4">
+<h4 id="org7a6becc"><span class="section-number-4">1.1.1</span> Utilization</h4>
+<div class="outline-text-4" id="text-1-1-1">
+</div>
+<ol class="org-ol">
+<li><a id="org6abd286"></a>vmstat<br />
+<div class="outline-text-6" id="text-1-1-1-0-1">
+<p>
+<code>vmstat</code>, when called without further option shows information on the CPU usage.
+We are interested in the 13th, 14th and 17th column:
+</p>
+<ul class="org-ul">
+<li>US: user time - time CPU time consumed by user processes.</li>
+<li>SY: system time - time CPU time consumed by system processes.</li>
+<li>st: stolen time  - time time the virtual machine process are waiting on the physical CPU for their CPU time.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash">vmstat 1 3 | awk <span style="color: #72a4ff;">'{ print  $13 " " $14 " " $17}'</span> | column -tc3
+</pre>
+</div>
+
+<pre class="example">
+US  SY  st
+8   3   0
+3   1   0
+3   1   0
+
+</pre>
+
+<p>
+In the snippet I used awk to only print the columns I need, separated be a space. The column command is used for a better layout:
+-t: fill columns.
+-c3: three columns.
+</p>
+</div>
+</li>
+</ol>
+
+<li><a id="orgf2cb41c"></a>sar<br />
+<div class="outline-text-5" id="text-1-1-1-1">
+<p>
+For permanent monitor <code>sasd</code> from the <code>sysstat</code> package can be used. <code>sar</code> is used, to read the collected data.
+Without the option <code>-u</code> (or without, as it is the default) you get information on the CPU. We are interested in all columns but <code>%idle</code> and <code>%iowait</code>.
+You can choose a time period of time with <code>-s</code> (start) and ~-e~(end)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sar -u -s 10:00 -e 11:00 | awk <span style="color: #72a4ff;">'NR &gt; 1 {print $1 " " $2 " " $3 " " $4 " " $6}'</span> 
+</pre>
+</div>
+
+<p>
+Use <code>-P ALL</code> for multiple CPUs. You can replace <code>ALL</code> by a list of CPUs:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sar -P 1,3 -s 10:00 -e 10:20 | awk <span style="color: #72a4ff;">'NR &gt; 1 {print $1 " " $2 " " $3 " " $4 " " $6}'</span> 
+</pre>
+</div>
+
+<p>
+In the I printed only the date (4th column) from the first line of the output: <code>NR == 1 {print $4}</code>.
+For the following lines I printed all but the 5th and 7th column: <code>NR &gt; 1 { print ...}</code>.
+</p>
+</div>
+</li>
+
+<li><a id="org64ae444"></a>ps (top | htop)<br />
+<div class="outline-text-5" id="text-1-1-1-2">
+<p>
+You can also use <code>top</code> or <code>htop</code> to show the CPU usage. With <code>ps</code> we can just show this column - or add others of interest with the <code>-o</code> option:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">ps -o pid,pcpu | sed -n <span style="color: #72a4ff;">'2,$p'</span> | sort -rhk2 | head -5
+</pre>
+</div>
+
+<pre class="example">
+12755  1.0
+  13003  0.0
+  13002  0.0
+  13001  0.0
+  13000  0.0
+
+</pre>
+
+<p>
+For the sake of the snippet I concentrated on the first 5 lines. The <code>sed</code> command removes the header for sorting. This could also be done by adding the <code>--no-header~option to the ~ps~command.
+I sort the output with ~sort</code>:
+-r: reverse order (highest values first).
+-h: human number 1010 &gt; 101 &gt; 10.
+-k2: second column is the key for sorting.
+</p>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org932686f" class="outline-4">
+<h4 id="org932686f"><span class="section-number-4">1.1.2</span> Saturation</h4>
+<div class="outline-text-4" id="text-1-1-2">
+</div>
+<ol class="org-ol">
+<li><a id="org33f6c1c"></a>vmstat, sar, dstat<br />
+<div class="outline-text-5" id="text-1-1-2-1">
+<p>
+For system-wide  monitoring of CPU saturation any of this tool can be used. <code>sar</code> could evaluate again data collected be <code>sasd</code>. But as the other tools you can also use it for live monitoring.
+Each command collected each <code>3</code> seconds data <code>3</code> times. 
+We are interested in the number of processes in the run queue. This value should not be greater as as the number of CPU cores available. You can get this number from <code>lscpu~s output or from ~/proc/cpuinfo</code>.  
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">lscpu | grep -m1 <span style="color: #72a4ff;">'CPU(s)'</span>
+<span style="color: #f78fe7;">echo</span>
+<span style="color: #f78fe7;">echo</span> <span style="color: #72a4ff;">"vmstat"</span>
+vmstat 3 3 | awk <span style="color: #72a4ff;">'NR &gt; 1 {print $1}'</span>
+<span style="color: #f78fe7;">echo</span>
+<span style="color: #f78fe7;">echo</span> <span style="color: #72a4ff;">"sar"</span>
+sar -q  3 3 | awk <span style="color: #72a4ff;">'NR &gt; 2 {print $2}'</span>
+<span style="color: #f78fe7;">echo</span>
+<span style="color: #f78fe7;">echo</span> <span style="color: #72a4ff;">"dstat"</span>
+dstat -p 3 3 | awk <span style="color: #72a4ff;">'NR &gt; 1 {print $1}'</span>
+</pre>
+</div>
+
+<pre class="example">
+CPU(s):                          8
+
+vmstat
+r
+2
+0
+0
+
+sar
+AM
+AM
+AM
+AM
+0
+
+dstat
+run
+0
+0
+0
+</pre>
+</div>
+</li>
+
+<li><a id="orgd8e5990"></a><i>proc</i>[PID]/schedstat<br />
+<div class="outline-text-5" id="text-1-1-2-2">
+<p>
+The data in the file  <code>schedstat</code> in <code>/proc/[PID]</code> can be used to check the CPU saturation by single processes.
+It contains three numbers:
+1 CPU-time 
+2 time in run queue.
+3 number of time slices run on the CPU.
+</p>
+
+<p>
+We are interested in the run queue time:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #b6a0ff;">for</span> d<span style="color: #b6a0ff;"> in</span> $(<span style="color: #f78fe7;">find</span> /proc/  -maxdepth 1 -type d -regex <span style="color: #72a4ff;">'.*[0-9]$'</span>) ; <span style="color: #72a4ff;">\</span>
+  <span style="color: #b6a0ff;">do </span><span style="color: #f78fe7;">echo</span> -n <span style="color: #72a4ff;">"$d: "</span> ; <span style="color: #72a4ff;">\</span>
+  cut -f2 -d<span style="color: #72a4ff;">' '</span> $<span style="color: #00d3d0;">d</span>/schedstat 2&gt;/dev/null; <span style="color: #72a4ff;">\</span>
+<span style="color: #b6a0ff;">done</span> | sort -rhk2 | head -5
+</pre>
+</div>
+
+<pre class="example">
+
+&gt; &gt; /proc/12051: 7036411331
+/proc/12554: 4686968830
+/proc/3312: 4518019520
+/proc/12519: 3629617142
+/proc/12676: 1945725306
+
+</pre>
+
+<p>
+The <code>for</code> loop in the snippet go through all process directories.
+</p>
+
+<p>
+For better relation you can also divide the value by the CPU-time:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #b6a0ff;">for</span> d<span style="color: #b6a0ff;"> in</span> $(<span style="color: #f78fe7;">find</span> /proc/  -maxdepth 1 -type d -regex <span style="color: #72a4ff;">'.*[0-9]$'</span>) ; <span style="color: #72a4ff;">\</span>
+    <span style="color: #b6a0ff;">do </span><span style="color: #f78fe7;">echo</span> -n <span style="color: #72a4ff;">"$d: "</span> ; <span style="color: #72a4ff;">\</span>
+    <span style="color: #f78fe7;">echo</span> $(<span style="color: #f78fe7;">awk</span> <span style="color: #72a4ff;">'{print $2 " / " $1}'</span> $<span style="color: #00d3d0;">d</span>/schedstat 2&gt;/dev/null | bc 2&gt;/dev/null) ; <span style="color: #72a4ff;">\</span>
+<span style="color: #b6a0ff;">done</span>  | egrep -v <span style="color: #72a4ff;">'0$'</span> | sort -rhk2 | head -5
+</pre>
+</div>
+
+<pre class="example">
+
+&gt; &gt; /proc/67: 1826
+/proc/567: 265
+/proc/32: 199
+/proc/34: 122
+/proc/13: 98
+
+</pre>
+
+<p>
+See how different the top five is.  
+</p>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org6a13d66" class="outline-4">
+<h4 id="org6a13d66"><span class="section-number-4">1.1.3</span> Errors</h4>
+<div class="outline-text-4" id="text-1-1-3">
+<p>
+I don't know of a way to check for CPU errors on CLI.    
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org65b3645" class="outline-3">
+<h3 id="org65b3645"><span class="section-number-3">1.2</span> Memory</h3>
+<div class="outline-text-3" id="text-1-2">
+</div>
+<div id="outline-container-org2bfbcad" class="outline-4">
+<h4 id="org2bfbcad"><span class="section-number-4">1.2.1</span> Utilization</h4>
+<div class="outline-text-4" id="text-1-2-1">
+</div>
+<ol class="org-ol">
+<li><a id="orgaa2769d"></a>free<br />
+<div class="outline-text-5" id="text-1-2-1-1">
+<p>
+The first utility that comes to mind, when evaluating memory usage is of cause <code>free</code>.
+The <code>-m</code> uses mebibytes as the unit. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">free -m
+</pre>
+</div>
+
+<pre class="example">
+gesamt      belegt       frei     gemeinsam    Zwischen   verfügbar
+Speicher:        7839        1936        3785         610        2117        4990
+Auslager:        8191         947        7244
+
+</pre>
+
+<p>
+The ~~ just replaces the German locales on my system. 
+</p>
+</div>
+</li>
+
+<li><a id="org21d299c"></a>vmstat<br />
+<div class="outline-text-5" id="text-1-2-1-2">
+<p>
+Again we can use <code>vmstat</code> for cumulative values. The option <code>-SM</code> again uses mebibytes.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">vmstat -SM | awk <span style="color: #72a4ff;">'NR &gt;  1 { print $3 " " $4 }'</span>
+</pre>
+</div>
+
+<pre class="example">
+swpd frei
+946 3785
+
+</pre>
+</div>
+</li>
+
+<li><a id="org85e6c96"></a>sar<br />
+<div class="outline-text-5" id="text-1-2-1-3">
+<p>
+This is also a standard in the toolbox: <code>sar -r</code> (<code>-r</code> for memory stats). The <code>-h~option stands for 'human readable'.
+We are interested in the column ~%memused</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sar -rh -s 15:00 -e 15:30 |<span style="color: #72a4ff;">\</span>
+awk <span style="color: #72a4ff;">'NR == 1 { print $4 } \</span>
+<span style="color: #72a4ff;">     NR &gt; 2 {print $1 " " $5}'</span>
+</pre>
+</div>
+
+<pre class="example">
+
+&gt; 03/27/2021
+
+</pre>
+</div>
+</li>
+
+<li><a id="org5a4dd59"></a>dstat<br />
+<div class="outline-text-5" id="text-1-2-1-4">
+<p>
+You can also install <code>dstat</code>, that gives you memory information with "-m" option.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">dstat -m  1 3 | awk <span style="color: #72a4ff;">' NR &gt;= 2 { print $2 }'</span>
+</pre>
+</div>
+
+<pre class="example">
+free
+3780M
+3780M
+3785M
+
+</pre>
+</div>
+</li>
+
+<li><a id="org9859859"></a>slabtop<br />
+<div class="outline-text-5" id="text-1-2-1-5">
+<p>
+This tool requires root permission and provides a special inside. It show ressources of the so called slabs - groups of processes,
+for which the kernel allocates cache of different size. The <code>-s c</code> option sorts by the cache size. The ~-o~option means 'once'.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sudo slabtop -os c | head -5
+</pre>
+</div>
+
+<pre class="example">
+
+benutzt) : 1876116 / 2027870 (92.5%)
+benutzt)   : 56285 / 56285 (100.0%)
+benutzt)  : 117 / 159 (73.6%)
+benutzt) : 374812.83K / 411568.09K (91.1%)
+ Minimum / Durchschnitt / Maximum Objekt: 0.01K / 0.20K / 14.75K
+
+</pre>
+
+<p>
+  OBJS ACTIVE  USE OBJ SIZE  SLABS OBJ/SLAB CACHE SIZE NAME
+193565 158200  81%    1.07K  33053       29   1057696K ext4<sub>inode</sub><sub>cache</sub>
+568407 394356  69%    0.19K  27067       21    108268K dentry
+ 79408  57934  72%    0.57K   2836       28     45376K radix<sub>tree</sub><sub>node</sub>
+</p>
+</div>
+</li>
+
+<li><a id="org0ac7f29"></a>ps (top/htop)<br />
+<div class="outline-text-5" id="text-1-2-1-6">
+<p>
+You can also use <code>top</code> or <code>htop</code>. But <code>ps</code> with the <code>-o</code> option can help us focus on the information we need. 
+</p>
+<ul class="org-ul">
+<li>pid: PID</li>
+<li>%mem: memory usage in %</li>
+<li>vsz:  virtual memory (swap)</li>
+<li>comm: command</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash">ps -eo pid,%mem,vsz,comm | sort -rhk2,3 | column -tc4 | head -5
+</pre>
+</div>
+
+<pre class="example">
+12051  3.7   790508    chrome
+12554  3.5   38319672  chrome
+12519  3.0   46685864  chrome
+12718  2.5   38272124  chrome
+12676  2.5   38267212  chrome
+
+</pre>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-orge003729" class="outline-4">
+<h4 id="orge003729"><span class="section-number-4">1.2.2</span> Saturation</h4>
+<div class="outline-text-4" id="text-1-2-2">
+</div>
+<ol class="org-ol">
+<li><a id="org634cc3b"></a>vmstat<br />
+<div class="outline-text-5" id="text-1-2-2-1">
+<p>
+High swapping rates are a sign of memory saturation. In <code>vmstat</code> the columns <code>si</code> (swap in) and <code>so</code> (swap out) give us this information. 
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">vmstat -SM | awk <span style="color: #72a4ff;">'NR &gt;  1 { print $7 " " $8 }'</span>
+</pre>
+</div>
+
+<pre class="example">
+si so
+0 1
+
+</pre>
+</div>
+</li>
+
+<li><a id="orgf36acde"></a>sar<br />
+<div class="outline-text-5" id="text-1-2-2-2">
+<p>
+With the <code>-B</code> option <code>sar</code> reports pageing statistics. High values for pagescaning are in indicator for memory saturation.
+The corresponding columns are <code>pgscank~for pages scanned by kswapd daemon and ~pgscand</code> for directly scanned pages.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sar -B | awk <span style="color: #72a4ff;">'NR == 3 {print $1 " " $7 " " $8 } ; END {print $1 " " $7 " " $8 }'</span> | column -tc3
+</pre>
+</div>
+
+<pre class="example">
+09:41:52
+Durchschnitt:  4607.58  240.54
+
+</pre>
+
+<p>
+With the <code>-W</code> provides the swap in and swap out values in pages per second:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sar -W | sed -n <span style="color: #72a4ff;">'3p;$p'</span> | column -tc3
+</pre>
+</div>
+
+<pre class="example">
+09:41:52       AM     LINUX    RESTART  (8  CPU)
+Durchschnitt:  76.57  1632.91
+
+</pre>
+
+
+<p>
+<b>**</b> <i>proc</i>[PID]/stat
+</p>
+
+<p>
+In this file the 10th value shows the minor fault rate, that can be an indicator for memory saturation on the process level - according to Gregg Brendan. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">cat /proc/33/stat | awk <span style="color: #72a4ff;">'{print $10}'</span>
+</pre>
+</div>
+
+<pre class="example">
+0
+
+</pre>
+</div>
+</li>
+
+<li><a id="orge5918f1"></a>dmesg | journalctl<br />
+<div class="outline-text-5" id="text-1-2-2-3">
+<p>
+I use earlyoom to prevent out of memory situations. I you do you check the output of <code>journalctl</code> with the <code>-u</code> option to choose messages from <code>earlyoom.service</code>. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">journalctl -u earlyoom.service --since 10:20 --until 10:25
+</pre>
+</div>
+
+<pre class="example">
+-- Logs begin at Sun 2020-12-20 19:33:33 CET, end at Sat 2021-03-27 10:08:57 CET. --
+-- No entries --
+
+</pre>
+
+<p>
+In dmesg you can grep for processes that were killed by OOM killer:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">dmesg | grep kill | tail -5
+</pre>
+</div>
+
+<pre class="example">
+[   12.026848] rfkill: input handler disabled
+[   32.854615] rfkill: input handler enabled
+
+</pre>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org4996a54" class="outline-4">
+<h4 id="org4996a54"><span class="section-number-4">1.2.3</span> Error</h4>
+<div class="outline-text-4" id="text-1-2-3">
+<p>
+You may install and use <code>memtester</code> for testing the memory, or look in the journal for physical failures.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8a3867a" class="outline-3">
+<h3 id="org8a3867a"><span class="section-number-3">1.3</span> Network</h3>
+<div class="outline-text-3" id="text-1-3">
+</div>
+<div id="outline-container-orgd5bf7d2" class="outline-4">
+<h4 id="orgd5bf7d2"><span class="section-number-4">1.3.1</span> Utilization</h4>
+<div class="outline-text-4" id="text-1-3-1">
+</div>
+<ol class="org-ol">
+<li><a id="org177129a"></a>ip<br />
+<div class="outline-text-5" id="text-1-3-1-1">
+<p>
+While <code>ifconfig</code> is long deprecate, today <code>ip</code> is what comes first to mind for monitoring network usage.
+With the <code>-s</code> flag you get the statistics you need.
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">ip -s link show wlp1s0 | awk <span style="color: #72a4ff;">' BEGIN { i=999 }</span>
+<span style="color: #72a4ff;">                      /^[1-9]/ {print $2} ; \</span>
+<span style="color: #72a4ff;">                      /RX/     {printf "%s", "RX: " ; i=(NR + 1)} ; \</span>
+<span style="color: #72a4ff;">                      /TX/     {printf "%s", "TX: " ; i=(NR + 1)} ; \</span>
+<span style="color: #72a4ff;">                      NR == i  {printf "%2.2f GiB\n", ($1/1024/1024/1024)}'</span> 
+</pre>
+</div>
+
+<pre class="example">
+
+&gt; &gt; &gt; wlp1s0:
+RX: 0.03 GiB
+TX: 0.00 GiB
+
+</pre>
+
+<p>
+In the snippet, the <code>awk</code> code searches for lines start with a number, which indicates the beginning of a new section for a device, the name of which (second column) is then printed.
+Then it searches for the string 'RX' and 'TX' where a variable i is set to the line number increased by one, for which the first value  column is printed after converting bytes to gibibytes.
+</p>
+</div>
+</li>
+
+<li><a id="org19ae3f0"></a>ifstat<br />
+<div class="outline-text-5" id="text-1-3-1-2">
+<p>
+While <code>ifconfig</code> only gives you one sum up value, there are a lot of tools to watch the netload live. 
+One of them is <code>ifstat</code>:
+-z Hide the interfaces which counters are null.
+-b Use kbits/sec instead of the default kbytes/sec.
+-T Show totals.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">ifstat -zbT 1 3 |<span style="color: #72a4ff;">\</span>
+    awk <span style="color: #72a4ff;">'NR == 1 {print "-" $1 "- -------- -" $2 "- -------- " } ; NR &gt; 1 {print $0}'</span> |<span style="color: #72a4ff;">\</span>
+    sed <span style="color: #72a4ff;">'s/s /s_/g'</span>
+</pre>
+</div>
+
+<pre class="example">
+
+&gt; -wlp1s0- -------- -Total- -------- 
+ Kbps_in  Kbps_out   Kbps_in  Kbps_out
+    2.36      5.47      2.36      5.47
+    0.70      0.96      0.70      0.96
+    1.93      2.89      1.93      2.89
+
+</pre>
+
+<p>
+The <code>awl</code> and <code>sed</code> statements in the snippet are just there to beautify the org-mode results.
+</p>
+</div>
+</li>
+
+<li><a id="orgd89c979"></a>sar<br />
+<div class="outline-text-5" id="text-1-3-1-3">
+<div class="org-src-container">
+<pre class="src src-bash">sar -n DEV 1 1 | awk <span style="color: #72a4ff;">'NR &gt; 2 &amp;&amp; $3 != 0 {print $1 " " $2 " " $3 " " $4 " " $5 " " $6}'</span>
+</pre>
+</div>
+
+<pre class="example">
+10:09:07 AM IFACE rxpck/s txpck/s rxkB/s
+10:09:08 AM lo 0.00 0.00 0.00
+10:09:08 AM ens1f1 0.00 0.00 0.00
+10:09:08 AM wlp1s0 2.00 2.00 0.15
+10:09:08 AM docker0 0.00 0.00 0.00
+     
+Durchschnitt: IFACE rxpck/s txpck/s rxkB/s txkB/s
+Durchschnitt: wlp1s0 2.00 2.00 0.15 0.21
+
+</pre>
+</div>
+</li>
+
+
+<li><a id="org213c7e7"></a>dtstat<br />
+<div class="outline-text-5" id="text-1-3-1-4">
+<div class="org-src-container">
+<pre class="src src-bash">dstat -n 1 3
+</pre>
+</div>
+
+<pre class="example">
+Terminal width too small, trimming output.
+
+</pre>
+</div>
+</li>
+
+<li><a id="org24e0f33"></a>nicstat<br />
+<div class="outline-text-5" id="text-1-3-1-5">
+<div class="org-src-container">
+<pre class="src src-bash">nicstat -zM | awk <span style="color: #72a4ff;">'{$9=$10=""; print $0}'</span>
+</pre>
+</div>
+
+<pre class="example">
+Time Int rMbps wMbps rPk/s wPk/s rAvs wAvs  
+10:09:13 lo 0.00 0.00 1.25 1.25 92.00 92.00  
+10:09:13 wlp1s0 0.13 0.02 18.83 10.38 910.2 278.5
+
+</pre>
+</div>
+</li>
+
+
+
+<li><a id="orgc636075"></a>collected<br />
+<div class="outline-text-5" id="text-1-3-1-6">
+<div class="org-src-container">
+<pre class="src src-bash">collectl -sn -oT -i05 -c3 | awk <span style="color: #72a4ff;">'NR &gt; 2 {print $0}'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgf55bd6e"></a>/proc/net/dev<br />
+<div class="outline-text-5" id="text-1-3-1-7">
+<div class="org-src-container">
+<pre class="src src-bash">cat /proc/net/dev |<span style="color: #72a4ff;">\</span>
+awk <span style="color: #72a4ff;">'NR == 1 {print $1 $2" -------- "$4" --------"} ; \</span>
+<span style="color: #72a4ff;">     NR == 2 {print $1 " MBytes packets MBytes packets"}</span>
+<span style="color: #72a4ff;">     NR &gt;  2 {print $1 " " ($2 / 1000000) " " $3 " " ($10 / 1000000) " " $11}'</span>
+</pre>
+</div>
+
+<pre class="example">
+cat /proc/net/dev |\
+awk 'NR == 1 {print $1 $2" -------- "$4" --------"} ; \
+NR == 2 {print $1 " MBytes packets MBytes packets"}
+
+</pre>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-orga67d0cd" class="outline-4">
+<h4 id="orga67d0cd"><span class="section-number-4">1.3.2</span> Saturation</h4>
+<div class="outline-text-4" id="text-1-3-2">
+</div>
+<ol class="org-ol">
+<li><a id="orgd397880"></a>nicstat<br />
+<div class="outline-text-5" id="text-1-3-2-1">
+<p>
+This is the only tool that provides you with a dedicated column for network saturation, which is calculated from different kernel statistic as errors/second:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">nicstat | awk <span style="color: #72a4ff;">'{print $1 " " $10}'</span>
+</pre>
+</div>
+
+<p>
+With the <code>-x</code> option you get more detailed statistics:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">nicstat -x 
+</pre>
+</div>
+
+<pre class="example">
+nicstat -x
+
+</pre>
+</div>
+</li>
+
+
+<li><a id="org5419f70"></a>ip<br />
+<div class="outline-text-5" id="text-1-3-2-2">
+<p>
+A clear sign of network saturation are overruns packets. Also a high number of dropped packets may give you a clue.
+Both can be shown with the <code>ip</code> command with <code>-s</code> option and <code>link</code> parameter: 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">ip -s link show wlp1s0 | awk <span style="color: #72a4ff;">' BEGIN { i=999 ; j=999}</span>
+<span style="color: #72a4ff;">                      /^[1-9]/ {print $2} ; \</span>
+<span style="color: #72a4ff;">                      /RX/     {printf "%s", "RX: " ; i=(NR + 1)} ; \</span>
+<span style="color: #72a4ff;">                      /TX/     {printf "%s", "TX: " ; j=(NR + 1)} ; \</span>
+<span style="color: #72a4ff;">                      NR == i  {printf "Dropped: %d Overrun: %d \n", $4, $5 } ; \</span>
+<span style="color: #72a4ff;">                      NR == j  {printf "Dropped: %d", $4 } '</span> 
+</pre>
+</div>
+
+<pre class="example">
+ip -s link show wlp1s0 | awk ' BEGIN { i=999 ; j=999}
+/^[1-9]/ {print $2} ; \
+/RX/     {printf "%s", "RX: " ; i=(NR + 1)} ; \
+/TX/     {printf "%s", "TX: " ; j=(NR + 1)} ; \
+NR == i  {printf "Dropped: %d Overrun: %d \n", $4, $5 } ; \
+
+</pre>
+</div>
+</li>
+
+<li><a id="org9e7b429"></a>sar<br />
+<div class="outline-text-5" id="text-1-3-2-3">
+<p>
+This statistics can also be collected by <code>sasd</code> and show by <code>sar -n EDEV</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sar -n EDEV -s 19:30 -e 20:00 | awk <span style="color: #72a4ff;">'NR &gt; 2 {print $6 " " $7 " " $10 " " $11}'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org95f5b51"></a>ss<br />
+<div class="outline-text-5" id="text-1-3-2-4">
+<p>
+With <code>ss</code> you can get the number of dropped packets per socket with the <code>-m</code> (or <code>--memory</code>) option:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">ss -tuam | sed -E <span style="color: #72a4ff;">'s/skmem[:(].*?d([0-9]+)[)]/Dropped: \1/g;</span>
+<span style="color: #72a4ff;">                  s/\b0\b/--/g;</span>
+<span style="color: #72a4ff;">                  s/([0-9]{1,3})(.([0-9]{1,3})){3,3}/&#9015;&#9015;&#9015;.&#9015;&#9015;&#9015;.&#9015;&#9015;&#9015;.&#9015;&#9015;&#9015;/g'</span> |<span style="color: #72a4ff;">\</span>
+head
+</pre>
+</div>
+
+<pre class="example">
+ss -tuam | sed -E 's/skmem[:(].*?d([0-9]+)[)]/Dropped: \1/g;
+s/\b0\b/--/g;
+s/([0-9]{1,3})(.([0-9]{1,3})){3,3}/⌷⌷⌷.⌷⌷⌷.⌷⌷⌷.⌷⌷⌷/g' |\
+head
+Netid   State    Recv-Q   Send-Q                                  Local Address:Port                                                  Peer Address:Port         Process                                                                         
+udp     UNCONN   --        --                                             --.--.--.--:60957                                                      --.--.--.--:*            
+	 Dropped: --
+lo:domain                                                     --.--.--.--:*            
+	 Dropped: --
+
+</pre>
+
+<p>
+The <code>sed~command in the snippet does (by line):
+     1 Extract the dropped packets from the output of the ~-m</code> option.
+    2 Replace zero values by '&#x2013;' for better overview.
+    3 Hide the IP-addresses in the out for privacy reasons.
+</p>
+</div>
+</li>
+
+<li><a id="org52e2592"></a>/proc/dev/net<br />
+<div class="outline-text-5" id="text-1-3-2-5">
+<p>
+You can get the same results from the <code>/proc/</code> file system:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">cat /proc/net/dev |<span style="color: #72a4ff;">\</span>
+awk <span style="color: #72a4ff;">'NR == 1 {print $1 $2 " -- " $4 " -- "};\</span>
+<span style="color: #72a4ff;">     NR == 2 {print $1 " RX-drops RX-overrun TX_drops RX-overrun" };\</span>
+<span style="color: #72a4ff;">     NR &gt;  2 {print $1 " " $5 " " $6 " " $14 " " $15}'</span>
+</pre>
+</div>
+
+<pre class="example">
+cat /proc/net/dev |\
+awk 'NR == 1 {print $1 $2 " -- " $4 " -- "};\
+NR == 2 {print $1 " RX-drops RX-overrun TX_drops RX-overrun" };\
+
+</pre>
+</div>
+</li>
+
+<li><a id="org2a0f913"></a><i>sys/class/net</i>[device]/statistics<br />
+<div class="outline-text-5" id="text-1-3-2-6">
+<p>
+… and from the <code>sys</code> file system. 
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">egrep <span style="color: #72a4ff;">'[0-9]+'</span> /sys/class/net/*/statistics/* |<span style="color: #72a4ff;">\</span>
+egrep <span style="color: #72a4ff;">'(drop|fifo)'</span> |&amp; <span style="color: #72a4ff;">\</span>
+sed <span style="color: #72a4ff;">'s|:|/|g'</span>|<span style="color: #72a4ff;">\</span>
+awk -F <span style="color: #72a4ff;">'/'</span> <span style="color: #72a4ff;">'BEGIN     {DEV = ""};\</span>
+<span style="color: #72a4ff;">            DEV != $5 {print $5 "-------------- ---"} ; \</span>
+<span style="color: #72a4ff;">                      {print " *" $7 " " $8 ; DEV = $5}'</span> ; 
+</pre>
+</div>
+
+<pre class="example">
+egrep '[0-9]+' /sys/class/net/*/statistics/* |\
+egrep '(drop|fifo)' |&amp; \
+sed 's|:|/|g'|\
+awk -F '/' 'BEGIN     {DEV = ""};\
+DEV != $5 {print $5 "-------------- ---"} ; \
+
+</pre>
+
+<p>
+The data is provided in different files (one file per value). I use <code>egrep</code> here to extract the data here, because this way I also get the file name in the output.
+I then grep for file name that contain 'drop' (for dropped packets) and 'fifo' (for fifo errors).
+With the <code>sed</code> command I replace the colon,  <code>egrep</code> places between the file name and the value by a slash, that <code>awk</code> with the <code>-F</code> option then uses as a column delimeter for a nice and readable output.  
+</p>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-orge3e67a9" class="outline-4">
+<h4 id="orge3e67a9"><span class="section-number-4">1.3.3</span> Error</h4>
+<div class="outline-text-4" id="text-1-3-3">
+</div>
+<ol class="org-ol">
+<li><a id="org3a5cda3"></a>ip<br />
+<div class="outline-text-5" id="text-1-3-3-1">
+<p>
+The first look network errors should be <code>ip</code> with the <code>-s</code> option for statistics. Look out for RX- and TX-errors. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">ip -s link show wlp1s0 | awk <span style="color: #72a4ff;">'BEGIN { i=999 }</span>
+<span style="color: #72a4ff;">                /^[1-9]/ {print $2} ; \</span>
+<span style="color: #72a4ff;">                /RX/    {printf "%s", "RX-errors: " ; i=(NR + 1)} ; \</span>
+<span style="color: #72a4ff;">                /TX/    {printf "%s", "TX-errors: " ; i=(NR + 1)} ; \</span>
+<span style="color: #72a4ff;">                NR == i {print $3}'</span> 
+</pre>
+</div>
+
+<pre class="example">
+ip -s link show wlp1s0 | awk 'BEGIN { i=999 }
+/^[1-9]/ {print $2} ; \
+/RX/    {printf "%s", "RX-errors: " ; i=(NR + 1)} ; \
+/TX/    {printf "%s", "TX-errors: " ; i=(NR + 1)} ; \
+
+</pre>
+</div>
+</li>
+
+<li><a id="org3e639ed"></a>sar<br />
+<div class="outline-text-5" id="text-1-3-3-2">
+<p>
+Again can you also use the swith army knive of monitoring: <code>sar -n EDEV</code> provides you with the disired information. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sar -n EDEV 1 1 | awk <span style="color: #72a4ff;">'NR &gt; 2 {print $1 " " $2 " " $3 " " $4}'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org13154df"></a>nicstat<br />
+<div class="outline-text-5" id="text-1-3-3-3">
+<p>
+You can get the information with the <code>-x</code> option in the 'IErr' and 'OErr' colums.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">nicstat -x | awk <span style="color: #72a4ff;">'{print $1 " " $6 " " $7}'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org07dc09d"></a>/proc/dev/net<br />
+<div class="outline-text-5" id="text-1-3-3-4">
+<p>
+And again the <code>/proc/</code> filesystem is your friend …
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">cat /proc/net/dev |<span style="color: #72a4ff;">\</span>
+awk <span style="color: #72a4ff;">'NR == 1 {print $1 $2 " " $4 };\</span>
+<span style="color: #72a4ff;">     NR == 2 {print $1 " RX_Errors TX_Errors" };\</span>
+<span style="color: #72a4ff;">     NR &gt;  2 {print $1 " " $4 " " $13}'</span>
+</pre>
+</div>
+
+<pre class="example">
+cat /proc/net/dev |\
+awk 'NR == 1 {print $1 $2 " " $4 };\
+NR == 2 {print $1 " RX_Errors TX_Errors" };\
+
+</pre>
+</div>
+</li>
+
+<li><a id="org247efc6"></a><i>sys/class/net</i>[device]/statistics<br />
+<div class="outline-text-5" id="text-1-3-3-5">
+<p>
+… as is the <code>sys</code> filesystem.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">egrep <span style="color: #72a4ff;">'[0-9]+'</span> /sys/class/net/*/statistics/*_errors |<span style="color: #72a4ff;">\</span>
+sed <span style="color: #72a4ff;">'s/:/\//'</span> |<span style="color: #72a4ff;">\</span>
+awk -F <span style="color: #72a4ff;">'/'</span> <span style="color: #72a4ff;">'BEGIN     {DEV = ""};\</span>
+<span style="color: #72a4ff;">            DEV != $5 {print $5 "-------------- ---"} ; \</span>
+<span style="color: #72a4ff;">                      {print " *" $7 " " $8 ; DEV = $5}'</span> |<span style="color: #72a4ff;">\</span>
+head -14
+</pre>
+</div>
+
+<pre class="example">
+egrep '[0-9]+' /sys/class/net/*/statistics/*_errors |\
+sed 's/:/\//' |\
+awk -F '/' 'BEGIN     {DEV = ""};\
+DEV != $5 {print $5 "-------------- ---"} ; \
+{print " *" $7 " " $8 ; DEV = $5}' |\
+head -14
+docker0-------------- ---
+ *rx_crc_errors 0
+ *rx_errors 0
+ *rx_fifo_errors 0
+ *rx_frame_errors 0
+ *rx_length_errors 0
+ *rx_missed_errors 0
+ *rx_over_errors 0
+ *tx_aborted_errors 0
+ *tx_carrier_errors 0
+ *tx_errors 0
+ *tx_fifo_errors 0
+ *tx_heartbeat_errors 0
+ *tx_window_errors 0
+</pre>
+</div>
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org26ded26" class="outline-3">
+<h3 id="org26ded26"><span class="section-number-3">1.4</span> Storage</h3>
+<div class="outline-text-3" id="text-1-4">
+</div>
+<div id="outline-container-org6d76077" class="outline-4">
+<h4 id="org6d76077"><span class="section-number-4">1.4.1</span> I/O</h4>
+<div class="outline-text-4" id="text-1-4-1">
+</div>
+<ol class="org-ol">
+<li><a id="org85b13f7"></a>Utilization<br />
+<ol class="org-ol">
+<li><a id="orgcb8dbe8"></a>iostat<br />
+<div class="outline-text-6" id="text-1-4-1-1-1">
+<p>
+When you call <code>iostat</code> with the <code>-x</code> option for extended statistics you find the utilization percentage in the last column.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">iostat -xz 1 1 | awk <span style="color: #72a4ff;">'NR == 6 {print $1 " " $NF}</span>
+<span style="color: #72a4ff;">                               NR &gt; 6 &amp;&amp; $(</span><span style="color: #f78fe7;">NF</span><span style="color: #72a4ff;">) != 0 &amp;&amp; $0 != "" {print  $1 " " $NF }'</span> 
+</pre>
+</div>
+
+<pre class="example">
+
+1 " " $NF}
+
+</pre>
+</div>
+</li>
+
+<li><a id="orga110e89"></a>sar<br />
+<div class="outline-text-6" id="text-1-4-1-1-2">
+<p>
+And as almost ever you can get the same information from <code>sar</code> with the <code>-d</code> option and also in the last column.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"> sar -d -s 15:00 -e 15:30 |<span style="color: #72a4ff;">\</span>
+awk <span style="color: #72a4ff;">'NR == 3            {print $1 " " $2 " " $NF};</span>
+<span style="color: #72a4ff;">     NR &gt; 3 &amp;&amp; $NF != 0 {print $1 " " $2 " " $NF}'</span>
+</pre>
+</div>
+
+<pre class="example">
+sar -d -s 15:00 -e 15:30 |\
+awk 'NR == 3            {print $1 " " $2 " " $NF};
+
+</pre>
+</div>
+</li>
+
+<li><a id="orgffc01c2"></a>iotop<br />
+<div class="outline-text-6" id="text-1-4-1-1-3">
+<p>
+On a process level <code>iotop</code> gives you the information you need. The tool is generally interactive, but can be run in batch mode (<code>-b</code>) with a specified  iteration (<code>-n</code>) and delay (<code>-d</code>):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sudo iotop -ob -n 2 -d 1
+</pre>
+</div>
+
+<pre class="example">
+Total DISK READ:         0.00 B/s | Total DISK WRITE:         0.00 B/s
+Current DISK READ:       0.00 B/s | Current DISK WRITE:       0.00 B/s
+    TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN      IO    COMMAND
+Total DISK READ:        30.42 K/s | Total DISK WRITE:        34.23 K/s
+Current DISK READ:      30.42 K/s | Current DISK WRITE:      83.67 K/s
+    TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN      IO    COMMAND
+0.63 % [jbd2/sda2-8]
+0.29 % insync start
+0.00 % tccd --start
+
+</pre>
+</div>
+</li>
+
+<li><a id="orgadf31d0"></a>pidstat<br />
+<div class="outline-text-6" id="text-1-4-1-1-4">
+<p>
+Annother tool is <code>pidstat</code> with <code>-d</code> option, that doesn't need root permissions:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">pidstat -d | sed -n <span style="color: #72a4ff;">'3,9p'</span>
+</pre>
+</div>
+
+<pre class="example">
+10:10:10 AM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+10:10:10 AM     0         1     -1.00     -1.00     -1.00      62  systemd
+10:10:10 AM     0       124     -1.00     -1.00     -1.00     231  kworker/u16:1-events_unbound
+10:10:10 AM     0       130     -1.00     -1.00     -1.00    1135  kswapd0
+10:10:10 AM     0       340     -1.00     -1.00     -1.00    1017  jbd2/sda2-8
+10:10:10 AM     0       398     -1.00     -1.00     -1.00      72  systemd-journal
+10:10:10 AM     0       435     -1.00     -1.00     -1.00       2  loop0
+
+</pre>
+</div>
+</li>
+</ol>
+</li>
+
+<li><a id="orga1b3ff1"></a>Saturation<br />
+<ol class="org-ol">
+<li><a id="orgeab9813"></a>iostat<br />
+<div class="outline-text-6" id="text-1-4-1-2-1">
+<p>
+To check for I/O saturation we need the extended statistics (<code>-x</code>). 
+We are only interested in device that produce I/O in the sample time (<code>-z</code>).
+I highly recommend the <code>-h</code> option for a human readable output.
+</p>
+
+<p>
+We are interested in the await times the should go to high. But our main interest should be the average queue length of I/O request (<code>aqu-sz</code>), which should never got above 1.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"> <span style="color: #72a4ff;">\</span>
+iostat -hxz 1 1 |<span style="color: #72a4ff;">\</span>
+awk <span style="color: #72a4ff;">'NR &gt; 5 &amp;&amp; $5 != 0 &amp;&amp; NF &gt; 3 {print $5 " " $NF};</span>
+<span style="color: #72a4ff;">     NF == 3 &amp;&amp; $1 != 0           {print $1 " " $NF}'</span>|<span style="color: #72a4ff;">\</span>
+grep -v loop
+</pre>
+</div>
+
+<pre class="example">
+\
+iostat -hxz 1 1 |\
+awk 'NR &gt; 5 &amp;&amp; $5 != 0 &amp;&amp; NF &gt; 3 {print $5 " " $NF};
+NF == 3 &amp;&amp; $1 != 0           {print $1 " " $NF}'|\
+grep -v loop
+r_await Device
+0.77 sda
+w_await Device
+1.85 sda
+d_await Device
+1.27 sda
+aqu-sz Device
+0.38 sda
+</pre>
+
+<p>
+The output of <code>iostat</code> contains 5 data set. In the snippet I skip the first, about the average CPU usage (<code>NR &gt; 5</code>).
+The I check the 2 data sets on read, write and discard request, which are all more the 3 column (<code>NF &gt; 3</code>) and check if the await values in the 5th column are greater the 0 (<code>$5 &gt; 0</code>), before printing that value and the device name in the last column (<code>$NF).
+Finally I print the 1st and last column (~aqu-sz</code> and <code>Device</code>) from the last data set, that is 3 columns wide (<code>NF == 3</code>). 
+I also don't care for loop devices here, so I filter the out (<code>grep -v</code>).
+</p>
+</div>
+</li>
+
+<li><a id="org6f099ca"></a>sar<br />
+<div class="outline-text-6" id="text-1-4-1-2-2">
+<p>
+And yes, you <b>can</b> get the same data with <code>sar</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"> <span style="color: #72a4ff;">\</span>
+sar -hd -s 11:00 -e 11:20 |<span style="color: #72a4ff;">\</span>
+awk <span style="color: #72a4ff;">'($7 &gt; 0 || $8 &gt;0)  &amp;&amp; NR &gt; 2 {print $1 " " $7 " " $8 " " $NF}'</span>
+</pre>
+</div>
+
+<pre class="example">
+\
+sar -hd -s 11:00 -e 11:20 |\
+
+</pre>
+</div>
+</li>
+</ol>
+</li>
+
+<li><a id="org31e1175"></a>Errors<br />
+<ol class="org-ol">
+<li><a id="orgfbef679"></a>smartctl<br />
+<div class="outline-text-6" id="text-1-4-1-3-1">
+<p>
+The dedicated tools for finding storage I/O device errors is <code>smartctl</code>. It's not preinstalled on most distributions.
+You can call it with the <code>-l errors</code> option, and if any errors are reported you can take a deep dive with <code>-a</code> (all SMART information about the disk) or <code>-x</code> to even include non-SMART information.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sudo smartctl -l error /dev/sda
+</pre>
+</div>
+
+<pre class="example">
+smartctl 7.1 2019-12-30 r5022 [x86_64-linux-5.8.0-45-generic] (local build)
+Copyright (C) 2002-19, Bruce Allen, Christian Franke, www.smartmontools.org
+
+=== START OF READ SMART DATA SECTION ===
+SMART Error Log Version: 1
+No Errors Logged
+
+</pre>
+</div>
+</li>
+
+<li><a id="orgcebc9c5"></a><i>sys/devices</i>&#x2026;/ioerr<sub>cnt</sub><br />
+<div class="outline-text-6" id="text-1-4-1-3-2">
+<p>
+If you don't have <code>smartctl</code> installed you still some information on I/O errors in the <code>/sys/</code> file system.
+The error count is given as hexadecimal number.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">find /sys/devices/ -iname <span style="color: #72a4ff;">'ioerr_cnt'</span> |<span style="color: #72a4ff;">\</span>
+ xargs cat | sed <span style="color: #72a4ff;">'s/0x//'</span> | xargs echo <span style="color: #72a4ff;">'ibase=16; '</span> | bc 
+</pre>
+</div>
+
+<pre class="example">
+find /sys/devices/ -iname 'ioerr_cnt' |\
+xargs cat | sed 's/0x//' | xargs echo 'ibase=16; ' | bc
+32
+
+</pre>
+</div>
+</li>
+</ol>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-orgf3b316a" class="outline-4">
+<h4 id="orgf3b316a"><span class="section-number-4">1.4.2</span> Capacity</h4>
+<div class="outline-text-4" id="text-1-4-2">
+</div>
+<ol class="org-ol">
+<li><a id="org8f83215"></a>Utilization<br />
+<ol class="org-ol">
+<li><a id="org54b07ea"></a>df<br />
+<div class="outline-text-6" id="text-1-4-2-1-1">
+<p>
+To get an overview over the usage of your devices, <code>df</code> is the first choice. You can make it human readable (<code>-h</code>) and exclude all those virtual file system of modern systems for better overview (<code>-x</code> &#x2026;).  
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"> <span style="color: #72a4ff;">\</span>
+df -h -x tmpfs -x devtmpfs -x squashfs 
+</pre>
+</div>
+
+<pre class="example">
+\
+df -h -x tmpfs -x devtmpfs -x squashfs
+Eingehängt auf
+
+</pre>
+</div>
+</li>
+
+<li><a id="org06eed87"></a>du<br />
+<div class="outline-text-6" id="text-1-4-2-1-2">
+<p>
+You can use <code>du</code> if a storage drive is overfull for further investigation. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"> <span style="color: #72a4ff;">\</span>
+du -d 1 -h | sort -h | sed -En <span style="color: #72a4ff;">'/[0-9]G/p'</span> |<span style="color: #72a4ff;">\</span>
+sed -E <span style="color: #72a4ff;">'s|/[.a-zA-Z@]+|********|'</span>
+</pre>
+</div>
+
+<pre class="example">
+\
+du -d 1 -h | sort -h | sed -En '/[0-9]G/p' |\
+sed -E 's|/[.a-zA-Z@]+|********|'
+1.2G	.********
+1.5G	.********
+1.7G	.********
+1.8G	.********
+2.4G	.********
+2.5G	.********
+2.6G	.********
+2.9G	.********
+3.3G	.********
+4.6G	.********
+30G	.********
+57G	.
+</pre>
+</div>
+</li>
+</ol>
+</li>
+
+<li><a id="org5e48d1b"></a>Saturation<br />
+<div class="outline-text-5" id="text-1-4-2-2">
+<p>
+Actually you will be told by linux when you have run out of disk space and if you really do you can not actually do a lot any more. 
+Most of the times have do go to rescue mode and first delete some data you are sure, you don't need any more, before you can use do any research on the reasons by examining the storage utilisation. 
+</p>
+</div>
+</li>
+<li><a id="org58681e3"></a>Errors<br />
+<div class="outline-text-5" id="text-1-4-2-3">
+<p>
+I don't actually know what errors you could look here for. 
+</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Sebastian Meisel</p>
+<p class="date">Created: 2021-03-27 Sa 10:10</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
