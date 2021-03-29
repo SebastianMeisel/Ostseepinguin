@@ -1,6 +1,6 @@
 * USE Method
 :PROPERTIES:
-:header-args: :session *R* :cache yes :results value verbatim :exports both :tangle yes
+:header-args: :session *R* :cache yes :results value table :exports both  :tangle yes
 :END:
 
 To troubleshoot performance issues on a system it is important to use a systematic approach.
@@ -26,6 +26,10 @@ export LC_ALL=en_US.utf8
 S_COLORS=never
 #+END_SRC
 
+#+RESULTS[1adec801b228e5ff6f19b07cfc97fda15ee1b2ad]:
+| export         | LC_ALL=en_US.utf8 |
+| S_COLORS=never |                   |
+
 ** CPU
 *** Utilization 
 ***** vmstat
@@ -40,10 +44,6 @@ We are interested in the 13th, 14th and 17th column:
 #+END_SRC
 
 #+RESULTS[ab1616d5835201b12bfd5c13d6393a40d7a96587]:
-| US | SY | st |
-| 13 |  5 |  0 |
-|  2 |  2 |  0 |
-|  3 |  2 |  0 |
 
 In the snippet I used awk to only print the columns I need, separated be a space. The column command is used for a better layout:
 -t: fill columns.
@@ -55,18 +55,10 @@ With the option ~-u~ (or without, as it is the default) you get information on t
 You can choose a time period of time with ~-s~ (start) and ~-e~(end)
 
 #+BEGIN_SRC bash
-sar -u -s 10:00 -e 11:00 | awk 'NR > 1 {print $1 " " $2 " " $3 " " $4 " " $6}' 
+sar -u -s 10:00 -e 11:00 | awk 'NR > 1 {$6=""; $8=""; print $0}' 
 #+END_SRC
 
-#+RESULTS[991573eab07ce16838ac69463fae5fd3d3570ca5]:
-|               |     |       |       |         |
-|      10:05:01 | CPU | %user | %nice | %iowait |
-|      10:15:01 | all | 2,50  | 0,00  | 0,07    |
-|      10:25:01 | all | 3,52  | 0,01  | 0,08    |
-|      10:35:01 | all | 4,15  | 0,01  | 0,08    |
-|      10:45:01 | all | 4,07  | 0,03  | 0,08    |
-|      10:55:01 | all | 4,00  | 0,01  | 0,08    |
-| Durchschnitt: | all | 3,65  | 0,01  | 0,08    |
+#+RESULTS[14ef208ff42a3afbfcef219c5f0813d0ce6d2214]:
 
 Use ~-P ALL~ for multiple CPUs. You can replace ~ALL~ by a list of CPUs:
 
@@ -74,13 +66,7 @@ Use ~-P ALL~ for multiple CPUs. You can replace ~ALL~ by a list of CPUs:
 sar -P 1,3 -s 10:00 -e 10:20 | awk 'NR > 1 {print $1 " " $2 " " $3 " " $4 " " $6}' 
 #+END_SRC
 
-#+RESULTS:
-|               |     |       |       |         |
-|      10:05:01 | CPU | %user | %nice | %iowait |
-|      10:15:01 |   1 | 2,42  | 0,00  | 0,05    |
-|      10:15:01 |   3 | 2,34  | 0,00  | 0,04    |
-| Durchschnitt: |   1 | 2,42  | 0,00  | 0,05    |
-| Durchschnitt: |   3 | 2,34  | 0,00  | 0,04    |
+#+RESULTS[da1a28c52d113718d0e406ec64d7bbb9fbd1678b]:
 
 In the snippet I printed only the date (4th column) from the first line of the output: ~NR == 1 {print $4}~.
 For the following lines I printed all but the 5th and 7th column: ~NR > 1 { print ...}~.
@@ -208,7 +194,6 @@ The ~-m~ uses mebibytes as the unit.
 | Mem:  | 7839 | 5868 |    172 |        277 |      1798 | 1392 |
 | Swap: | 8191 | 5454 |   2737 |            |           |      |
 
-The ~~ just replaces the German locales on my system. 
 
 **** vmstat
 Again we can use ~vmstat~ for cumulative values. The option ~-SM~ again uses mebibytes.
