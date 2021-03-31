@@ -1,6 +1,6 @@
 * USE Method
 :PROPERTIES:
-:header-args: :session *R* :cache yes :results value verbatim :exports both  :tangle yes
+:header-args: :session *R* :cache yes :results value table :exports both  :tangle yes
 :END:
 
 To troubleshoot performance issues on a system it is important to use a systematic approach.
@@ -21,6 +21,14 @@ In this file I go through the main system resources and show tools check on this
 
 Before I start, I have to set my locals to English (instead of German, that I normally use) for the commands in this file.
 
+#+BEGIN_SRC bash 
+export LC_ALL=en_US.utf8
+S_COLORS=never
+#+END_SRC
+
+#+RESULTS[1adec801b228e5ff6f19b07cfc97fda15ee1b2ad]:
+| export         | LC_ALL=en_US.utf8 |
+| S_COLORS=never |                   |
 
 ** CPU
 *** Utilization 
@@ -35,11 +43,7 @@ We are interested in the 13th, 14th and 17th column:
   vmstat 1 3 | awk '{ print  $13 " " $14 " " $17}' | column -tc3
 #+END_SRC
 
-#+RESULTS[b04423ce41cf1f1f3b2f2f97acb9812696649f0f]:
-: US  SY  st
-: 22  5   0
-: 13  3   0
-: 13  4   0
+#+RESULTS[ab1616d5835201b12bfd5c13d6393a40d7a96587]:
 
 In the snippet I used awk to only print the columns I need, separated be a space. The column command is used for a better layout:
 -t: fill columns.
@@ -54,7 +58,7 @@ You can choose a time period of time with ~-s~ (start) and ~-e~(end)
 sar -u -s 10:00 -e 11:00 | awk 'NR > 1 {$6=""; $8=""; print $0}' 
 #+END_SRC
 
-#+RESULTS[6bff7d1fe3868e2dc05318082d63513475f4e077]:
+#+RESULTS[14ef208ff42a3afbfcef219c5f0813d0ce6d2214]:
 
 Use ~-P ALL~ for multiple CPUs. You can replace ~ALL~ by a list of CPUs:
 
@@ -75,12 +79,12 @@ You can also use ~top~ or ~htop~ to show the CPU usage. With ~ps~ we can just sh
 ps -o pid,pcpu | sed -n '2,$p' | sort -rhk2 | head -5
 #+END_SRC
 
-#+RESULTS[8ab582f992aabbb5c87c9e8410985984c2a4da72]:
-: 7944  0.0
-:    7943  0.0
-:    7942  0.0
-:    7941  0.0
-:    7643  0.0
+#+RESULTS:
+|  48013 | 2.6 |
+|  48803 | 0.2 |
+|  48500 | 0.2 |
+| 239089 | 0.2 |
+|  48562 | 0.1 |
 
 For the sake of the snippet I concentrated on the first 5 lines. The ~sed~ command removes the header for sorting. This could also be done by adding the ~--no-header~option to the ~ps~command.
 I sort the output with ~sort~:
@@ -145,13 +149,12 @@ for d in $(find /proc/  -maxdepth 1 -type d -regex '.*[0-9]$') ; \
 done | sort -rhk2 | head -5
 #+END_SRC
 
-#+RESULTS[55764842663ae78349abd106cf3b2191a7dd126a]:
-: 
-: > > /proc/6899: 7727941878
-: /proc/7449: 5336157303
-: /proc/7311: 5183995249
-: /proc/7296: 4365711566
-: /proc/7052: 2763888085
+#+RESULTS:
+| /proc/49685: | 1209460913065 |
+| /proc/49752: | 1115469765976 |
+| /proc/49784: |  993393130709 |
+| /proc/51353: |  936296776909 |
+| /proc/49686: |  824275814797 |
 
 The ~for~ loop in the snippet go through all process directories.
 
@@ -164,13 +167,7 @@ for d in $(find /proc/  -maxdepth 1 -type d -regex '.*[0-9]$') ; \
 done  |  sort -k2rh | head -5
 #+END_SRC
 
-#+RESULTS[f49663ea250ebfccf2abda44b7cac9e330873146]:
-: 
-: > > /proc/26: 176.175
-: /proc/20: 78.3011
-: /proc/564: 77.2303
-: /proc/13: 46.9056
-: /proc/9: 22.2232
+#+RESULTS[8a5fffae7729e8135fb37f06160bf80b3fd43009]:
 
 See how different the top five is.  
 
