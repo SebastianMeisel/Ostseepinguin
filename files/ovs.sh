@@ -63,14 +63,41 @@ ip link set eth0-r netns red
 ip link set eth0-g netns green
 ip link set eth0-b netns blue
 
-red ip add 10.0.0.2/24 dev eth0-r
-red ip link dev eth0-r up
-green ip add 10.0.0.3/24 dev eth0-g
-green ip link dev eth0-g up
-blue ip add 10.0.0.4/24 dev eth0-b
-blue ip link dev eth0-b up
+red ip address add 10.0.0.2/24 dev eth0-r
+red ip link set dev eth0-r up
+green ip address add 10.0.0.3/24 dev eth0-g
+green ip link set dev eth0-g up
+blue ip address add 10.0.0.4/24 dev eth0-b
+blue ip link set dev eth0-b up
 
-systemctl start ovs-vswitchd.service
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+else
+    echo "Cannot determine the Linux distribution."
+    exit 1
+fi
+case $ID_LIKE in
+    debian|ubuntu)
+        systemctl start ovs-vswitchd.service
+        ;;
+    fedora|rhel|centos)
+        systemctl start ovs-vswitchd
+        ;;
+    suse)
+        systemctl start ovs-vswitchd
+        ;;
+    arch)
+        systemctl start openvswitch
+        ;;
+    *)
+        echo "Unsupported distribution."
+        exit 1
+        ;;
+esac
+else
+echo "Cannot determine the Linux distribution."
+exit 1
+fi
 
 ovs-vsctl add-br SW1
 ovs-vsctl show

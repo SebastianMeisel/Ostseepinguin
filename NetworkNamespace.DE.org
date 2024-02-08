@@ -7,7 +7,7 @@
 :END:
 
 
-* Virtual network with Openswitch
+* Virtuelle Netzwerke mit Openswitch und Linux Netzwerk-Namespaces
 :PROPERTIES:
 :header-args:bash: :shebang #!/bin/bash :tangle files/ovs.sh :eval never :session OVS :exports code
 :header-args:mermaid: :tangle nil :results file :exports results
@@ -150,12 +150,10 @@ input:checked +label::after {
 #+END_SRC
 
 
+In diesem Projekt möchte ich zeigen, wie man ein virtuelles Netzwerk unter Linux mithilfe von Openvswitch und Netzwerk-Namespaces entwirft und implementiert. Durch die Nutzung virtueller Ethernet-Tunnel und eines zentralen virtuellen Switches schaffen wir eine flexible und skalierbare Netzwerkumgebung. Dieses Projekt zielt darauf ab, die Möglichkeiten virtueller Netzwerktechnologien zu demonstrieren und ein praktisches Beispiel für Bildungszwecke bereitzustellen.
 
+Das folgende Diagramm veranschaulicht den Aufbau eines virtuellen Netzwerks unter Verwendung von Openswitch. Der vSwitch dient als zentraler Punkt und verbindet drei verschiedene Netzwerk-Namespaces: red, green, blue. Jeder Namespace erhält eine IP-Adresse (=eth0-r=, =eth0-g=, =eth0-b=) innerhalb des Subnetzes =10.0.0.0/24= und ist über virtuelle Ethernet-Schnittstellen (=veth-r=, =veth-g=, =veth-b=) mit dem vSwitch verbunden.
 
-In this project, I want to show, how to designed and implemented a virtual network using Openvswitch and network namespaces under linux. By leveraging virtual Ethernet tunnels and a central virtual switch, we createa flexible and scalable network environment. This project aims to demonstrate the capabilities of virtual networking technologies and provide a practical example for educational purposes.
-
-
-The following diagram illustrates a virtual network setup using Openswitch. The vSwitch serves as the central point, connecting three distinct network namespaces represented by red, green, and blue. Each namespace is allocated an IP address (=eth0-r=, =eth0-g=, =eth0-b=) within the =10.0.0.0/24= subnet and is connected to the vSwitch via virtual Ethernet interfaces (=veth-r=, =veth-g=, =veth-b=).
 
 #+BEGIN_SRC mermaid :file img/ovs-net.png
 graph TD;
@@ -188,15 +186,17 @@ graph TD;
 
 #+CAPTION: Network Diagram 
 #+NAME: fig:netdiag
-#+ATTR_HTML: :width 50% :alt Network Diagram showing the relationship between the namespaces as described in the paragraph above.
+#+ATTR_HTML: :width 50% :alt Netzwerkdiagramm, das die Beziehung zwischen den Namensräumen wie oben beschriebenen zeigt.
 #+ATTR_LATEX: :width .65\linewidth
 #+ATTR_ORG: :width 700
 #+RESULTS:
 [[file:img/ovs-net.png]]
 
-** Create functions for each name space
+** Eine Funktion für jeden Namespace
 
-To begin with we define functions for each network namespace: green, red, orange (as a spare for future projects), and blue. These functions allow executing commands within the respective namespaces using the =ip netns exec= command. Each function changes the color output of the executed commands for better visual identification.
+Zunächst definieren wir Funktionen für jeden Netzwerk-Namensraum: grün, rot, orange (als Reserve für zukünftige Projekte) und blau. Diese Funktionen ermöglichen das Ausführen von Befehlen innerhalb der jeweiligen Namensräume unter Verwendung des Befehls =ip netns exec=. Jede Funktion ändert die Farbausgabe der ausgeführten Befehle zur besseren visuellen Identifizierung.
+
+
 
 #+BEGIN_SRC bash
 function green () {
@@ -257,9 +257,9 @@ function blue () {
     }
 #+END_SRC
 
-** Create namespaces
+** Namensräume erstellen
 
-The next step is initializing the three network namespaces named red, green, and blue using the =ip netns add= command. Subsequently, the loopback interface within each namespace is brought up using the =ip l dev lo up= command to enable local communication within the namespace. Finally, the current state of network interfaces within each namespace is displayed using the =ip l= command.
+Der nächste Schritt besteht darin, die drei Netzwerk-Namensräume namens rot, grün und blau mit dem Befehl =ip netns add= zu initialisieren. Anschließend wird die Loopback-Schnittstelle innerhalb jedes Namensraums mit dem Befehl =ip l dev lo up= aktiviert, um die lokale Kommunikation innerhalb des Namensraums zu ermöglichen. Schließlich wird der aktuelle Zustand der Netzwerkschnittstellen innerhalb jedes Namensraums mit dem Befehl =ip l= angezeigt.
 
 #+BEGIN_SRC bash
 ip netns add red
@@ -279,9 +279,9 @@ green ip l
 blue ip l
 #+END_SRC
 
-** Create tunnels
+** Tunnel erstellen
 
-Now we create virtual Ethernet tunnels (veth) named =veth-r=, =veth-g=, and =veth-b=, each paired with an interface in its respective network namespace (=eth0-r=, =eth0-g=, =eth0-b=) for communication. These tunnels facilitate communication between the vSwitch and the network namespaces.
+Nun erstellen wir virtuelle Ethernet-Tunnel (veth) namens =veth-r=, =veth-g= und =veth-b=, die jeweils mit einer Schnittstelle in ihrem jeweiligen Netzwerk-Namensraum (=eth0-r=, =eth0-g=, =eth0-b=) für die Kommunikation gekoppelt sind. Diese Tunnel erleichtern die Kommunikation zwischen dem vSwitch und den Netzwerk-Namensräumen.
 
 #+BEGIN_SRC bash
 ip link add veth-r type veth peer eth0-r
@@ -289,9 +289,9 @@ ip link add veth-g type veth peer eth0-g
 ip link add veth-b type veth peer eth0-b
 #+END_SRC
 
-** Place link in namespaces
+** Verknüpfung in Namensräume platzieren
 
-After creating the tunnels, the next step is to assign the interfaces to their respective namespaces. This is achieved by associating each tunnel's endpoint (=eth0-r=, =eth0-g=, =eth0-b=) with its corresponding namespace (red, green, blue).
+Nachdem die Tunnel erstellt wurden, ist der nächste Schritt, die Schnittstellen ihren jeweiligen Namensräumen zuzuweisen. Dies wird erreicht, indem jedem Endpunkt eines Tunnels (=eth0-r=, =eth0-g=, =eth0-b=) sein entsprechender Namensraum (red, green, blue) zugeordnet wird.
 
 
 #+BEGIN_SRC bash
@@ -300,9 +300,9 @@ ip link set eth0-g netns green
 ip link set eth0-b netns blue
 #+END_SRC
 
-** Add IPv4-Addresses
+** IPv4-Adressen hinzufügen
 
-Finally, IPv4 addresses are assigned to the interfaces within each namespace to enable network communication. The IP addresses =10.0.0.2=, =10.0.0.3=, and =10.0.0.4= with a =/24= subnet mask are allocated to =eth0-r=, =eth0-g=, and =eth0-b= interfaces, respectively. Additionally, the interfaces are brought up to activate the network configuration.
+Schließlich werden IPv4-Adressen den Schnittstellen innerhalb jedes Namensraums zugewiesen, um die Netzwerkkommunikation zu ermöglichen. Die IP-Adressen =10.0.0.2=, =10.0.0.3= und =10.0.0.4= mit einer =/24= Subnetzmaske werden den Schnittstellen =eth0-r=, =eth0-g= und =eth0-b= jeweils zugewiesen. Zusätzlich werden die Schnittstellen aktiviert, um die Netzwerkkonfiguration zu aktivieren.
 
 
 #+BEGIN_SRC bash
@@ -314,13 +314,14 @@ blue ip address add 10.0.0.4/24 dev eth0-b
 blue ip link set dev eth0-b up
 #+END_SRC
 
-** Open virtual switch
 
-To set up the virtual switch, first, the Openvswitch package is installed using the appropriate package manager, followed by starting the =ovs-vswitchd= service to manage the switch.
+** Open Virtual Switch
+
+*** Installieren
+Um den virtuellen Switch einzurichten, wird zunächst das Openvswitch-Paket mithilfe des passenden Paketmanagers installiert. Anschließend wird der =ovs-vswitchd= Dienst gestartet, um den Switch zu verwalten.
 
 
-*** Install
-#+BEGIN_SRC bash :eval never :tangle nil
+#+BEGIN_SRC bash :eval never :tangle files/install_ovs.sh
 if [ -f /etc/os-release ]; then
     . /etc/os-release
 else
@@ -351,18 +352,19 @@ esac
 systemctl start ovs-vswitchd.service
 #+END_SRC
 
-*** Add Switch
+**** Virtuellen Switch hinzufügen
 
-After installation, a virtual switch named SW1 is created using the =ovs-vsctl add-br= command. The switch configuration is displayed using =ovs-vsctl show=.
+Nach der Installation wird ein virtueller Switch mit dem Namen =SW1= mithilfe des Befehls =ovs-vsctl add-br= erstellt. Die Switch-Konfiguration wird mithilfe des Befehls =ovs-vsctl show= angezeigt.
 
 #+BEGIN_SRC bash
 ovs-vsctl add-br SW1
 ovs-vsctl show
 #+END_SRC
 
+*** Ports hinzufügen
 
-*** Add ports
-Next, ports are added to the virtual switch to connect it with the network namespaces. Each port is associated with a corresponding tunnel interface (=veth-r=, =veth-g=, =veth-b=).
+Als nächstes werden Ports zum virtuellen Switch hinzugefügt, um ihn mit den Netzwerk-Namensräumen zu verbinden. Jeder Port ist mit einer entsprechenden Tunnel-Schnittstelle (=veth-r=, =veth-g=, =veth-b=) verbunden.
+
 
 #+BEGIN_SRC bash
 ovs-vsctl add-port SW1 veth-r
@@ -371,7 +373,7 @@ ovs-vsctl add-port SW1 veth-g
 ovs-vsctl show
 #+END_SRC
 
-These ports must now be activated.
+Diese Ports müssen nun noch aktiviert werden.
 
 #+BEGIN_SRC bash
 ip link set veth-r up
@@ -380,13 +382,13 @@ ip link set veth-b up
 ip a | grep veth -A3
 #+END_SRC
 
-* Conclusion
+Conclusion
 
-In conclusion, our virtual network setup showcases the versatility and efficiency of software-defined networking (SDN) solutions. By abstracting network functionality into virtualized components, we enable easier management, increased flexibility, and better resource utilization. This project serves as a foundation for further exploration and experimentation in the realm of virtualized networking environments.
+Zusammenfassend zeigt unsere virtuelle Netzwerkkonfiguration die Vielseitigkeit und Effizienz von softwaredefinierten Netzwerk (SDN)-Lösungen. Durch die Abstraktion von Netzwerkfunktionalitäten in virtualisierte Komponenten ermöglichen wir eine einfachere Verwaltung, erhöhte Flexibilität und eine bessere Ressourcennutzung. Dieses Projekt dient als Grundlage für weitere Erkundungen und Experimente im Bereich virtualisierter Netzwerkumgebungen.
 
-You can now go and explore the different name spaces, by calling network related command with the =red()=, =blue()= and =green()= functions like:
+Jetzt können Sie die verschiedenen Namensräume erkunden, indem Sie netzwerkbezogene Befehle mit den Funktionen =red()=, =blue()= und =green()= aufrufen, wie:
 
-#+BEGIN_SRC bash :tangle nil
+#+BEGIN_SRC bash
 blue ip route
 red ping 10.0.0.3 -c 5
 green nstat -s | grep -i icmp
@@ -394,7 +396,6 @@ green nstat -s | grep -i icmp
 
 
 
-
 # Local Variables:
-# jinx-languages: "en_US"
+# jinx-languages: "de_DE"
 # End:
