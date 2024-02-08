@@ -1,0 +1,376 @@
+#+TITLE: Virtual network with Openswitch
+#+AUTHOR: Sebastian Meisel
+
+:HTML_PROPERTIES:
+#+OPTIONS: num:nil toc:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
+:END:
+
+
+* Virtual network with Openswitch
+:PROPERTIES:
+:header-args:bash: :shebang #!/bin/bash :tangle files/ovs.sh :eval never :session OVS :exports code
+:header-args:mermaid: :tangle nil :results file :exports results
+:header-args:javascript: :tangle script.js :exports none
+:header-args:css: :tangle mystyle.css :exports none
+:END:
+
+#+NAME: toggle-mode-script
+#+BEGIN_EXPORT HTML
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+#+END_EXPORT
+
+#+BEGIN_SRC javascript
+
+document.addEventListener('DOMContentLoaded', function() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+});
+
+// Toggle dark mode
+function toggleDarkMode() {
+  console.log("hallo");
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+}
+
+const body = document.querySelector('#darkmode-toggle').addEventListener('click', toggleDarkMode)
+#+END_SRC
+
+
+
+#+NAME: toggle-mode-css
+#+BEGIN_SRC css
+:root {
+  /* Light mode colors */
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --primary-color: #0000ff;
+  --secondary-color: #008000;
+  --highlight-color: #ff0000;
+  --code-background-color: #f0f0f0;
+  --border-color: #cccccc;
+  --tag-background-color: #cccccc;
+  --code-color: #ff00ff;
+}
+
+:root[data-theme="dark"] {
+  --background-color: #1f1f1f;
+  --text-color: #c7c7c7;
+  --primary-color: #6a9fb5;
+  --secondary-color: #b5b5b5;
+  --highlight-color: #f0c674;
+  --code-background-color: #262626;
+  --border-color: #333333;
+  --tag-background-color: #3f3f3f;
+  --code-color: #d80ffc;
+}
+
+/* Default to light mode */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+
+.title  { color: var(--primary-color);}
+.subtitle { color: var(--secondary-color); }
+.todo   { color: red; } /* Keeping specific colors for statuses */
+.done   { color: green; }
+.priority { color: orange; }
+.tag    { background-color: var(--tag-background-color); }
+
+.timestamp, .timestamp-kwd { color: var(--highlight-color); }
+
+pre {
+  border: 1px solid var(--border-color);
+  background-color: var(--code-background-color);
+  color: var(--code-color);
+  font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
+  font-size: 16px;
+}
+
+code {
+  color: var(--code-color);
+  font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
+  font-size: 16px;
+}
+
+label {
+    width: 50px;
+    height: 20px;
+    position: absolute;
+    top: 50px;
+    left: 100px;
+    display: block;
+    background: #ebebeb;
+    border-radius: 20px;
+    box-shadow: inset 0px 1px 2px rgba(0,0,0,0.4), inset 0px -1px 2px rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+label:after {
+    content: "";
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    top: 1px;
+    left:1px;
+    background: linear-gradient(180deg, #ffcc89, #d8860b);
+    border-radius: 18px;
+    box-shadow: 0px 1px 2px rgba(0,0,0,0.2);
+    transition: 0.3s;t
+}
+
+
+input {
+    width: 0;
+    height: 0;
+    visibility: hidden;
+    position: absolute;
+    top: 50px;
+    left: 100px;
+}
+
+input:checked + label {
+    background: #242424;
+}
+input:checked +label::after {
+    left: 49px;
+    transform: translateX(-100%);
+    background: linear-gradient(180deg, #777, #3a3a3a);
+}
+#+END_SRC
+
+
+
+
+In this project, I want to show, how to designed and implemented a virtual network using Openvswitch and network namespaces under linux. By leveraging virtual Ethernet tunnels and a central virtual switch, we createa flexible and scalable network environment. This project aims to demonstrate the capabilities of virtual networking technologies and provide a practical example for educational purposes.
+
+
+The following diagram illustrates a virtual network setup using Openswitch. The vSwitch serves as the central point, connecting three distinct network namespaces represented by red, green, and blue. Each namespace is allocated an IP address (=eth0-r=, =eth0-g=, =eth0-b=) within the =10.0.0.0/24= subnet and is connected to the vSwitch via virtual Ethernet interfaces (=veth-r=, =veth-g=, =veth-b=).
+
+#+BEGIN_SRC mermaid :file img/ovs-net.png
+graph TD;
+   subgraph "default"
+     direction BT
+     SW[(vSwitch)]  o--o veth-r & veth-g & veth-b
+   end
+
+   subgraph redNS
+     red[eth0-r: 10.0.0.2] o---o veth-r
+   end
+
+
+   subgraph greenNS
+     green[eth0-g: 10.0.0.3] o---o veth-g
+   end
+
+   subgraph blueNS
+     blue[eth0-b: 10.0.0.4] o---o veth-b
+   end
+
+
+  classDef green fill:#9f6,stroke:#333,stroke-width:2px;
+  class greenNS,veth-g green
+  classDef red fill:#f69,stroke:#333,stroke-width:2px;
+  class redNS,veth-r red
+  classDef blue fill:#69f,stroke:#333,stroke-width:2px;
+  class blueNS,veth-b blue
+ #+END_SRC
+
+#+CAPTION: Network Diagram 
+#+NAME: fig:netdiag
+#+ATTR_HTML: :width 50% :alt Network Diagram showing the relationship between the namespaces as described in the paragraph above.
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 700
+#+RESULTS:
+[[file:img/ovs-net.png]]
+
+** Create functions for each name space
+
+To begin with we define functions for each network namespace: green, red, orange (as a spare for future projects), and blue. These functions allow executing commands within the respective namespaces using the =ip netns exec= command. Each function changes the color output of the executed commands for better visual identification.
+
+#+BEGIN_SRC bash
+function green () {
+    if [[ $1 = "bash" ]]
+    then
+	echo "To risky for my taste"
+    else
+	echo -ne '\e[32m'
+	ip netns exec green $@
+	echo -ne '\e[0m'
+    fi
+    }
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC bash
+function red () {
+    if [[ $1 = "bash" ]]
+    then
+	echo "To risky for my taste"
+    else
+	echo -ne '\e[31m'
+	ip netns exec red $@
+	echo -ne '\e[0m'
+    fi
+    }
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC bash
+function orange () {
+    if [[ $1 = "bash" ]]
+    then
+	echo "To risky for my taste"
+    else
+	echo -ne '\e[33m'
+	ip netns exec orange $@
+	echo -ne '\e[0m'
+    fi
+    }
+#+END_SRC
+
+#+RESULTS:
+
+
+#+BEGIN_SRC bash
+function blue () {
+    if [[ $1 = "bash" ]]
+    then
+	echo "To risky for my taste"
+    else
+	echo -ne '\e[34m'
+	ip netns exec blue $@
+	echo -ne '\e[0m'
+    fi
+    }
+#+END_SRC
+
+** Create namespaces
+
+The next step is initializing the three network namespaces named red, green, and blue using the =ip netns add= command. Subsequently, the loopback interface within each namespace is brought up using the =ip l dev lo up= command to enable local communication within the namespace. Finally, the current state of network interfaces within each namespace is displayed using the =ip l= command.
+
+#+BEGIN_SRC bash
+ip netns add red
+ip netns add green
+ip netns add blue
+#+END_SRC
+
+#+BEGIN_SRC bash
+red ip l dev lo up
+green ip l dev lo up
+blue ip l dev lo up
+#+END_SRC
+
+#+BEGIN_SRC bash
+red ip l
+green ip l
+blue ip l
+#+END_SRC
+
+** Create tunnels
+
+Now we create virtual Ethernet tunnels (veth) named =veth-r=, =veth-g=, and =veth-b=, each paired with an interface in its respective network namespace (=eth0-r=, =eth0-g=, =eth0-b=) for communication. These tunnels facilitate communication between the vSwitch and the network namespaces.
+
+#+BEGIN_SRC bash
+ip link add veth-r type veth peer eth0-r
+ip link add veth-g type veth peer eth0-g
+ip link add veth-b type veth peer eth0-b
+#+END_SRC
+
+** Place link in namespaces
+
+After creating the tunnels, the next step is to assign the interfaces to their respective namespaces. This is achieved by associating each tunnel's endpoint (=eth0-r=, =eth0-g=, =eth0-b=) with its corresponding namespace (red, green, blue).
+
+
+#+BEGIN_SRC bash
+ip link set eth0-r netns red
+ip link set eth0-g netns green
+ip link set eth0-b netns blue
+#+END_SRC
+
+** Add IPv4-Addresses
+
+Finally, IPv4 addresses are assigned to the interfaces within each namespace to enable network communication. The IP addresses =10.0.0.2=, =10.0.0.3=, and =10.0.0.4= with a =/24= subnet mask are allocated to =eth0-r=, =eth0-g=, and =eth0-b= interfaces, respectively. Additionally, the interfaces are brought up to activate the network configuration.
+
+
+#+BEGIN_SRC bash
+red ip address add 10.0.0.2/24 dev eth0-r
+red ip link set dev eth0-r up
+green ip address add 10.0.0.3/24 dev eth0-g
+green ip link set dev eth0-g up
+blue ip address add 10.0.0.4/24 dev eth0-b
+blue ip link set dev eth0-b up
+#+END_SRC
+
+** Open virtual switch
+
+To set up the virtual switch, first, the Openvswitch package is installed using the package manager (=zypper=), followed by starting the =ovs-vswitchd= service to manage the switch.
+
+
+*** Install
+#+BEGIN_SRC bash :eval never :tangle nil
+sudo zypper install openvswitch
+#+END_SRC
+
+#+BEGIN_SRC bash
+systemctl start ovs-vswitchd.service
+#+END_SRC
+
+After installation, a virtual switch named SW1 is created using the =ovs-vsctl add-br= command. The switch configuration is displayed using =ovs-vsctl show=.
+
+
+*** Add Switch
+#+BEGIN_SRC bash
+ovs-vsctl add-br SW1
+ovs-vsctl show
+#+END_SRC
+
+Next, ports are added to the virtual switch to connect it with the network namespaces. Each port is associated with a corresponding tunnel interface (=veth-r=, =veth-g=, =veth-b=).
+
+
+*** Add ports
+
+#+BEGIN_SRC bash
+ovs-vsctl add-port SW1 veth-r
+ovs-vsctl add-port SW1 veth-b
+ovs-vsctl add-port SW1 veth-g
+ovs-vsctl show
+#+END_SRC
+
+#+BEGIN_SRC bash
+ip link set veth-r up
+ip link set veth-g up
+ip link set veth-b up
+ip a | grep veth -A3
+#+END_SRC
+
+* Conclusion
+
+In conclusion, our virtual network setup showcases the versatility and efficiency of software-defined networking (SDN) solutions. By abstracting network functionality into virtualized components, we enable easier management, increased flexibility, and better resource utilization. This project serves as a foundation for further exploration and experimentation in the realm of virtualized networking environments.
+
+You can now go and explore the different name spaces, by calling network related command with the =red()=, =blue()= and =green()= functions like:
+
+#+BEGIN_SRC bash :tangle nil
+blue ip route
+red ping 10.0.0.3 -c 5
+green nstat -s | grep -i icmp
+#+END_SRC
+
+
+
+
+# Local Variables:
+# jinx-languages: "en_US"
+# End:

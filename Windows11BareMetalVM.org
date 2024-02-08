@@ -1,0 +1,5 @@
+#+TITLE Baremetal Windows 11 as VM in Virtmanager
+
+* Disk
+
+
