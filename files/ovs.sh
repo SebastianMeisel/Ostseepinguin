@@ -70,34 +70,7 @@ green ip link set dev eth0-g up
 blue ip address add 10.0.0.4/24 dev eth0-b
 blue ip link set dev eth0-b up
 
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-else
-    echo "Cannot determine the Linux distribution."
-    exit 1
-fi
-case $ID_LIKE in
-    debian|ubuntu)
-        systemctl start ovs-vswitchd.service
-        ;;
-    fedora|rhel|centos)
-        systemctl start ovs-vswitchd
-        ;;
-    suse)
-        systemctl start ovs-vswitchd
-        ;;
-    arch)
-        systemctl start openvswitch
-        ;;
-    *)
-        echo "Unsupported distribution."
-        exit 1
-        ;;
-esac
-else
-echo "Cannot determine the Linux distribution."
-exit 1
-fi
+systemctl start ovs-vswitchd.service
 
 ovs-vsctl add-br SW1
 ovs-vsctl show
