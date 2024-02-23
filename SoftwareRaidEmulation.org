@@ -1,0 +1,186 @@
+#+TITLE: Software RAID emulation
+#+AUTHOR: Sebastian Meisel
+
+:HTML_PROPERTIES:
+#+OPTIONS: num:nil toc:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
+:END:
+
+
+* Creating a virtual RAID for study
+:PROPERTIES:
+:header-args:bash: :shebang #!/bin/bash  :eval never :results verbatim :session RAID :tangle files/RAID.sh :exports code
+:header-args:mermaid: :tangle nil :results file :exports results :eval t
+:header-args:config: :exports both :eval never
+:END:
+
+#+NAME: toggle-mode-script
+#+BEGIN_EXPORT HTML
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+#+END_EXPORT
+
+#+BEGIN_SRC bash :eval t
+export LC_ALL=C
+#+END_SRC
+
+#+RESULTS:
+
+
+
+** Create File Images
+
+We start with creating a temporary directory to work in - for easier clean up. Therein we create four 500 MB files, that will serve as our disks using =fallocate=.
+
+#+BEGIN_SRC bash 
+export RAID_DIR=$(mktemp -d RAIDXXXXX)
+cd ${RAID_DIR}
+fallocate -l 500M disk1.img
+fallocate -l 500M disk2.img
+fallocate -l 500M disk3.img
+fallocate -l 500M disk4.img
+fallocate -l 500M disk5.img
+#+END_SRC
+
+#+RESULTS:
+
+** Creating loop devices
+
+Now we need to create loop devices for these files with the =losetup= tool.
+
+#+BEGIN_SRC bash  
+sudo /usr/sbin/losetup  /dev/loop100 ./disk1.img
+sudo /usr/sbin/losetup  /dev/loop200 ./disk2.img
+sudo /usr/sbin/losetup  /dev/loop300 ./disk3.img
+sudo /usr/sbin/losetup  /dev/loop400 ./disk4.img
+sudo /usr/sbin/losetup  /dev/loop500 ./disk5.img
+#+END_SRC
+
+We can check they are created with:
+
+#+BEGIN_SRC bash :tangle no 
+lsblk | grep loop
+#+END_SRC
+
+** Create the virtual RAID
+
+Now we can create a RAID with any level from 1 to 5.
+
+#+BEGIN_SRC bash
+sudo mdadm --create /dev/md0 --level=1 --raid-devices=5 /dev/loop{1..5}00
+#+END_SRC
+
+We also need a file system on the newly created RAID.
+
+#+BEGIN_SRC bash
+sudo /usr/sbin/mkfs.ext4 /dev/md0
+#+END_SRC
+
+*** Mount and enjoy
+
+Finally we can mount the new RAID.
+
+#+BEGIN_SRC bash
+sudo mkdir /mnt/raid_sim
+sudo mount /dev/md0 /mnt/raid_sim/
+cd /mnt/raid_sim
+#+END_SRC
+
+
+*** Simulate gradual drive failure 
+
+One thing we might want to do, is to simulate drive failures, to test how the raid handles it.
+We want to simulate the failure gradually over 10 minutes, writing bad data every 30 seconds.
+#+BEGIN_SRC bash :tangle files/RAID_stress.sh
+RAID_DIR=$(find /home/ -type d -name RAID?????)
+echo ${RAID_DIR}
+
+export FILE=${RAID_DIR}/disk2.img
+export iterations=$((600 / 30))
+bad_data_per_iteration=$((200 * 1024 * 1024 / iterations))
+for i in {1..$iterations}; do
+  # Seek to a random offset within the image file
+  offset=$((RANDOM % ($(($(du -b ${FILE} | awk '{print $1}') - 10240)))))
+  # Write bad data using fallocate
+  sudo fallocate -l $bad_data_per_iteration -o $offset ${FILE}
+  # Optionally, simulate some delay between writes
+  sleep 30
+done
+
+#+END_SRC
+
+Now we repeat with 2 disks.
+
+#+BEGIN_SRC bash :tangle files/RAID_stress2.sh
+RAID_DIR=$(find /home/ -type d -name RAID?????)
+echo ${RAID_DIR}
+
+for f in ${RAID_DIR}/disk{2,4}.img
+do
+    export FILE=$f
+    export iterations=$((600 / 30))
+    bad_data_per_iteration=$((200 * 1024 * 1024 / iterations))
+    for i in {1..$iterations}; do
+	# Seek to a random offset within the image file
+	offset=$((RANDOM % ($(($(du -b ${FILE} | awk '{print $1}') - 10240)))))
+	# Write bad data using fallocate
+	sudo fallocate -l $bad_data_per_iteration -o $offset ${FILE}
+	# Optionally, simulate some delay between writes
+	sleep 30
+    done
+done
+#+END_SRC
+
+
+…and 3 disks.
+
+#+BEGIN_SRC bash :tangle files/RAID_stress3.sh
+RAID_DIR=$(find /home/ -type d -name RAID?????)
+echo ${RAID_DIR}
+
+for f in ${RAID_DIR}/disk{1..3}.img
+do
+    export FILE=$f
+    export iterations=$((600 / 30))
+    bad_data_per_iteration=$((200 * 1024 * 1024 / iterations))
+    for i in {1..$iterations}; do
+	# Seek to a random offset within the image file
+	offset=$((RANDOM % ($(($(du -b ${FILE} | awk '{print $1}') - 10240)))))
+	# Write bad data using fallocate
+	sudo fallocate -l $bad_data_per_iteration -o $offset ${FILE}
+	# Optionally, simulate some delay between writes
+	sleep 30
+    done
+done
+#+END_SRC
+
+
+
+
+** Clean up
+:PROPERTIES:
+:header-args:bash: :shebang #!/bin/bash  :eval never :results verbatim :session RAID :tangle files/RAID_destroy.sh :exports code
+:END:
+
+#+BEGIN_SRC bash
+RAID_DIR=$(find /home/ -type d -name RAID?????)
+cd ${RAID_DIR}
+sudo umount /mnt/raid_sim
+sudo rm -r /mnt/raid_sim
+sudo mdadm --stop /dev/md0
+sudo mdadm --remove /dev/md0
+cat /proc/mdstat
+for i in {1..5}
+do
+    sudo losetup -d /dev/loop${i}00
+done
+cd ..
+rm -r ${RAID_DIR}
+#+END_SRC
+
+
+
+# Local Variables:
+# jinx-languages: "en_US"
+# End:

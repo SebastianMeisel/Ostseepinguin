@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-08 Do 16:45 -->
+<!-- 2024-02-18 So 16:30 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual network with Openswitch</title>
@@ -200,9 +200,9 @@
 <h1 class="title">Virtual network with Openswitch</h1>
 
 
-<div id="outline-container-orgcf29616" class="outline-2">
-<h2 id="orgcf29616">Virtual network with Openswitch</h2>
-<div class="outline-text-2" id="text-orgcf29616">
+<div id="outline-container-org14d6e9a" class="outline-2">
+<h2 id="org14d6e9a">Virtual network with Openswitch</h2>
+<div class="outline-text-2" id="text-org14d6e9a">
 <input type="checkbox" id="darkmode-toggle">
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
@@ -217,16 +217,16 @@ The following diagram illustrates a virtual network setup using Openswitch. The 
 </p>
 
 
-<div id="org6fd4bf6" class="figure">
+<div id="org709523a" class="figure">
 <p><img src="img/ovs-net.png" alt="Network Diagram showing the relationship between the namespaces as described in the paragraph above." width="50%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Network Diagram</p>
 </div>
 </div>
 
-<div id="outline-container-org9e52409" class="outline-3">
-<h3 id="org9e52409">Create functions for each name space</h3>
-<div class="outline-text-3" id="text-org9e52409">
+<div id="outline-container-orgd494d51" class="outline-3">
+<h3 id="orgd494d51">Create functions for each name space</h3>
+<div class="outline-text-3" id="text-orgd494d51">
 <p>
 To begin with we define functions for each network namespace: green, red, orange (as a spare for future projects), and blue. These functions allow executing commands within the respective namespaces using the <code>ip netns exec</code> command. Each function changes the color output of the executed commands for better visual identification.
 </p>
@@ -290,9 +290,9 @@ To begin with we define functions for each network namespace: green, red, orange
 </div>
 </div>
 
-<div id="outline-container-org9e68193" class="outline-3">
-<h3 id="org9e68193">Create namespaces</h3>
-<div class="outline-text-3" id="text-org9e68193">
+<div id="outline-container-orga871298" class="outline-3">
+<h3 id="orga871298">Create namespaces</h3>
+<div class="outline-text-3" id="text-orga871298">
 <p>
 The next step is initializing the three network namespaces named red, green, and blue using the <code>ip netns add</code> command. Subsequently, the loopback interface within each namespace is brought up using the <code>ip l dev lo up</code> command to enable local communication within the namespace. Finally, the current state of network interfaces within each namespace is displayed using the <code>ip l</code> command.
 </p>
@@ -320,9 +320,9 @@ blue ip l
 </div>
 </div>
 
-<div id="outline-container-org87ca9db" class="outline-3">
-<h3 id="org87ca9db">Create tunnels</h3>
-<div class="outline-text-3" id="text-org87ca9db">
+<div id="outline-container-orgcda76f6" class="outline-3">
+<h3 id="orgcda76f6">Create tunnels</h3>
+<div class="outline-text-3" id="text-orgcda76f6">
 <p>
 Now we create virtual Ethernet tunnels (veth) named <code>veth-r</code>, <code>veth-g</code>, and <code>veth-b</code>, each paired with an interface in its respective network namespace (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) for communication. These tunnels facilitate communication between the vSwitch and the network namespaces.
 </p>
@@ -336,9 +336,9 @@ ip link add veth-b type veth peer eth0-b
 </div>
 </div>
 
-<div id="outline-container-org63cb44c" class="outline-3">
-<h3 id="org63cb44c">Place link in namespaces</h3>
-<div class="outline-text-3" id="text-org63cb44c">
+<div id="outline-container-org1866f4b" class="outline-3">
+<h3 id="org1866f4b">Place link in namespaces</h3>
+<div class="outline-text-3" id="text-org1866f4b">
 <p>
 After creating the tunnels, the next step is to assign the interfaces to their respective namespaces. This is achieved by associating each tunnel's endpoint (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) with its corresponding namespace (red, green, blue).
 </p>
@@ -353,9 +353,9 @@ ip link set eth0-b netns blue
 </div>
 </div>
 
-<div id="outline-container-org19696ec" class="outline-3">
-<h3 id="org19696ec">Add IPv4-Addresses</h3>
-<div class="outline-text-3" id="text-org19696ec">
+<div id="outline-container-org327996b" class="outline-3">
+<h3 id="org327996b">Add IPv4-Addresses</h3>
+<div class="outline-text-3" id="text-org327996b">
 <p>
 Finally, IPv4 addresses are assigned to the interfaces within each namespace to enable network communication. The IP addresses <code>10.0.0.2</code>, <code>10.0.0.3</code>, and <code>10.0.0.4</code> with a <code>/24</code> subnet mask are allocated to <code>eth0-r</code>, <code>eth0-g</code>, and <code>eth0-b</code> interfaces, respectively. Additionally, the interfaces are brought up to activate the network configuration.
 </p>
@@ -373,18 +373,18 @@ blue ip link set dev eth0-b up
 </div>
 </div>
 
-<div id="outline-container-orgfd07552" class="outline-3">
-<h3 id="orgfd07552">Open virtual switch</h3>
-<div class="outline-text-3" id="text-orgfd07552">
+<div id="outline-container-orgf6d4d74" class="outline-3">
+<h3 id="orgf6d4d74">Open virtual switch</h3>
+<div class="outline-text-3" id="text-orgf6d4d74">
 <p>
 To set up the virtual switch, first, the Openvswitch package is installed using the appropriate package manager, followed by starting the <code>ovs-vswitchd</code> service to manage the switch.
 </p>
 </div>
 
 
-<div id="outline-container-org9deeabe" class="outline-4">
-<h4 id="org9deeabe">Install</h4>
-<div class="outline-text-4" id="text-org9deeabe">
+<div id="outline-container-orge903d95" class="outline-4">
+<h4 id="orge903d95">Install</h4>
+<div class="outline-text-4" id="text-orge903d95">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b6a0ff;">if</span> [ -f /etc/os-release ]; <span style="color: #b6a0ff;">then</span>
     <span style="color: #f78fe7;">.</span> /etc/os-release
@@ -420,9 +420,9 @@ To set up the virtual switch, first, the Openvswitch package is installed using 
 </div>
 </div>
 
-<div id="outline-container-org94f41ae" class="outline-4">
-<h4 id="org94f41ae">Add Switch</h4>
-<div class="outline-text-4" id="text-org94f41ae">
+<div id="outline-container-org3a8e374" class="outline-4">
+<h4 id="org3a8e374">Add Switch</h4>
+<div class="outline-text-4" id="text-org3a8e374">
 <p>
 After installation, a virtual switch named SW1 is created using the <code>ovs-vsctl add-br</code> command. The switch configuration is displayed using <code>ovs-vsctl show</code>.
 </p>
@@ -436,9 +436,9 @@ ovs-vsctl show
 </div>
 
 
-<div id="outline-container-orgc125785" class="outline-4">
-<h4 id="orgc125785">Add ports</h4>
-<div class="outline-text-4" id="text-orgc125785">
+<div id="outline-container-orge7e8938" class="outline-4">
+<h4 id="orge7e8938">Add ports</h4>
+<div class="outline-text-4" id="text-orge7e8938">
 <p>
 Next, ports are added to the virtual switch to connect it with the network namespaces. Each port is associated with a corresponding tunnel interface (<code>veth-r</code>, <code>veth-g</code>, <code>veth-b</code>).
 </p>
@@ -467,9 +467,9 @@ ip a | grep veth -A3
 </div>
 </div>
 
-<div id="outline-container-org221b850" class="outline-2">
-<h2 id="org221b850">Conclusion</h2>
-<div class="outline-text-2" id="text-org221b850">
+<div id="outline-container-orgb134f8e" class="outline-2">
+<h2 id="orgb134f8e">Conclusion</h2>
+<div class="outline-text-2" id="text-orgb134f8e">
 <p>
 In conclusion, our virtual network setup showcases the versatility and efficiency of software-defined networking (SDN) solutions. By abstracting network functionality into virtualized components, we enable easier management, increased flexibility, and better resource utilization. This project serves as a foundation for further exploration and experimentation in the realm of virtualized networking environments.
 </p>
@@ -489,7 +489,7 @@ green nstat -s | grep -i icmp
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2024-02-08 Do 16:45</p>
+<p class="date">Created: 2024-02-18 So 16:30</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

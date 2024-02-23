@@ -1,0 +1,11 @@
+zone "col.or" {
+    type master;
+    file "/etc/bind/zones/db.col.or";
+};
+
+zone "0.0.10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.0.0.10";
+};
+
+dnssec-enable no

@@ -158,10 +158,10 @@ In this project, I want to show, how to designed and implemented a virtual netwo
 The following diagram illustrates a virtual network setup using Openswitch. The vSwitch serves as the central point, connecting three distinct network namespaces represented by red, green, and blue. Each namespace is allocated an IP address (=eth0-r=, =eth0-g=, =eth0-b=) within the =10.0.0.0/24= subnet and is connected to the vSwitch via virtual Ethernet interfaces (=veth-r=, =veth-g=, =veth-b=).
 
 #+BEGIN_SRC mermaid :file img/ovs-net.png
-graph TD;
+graph LR;
    subgraph "default"
-     direction BT
-     SW[(vSwitch)]  o--o veth-r & veth-g & veth-b
+     direction RL
+     veth-r & veth-g & veth-b o--o SW[(SW1)]
    end
 
    subgraph redNS
@@ -184,7 +184,7 @@ graph TD;
   class redNS,veth-r red
   classDef blue fill:#69f,stroke:#333,stroke-width:2px;
   class blueNS,veth-b blue
- #+END_SRC
+     #+END_SRC
 
 #+CAPTION: Network Diagram 
 #+NAME: fig:netdiag
@@ -199,14 +199,19 @@ graph TD;
 To begin with we define functions for each network namespace: green, red, orange (as a spare for future projects), and blue. These functions allow executing commands within the respective namespaces using the =ip netns exec= command. Each function changes the color output of the executed commands for better visual identification.
 
 #+BEGIN_SRC bash
-function green () {
+function red () {
     if [[ $1 = "bash" ]]
     then
 	echo "To risky for my taste"
     else
-	echo -ne '\e[32m'
-	ip netns exec green $@
-	echo -ne '\e[0m'
+	if [[ $(ip netns list | grep -o "red") == red ]]
+	then
+	    echo -ne '\e[32m'
+	    sudo ip netns exec red $@
+	    echo -ne '\e[0m'
+	else
+	    echo "namespace red does not exist"
+	fi
     fi
     }
 #+END_SRC
@@ -214,14 +219,19 @@ function green () {
 #+RESULTS:
 
 #+BEGIN_SRC bash
-function red () {
+function green () {
     if [[ $1 = "bash" ]]
     then
 	echo "To risky for my taste"
     else
-	echo -ne '\e[31m'
-	ip netns exec red $@
-	echo -ne '\e[0m'
+	if [[ $(ip netns list | grep -o "green") == green ]]
+	then
+	    echo -ne '\e[32m'
+	    sudo ip netns exec green $@
+	    echo -ne '\e[0m'
+	else
+	    echo "namespace green does not exist"
+	fi
     fi
     }
 #+END_SRC
@@ -234,9 +244,14 @@ function orange () {
     then
 	echo "To risky for my taste"
     else
-	echo -ne '\e[33m'
-	ip netns exec orange $@
-	echo -ne '\e[0m'
+	if [[ $(ip netns list | grep -o "orange") == orange ]]
+	then
+	    echo -ne '\e[32m'
+	    sudo ip netns exec orange $@
+	    echo -ne '\e[0m'
+	else
+	    echo "namespace orange does not exist"
+	fi
     fi
     }
 #+END_SRC
@@ -250,33 +265,50 @@ function blue () {
     then
 	echo "To risky for my taste"
     else
-	echo -ne '\e[34m'
-	ip netns exec blue $@
-	echo -ne '\e[0m'
+	if [[ $(ip netns list | grep -o "blue") == blue ]]
+	then
+	    echo -ne '\e[32m'
+	    sudo ip netns exec blue $@
+	    echo -ne '\e[0m'
+	else
+	    echo "namespace blue does not exist"
+	fi
     fi
     }
 #+END_SRC
+
+
 
 ** Create namespaces
 
 The next step is initializing the three network namespaces named red, green, and blue using the =ip netns add= command. Subsequently, the loopback interface within each namespace is brought up using the =ip l dev lo up= command to enable local communication within the namespace. Finally, the current state of network interfaces within each namespace is displayed using the =ip l= command.
 
 #+BEGIN_SRC bash
-ip netns add red
-ip netns add green
-ip netns add blue
+for ns in {red,green,blue}
+do
+    if [[ ! -n $(ip netns list | grep -q ${ns}) ]]
+    then
+	sudo ip netns add ${ns}
+	echo "${ns} namespace added."	
+    fi
+done
+ip netns list
+sleep 1
 #+END_SRC
 
 #+BEGIN_SRC bash
-red ip l dev lo up
-green ip l dev lo up
-blue ip l dev lo up
+for ns in {red,green,blue}
+do
+  ${ns} ip link lo up
+  echo "Loopback in ${ns} is up."
+done
 #+END_SRC
 
-#+BEGIN_SRC bash
-red ip l
-green ip l
-blue ip l
+#+BEGIN_SRC bash :tangle no
+for ns in {red,green,blue}
+do
+    ${ns} ip link
+done
 #+END_SRC
 
 ** Create tunnels
@@ -284,9 +316,11 @@ blue ip l
 Now we create virtual Ethernet tunnels (veth) named =veth-r=, =veth-g=, and =veth-b=, each paired with an interface in its respective network namespace (=eth0-r=, =eth0-g=, =eth0-b=) for communication. These tunnels facilitate communication between the vSwitch and the network namespaces.
 
 #+BEGIN_SRC bash
-ip link add veth-r type veth peer eth0-r
-ip link add veth-g type veth peer eth0-g
-ip link add veth-b type veth peer eth0-b
+for ns in {r,g,b}
+do
+    sudo ip link add veth-${ns} type veth peer eth0-${ns}
+    echo "Linked veth-${ns} to eth0-${ns}."
+done
 #+END_SRC
 
 ** Place link in namespaces
@@ -295,10 +329,11 @@ After creating the tunnels, the next step is to assign the interfaces to their r
 
 
 #+BEGIN_SRC bash
-ip link set eth0-r netns red
-ip link set eth0-g netns green
-ip link set eth0-b netns blue
-#+END_SRC
+for ns in {red,green,blue}
+do
+    sudo ip link set eth0-${ns:0:1} netns ${ns}
+done
+    #+END_SRC
 
 ** Add IPv4-Addresses
 
@@ -306,12 +341,14 @@ Finally, IPv4 addresses are assigned to the interfaces within each namespace to 
 
 
 #+BEGIN_SRC bash
-red ip address add 10.0.0.2/24 dev eth0-r
-red ip link set dev eth0-r up
-green ip address add 10.0.0.3/24 dev eth0-g
-green ip link set dev eth0-g up
-blue ip address add 10.0.0.4/24 dev eth0-b
-blue ip link set dev eth0-b up
+ip=1
+for ns in {red,green,blue}
+do
+    ip=$((ip+1))
+    ${ns} ip address add 10.0.0.${ip}/24 dev eth0-${ns:0:1}
+    ${ns} ip link set dev eth0-${ns:0:1} up
+    echo "Add IP 10.0.0.${ip} to eth0-${ns:0:1}."
+done
 #+END_SRC
 
 ** Open virtual switch
@@ -320,7 +357,7 @@ To set up the virtual switch, first, the Openvswitch package is installed using 
 
 
 *** Install
-#+BEGIN_SRC bash :eval never :tangle nil
+#+BEGIN_SRC bash :eval never :tangle no
 if [ -f /etc/os-release ]; then
     . /etc/os-release
 else
@@ -329,16 +366,16 @@ else
 fi
 case $ID_LIKE in
     debian|ubuntu)
-        apt install -y openvswitch-switch
+        sudo apt install -y openvswitch-switch
         ;;
     fedora|rhel|centos)
-        yum install -y openvswitch
+        sudo yum install -y openvswitch
         ;;
     suse)
-        zypper install -y openvswitch
+        sudo zypper install -y openvswitch
         ;;
     arch)
-        pacman -Syu openvswitch
+        sudo pacman -Syu openvswitch
         ;;
     *)
         echo "Unsupported distribution."
@@ -348,7 +385,8 @@ esac
 #+END_SRC
 
 #+BEGIN_SRC bash
-systemctl start ovs-vswitchd.service
+sudo systemctl start ovs-vswitchd.service
+echo "Started ovs-vswitchd"
 #+END_SRC
 
 *** Add Switch
@@ -356,8 +394,8 @@ systemctl start ovs-vswitchd.service
 After installation, a virtual switch named SW1 is created using the =ovs-vsctl add-br= command. The switch configuration is displayed using =ovs-vsctl show=.
 
 #+BEGIN_SRC bash
-ovs-vsctl add-br SW1
-ovs-vsctl show
+sudo ovs-vsctl add-br SW1
+sudo ovs-vsctl show
 #+END_SRC
 
 
@@ -365,20 +403,80 @@ ovs-vsctl show
 Next, ports are added to the virtual switch to connect it with the network namespaces. Each port is associated with a corresponding tunnel interface (=veth-r=, =veth-g=, =veth-b=).
 
 #+BEGIN_SRC bash
-ovs-vsctl add-port SW1 veth-r
-ovs-vsctl add-port SW1 veth-b
-ovs-vsctl add-port SW1 veth-g
-ovs-vsctl show
+for ns in {r,g,b}
+do
+    sudo ovs-vsctl add-port SW1 veth-${ns}
+    echo "Added veth-${ns} to SW1."
+done
 #+END_SRC
+
+#+BEGIN_SRC bash  :tangle no
+sudo ovs-vsctl show
+#+END_SRC
+
 
 These ports must now be activated.
 
 #+BEGIN_SRC bash
-ip link set veth-r up
-ip link set veth-g up
-ip link set veth-b up
-ip a | grep veth -A3
+for ns in {r,g,b}
+do
+    sudo ip link set veth-${ns} up
+    echo "Link veth-{ns} is up."
+done
 #+END_SRC
+
+#+BEGIN_SRC bash
+sudo ip a | grep veth -A3
+#+END_SRC
+
+
+
+** Cleanup
+
+#+BEGIN_SRC bash :tangle files/ovs_cleanup.sh
+# List of namespaces created by your previous script
+target_namespaces=(red green blue)
+
+# List of veth interfaces created by your previous script
+target_interfaces=(veth-r veth-g veth-b)
+
+# Check for existing namespaces
+if [[ -n $(ip netns list) ]]; then
+  echo "Removing network namespaces..."
+
+  # Loop through each namespace and remove only matching ones
+  for ns in $(ip netns list | awk '{print $1}'); do
+    if [[ "${target_namespaces[@]}" =~ "$ns" ]]; then
+      sudo ip netns del $ns
+      echo "Removed namespace: $ns"
+    fi
+  done
+else
+  echo "No network namespaces found."
+fi
+
+# Check for existing veth interfaces
+if [[ $(ip link show | grep veth -c) -gt 0 ]]; then
+  echo "Removing veth interfaces..."
+
+  # Loop through each veth interface and remove only matching ones
+  for veth in $(ip link show | grep veth | awk '{print $2}' |sed 's/@.*$//g'); do
+    if [[ "${target_interfaces[@]}" =~ "$veth" ]]; then
+      sudo ip link del $veth
+      echo "Removed interface: $veth"
+    fi
+  done
+else
+  echo "No veth interfaces found."
+fi
+
+echo "Stopping and disabling Open vSwitch..."
+sudo systemctl stop ovs-vswitchd.service
+echo "Cleanup complete!"
+
+#+END_SRC
+
+
 
 * Conclusion
 
@@ -387,9 +485,9 @@ In conclusion, our virtual network setup showcases the versatility and efficienc
 You can now go and explore the different name spaces, by calling network related command with the =red()=, =blue()= and =green()= functions like:
 
 #+BEGIN_SRC bash :tangle nil
-blue ip route
-red ping 10.0.0.3 -c 5
-green nstat -s | grep -i icmp
+sudo blue ip route
+sudo red ping 10.0.0.3 -c 5
+sudo green nstat -s | grep -i icmp
 #+END_SRC
 
 
