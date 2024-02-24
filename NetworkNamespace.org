@@ -151,6 +151,11 @@ input:checked +label::after {
 #+END_SRC
 
 
+#+begin_menu
+- > [[file:index.html][Home]]
+- > [[file:NetworkNamespaceDNS.html][Part II]]
+#+end_menu
+
 
 In this project, I want to show, how to designed and implemented a virtual network using Openvswitch and network namespaces under Linux. By leveraging virtual Ethernet tunnels and a central virtual switch, we create a flexible and scalable network environment. My main goal with this - besides understanding Linux namespaces better – is to have an isolated network environment. As a teacher I sometimes want to show my students how a single network protocol works, or what happens when I ping a domain. However even in a virtual machine there is often are many other network connection running in the background that it is difficult to filter to what I want I'm interested in. In that setup I create here the only noise in the virtual network is IPv6 Router Solicitation.
 
