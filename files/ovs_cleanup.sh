@@ -37,4 +37,11 @@ fi
 
 echo "Stopping and disabling Open vSwitch..."
 sudo systemctl stop ovs-vswitchd.service
+
+# check if named run directory for blue namespace exitsts
+if [[ -d $(ls -d blue_named_run_?????) ]]; then 
+    rm -r blue_named_run_?????
+    echo "Removed run directory for named service in blue".
+fi
+
 echo "Cleanup complete!"

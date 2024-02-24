@@ -38,7 +38,7 @@ Now we want to add DNS[fn:1] to the mix.
 
 For this we first need to install an DNS server. There are a few options like [[https://thekelleys.org.uk/dnsmasq/doc.html][dnsmasq]] or [[https://cr.yp.to/djbdns/][djbdns]] but we stick with [[https://www.isc.org/bind/][bind9]] as the quasi standard for DNS servers.
 
-#+BEGIN_SRC bash :eval never-export :tangle nil :async :results file :file install.log
+#+BEGIN_SRC bash :eval never-export :tangle no :async :results file :file install.log
 if [ -f /etc/os-release ]; then
   . /etc/os-release
 else

@@ -63,7 +63,8 @@ function blue () {
     fi
     }
 
-for ns in {red,green,blue}
+namespaces=(red green blue)
+for ns in ${namespaces[@]}
 do
     if [[ ! -n $(ip netns list | grep -q ${ns}) ]]
     then
@@ -74,37 +75,36 @@ done
 ip netns list
 sleep 1
 
-for ns in {red,green,blue}
+for ns in ${namespaces[@]}
 do
   ${ns} ip link lo up
   echo "Loopback in ${ns} is up."
 done
 
-for ns in {r,g,b}
+for ns in ${namespaces[@]}
 do
-    sudo ip link add veth-${ns} type veth peer eth0-${ns}
+    sudo ip link add veth-${ns::1} type veth peer eth0-${ns::1}
     echo "Linked veth-${ns} to eth0-${ns}."
 done
 
-for ns in {red,green,blue}
+for ns in ${namespaces[@]}
 do
-    sudo ip link set eth0-${ns:0:1} netns ${ns}
+    sudo ip link set eth0-${ns::1} netns ${ns}
 done
 
 ip=1
-for ns in {red,green,blue}
+for ns in ${namespaces[@]}
 do
     ip=$((ip+1))
-    ${ns} ip address add 10.0.0.${ip}/24 dev eth0-${ns:0:1}
+    ${ns} ip address add 10.0.0.${ip}/24 dev eth0-${ns::1}
     ${ns} ip link set dev eth0-${ns:0:1} up
-    echo "Add IP 10.0.0.${ip} to eth0-${ns:0:1}."
+    echo "Add IP 10.0.0.${ip} to eth0-${ns::1}."
 done
 
 sudo systemctl start ovs-vswitchd.service
 echo "Started ovs-vswitchd"
 
 sudo ovs-vsctl add-br SW1
-sudo ovs-vsctl show
 
 for ns in {r,g,b}
 do
@@ -117,5 +117,3 @@ do
     sudo ip link set veth-${ns} up
     echo "Link veth-{ns} is up."
 done
-
-sudo ip a | grep veth -A3

@@ -1,3 +1,5 @@
 *~
 .*bash
 /nil
+webserver/Cargo.lock
+webserver/target/**
