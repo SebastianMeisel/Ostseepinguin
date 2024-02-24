@@ -1,8 +1,7 @@
 #+TITLE: Virtual network with Openswitch
 #+AUTHOR: Sebastian Meisel
 #+DATE: <2024-02-24 Sa>
-#+auto-tangle yes
-
+#+
 :HTML_PROPERTIES:
 #+OPTIONS: num:nil toc:nil
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />

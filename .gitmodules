@@ -1,0 +1,4 @@
+[submodule "ostseepinguin.blog/public"]
+	path = ostseepinguin.blog/public
+	url = git@github.com:SebastianMeisel/Ostseepinguin.github.io.git
+	branch = main
