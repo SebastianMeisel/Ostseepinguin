@@ -1,7 +1,6 @@
 #+TITLE: Virtual network with Openswitch
 #+AUTHOR: Sebastian Meisel
 #+DATE: <2024-02-24 Sa>
-#+
 :HTML_PROPERTIES:
 #+OPTIONS: num:nil toc:nil
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
@@ -88,6 +87,16 @@ body {
 .tag    { background-color: var(--tag-background-color); }
 
 .timestamp, .timestamp-kwd { color: var(--highlight-color); }
+
+.menu {
+    position: absolute;
+    display: block
+    width: 300px;
+    height: 200px;
+    left: 75px;
+    top: 100px;
+    color: var(--primary-color);
+}
 
 pre {
   border: 1px solid var(--border-color);
@@ -190,7 +199,7 @@ graph LR;
   class redNS,veth-r red
   classDef blue fill:#69f,stroke:#333,stroke-width:2px;
   class blueNS,veth-b blue
-     #+END_SRC
+#+END_SRC
 
 #+CAPTION: Network Diagram 
 #+NAME: fig:netdiag
