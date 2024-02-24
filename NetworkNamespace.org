@@ -513,8 +513,11 @@ sudo green nstat -s | grep -i icmp
 This is a great playground to explore basic network functionality. 
 
 
+* Acknowledgment
 
-
+I learned on network namespaces with this to fantastic videos:
+- [[https://www.youtube.com/watch?v=_WgUwUf1d34&t=940s][Introduction to Linux Network Namespaces by David Mahler (YouTube)]]
+- [[https://www.youtube.com/watch?v=iN2RnYaFn-0][Linux Network Namespaces with ip netns by Andrew Mallet (YouTube)]]
 
 
 
