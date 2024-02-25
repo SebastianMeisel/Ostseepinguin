@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-25 So 12:29 -->
+<!-- 2024-02-25 So 15:24 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>&lrm;</title>
+<title>Virtuelle Netzwerke (Teil II): DNS</title>
 <meta name="author" content="Sebastian Meisel" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,19 +197,17 @@
 </head>
 <body>
 <div id="content" class="content">
-<p>
-TITLE: Virtuelle Netzwerke (Teil II): DNS 
-</p>
+<h1 class="title">Virtuelle Netzwerke (Teil II): DNS</h1>
 
 
-<div id="outline-container-orgd17c350" class="outline-2">
-<h2 id="orgd17c350">DNS zum virtuellen Netzwerk hinzufügen</h2>
-<div class="outline-text-2" id="text-orgd17c350">
+<div id="outline-container-org5ad7ea1" class="outline-2">
+<h2 id="org5ad7ea1">DNS zum virtuellen Netzwerk hinzufügen</h2>
+<div class="outline-text-2" id="text-org5ad7ea1">
 <input type="checkbox" id="darkmode-toggle">
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="org1c92c0a">
+<div class="menu" id="org5f3da67">
 <p>
 <a href="NetworkNamespaceDNS.html">🇺🇸 EN</a>
 </p>
@@ -226,7 +224,7 @@ In Teil I haben wir ein kleines geswitchtes Netzwerk zwischen drei virtuellen Ge
 </p>
 
 
-<div id="org256e7cf" class="figure">
+<div id="org27de2d9" class="figure">
 <p><img src="img/ovs-net.png" alt="Netzwerkdiagramm, das die Beziehung zwischen den Namensräumen gemäß des obigen Absatzes zeigt." width="50%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Netzwerkdiagramm</p>
@@ -237,9 +235,9 @@ Nun möchten wir DNS<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-ba
 </p>
 </div>
 
-<div id="outline-container-orgc5742aa" class="outline-3">
-<h3 id="orgc5742aa">Installation von Bind</h3>
-<div class="outline-text-3" id="text-orgc5742aa">
+<div id="outline-container-orgcd6228b" class="outline-3">
+<h3 id="orgcd6228b">Installation von Bind</h3>
+<div class="outline-text-3" id="text-orgcd6228b">
 <p>
 Dafür müssen wir zuerst einen DNS-Server installieren. Es gibt einige Optionen wie <a href="https://thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> oder <a href="https://cr.yp.to/djbdns/">djbdns</a>, aber wir bleiben bei <a href="https://www.isc.org/bind/">bind9</a> als dem quasi Standard für DNS-Server.
 </p>
@@ -281,9 +279,9 @@ Dafür müssen wir zuerst einen DNS-Server installieren. Es gibt einige Optionen
 </div>
 </div>
 
-<div id="outline-container-org867c8c3" class="outline-3">
-<h3 id="org867c8c3">Erstellen von Konfigurationsverzeichnissen für Namensräume</h3>
-<div class="outline-text-3" id="text-org867c8c3">
+<div id="outline-container-org70d1660" class="outline-3">
+<h3 id="org70d1660">Erstellen von Konfigurationsverzeichnissen für Namensräume</h3>
+<div class="outline-text-3" id="text-org70d1660">
 <p>
 Als Nächstes benötigen wir ein Konfigurationsverzeichnis für jeden Netzwerk-Namensraum. Darin suchen alle Anwendungen, die Netzwerk-Namensräume kennen, nach Konfigurationsdateien, relativ zu ihrem 'normalen' Platz im <code>/etc/</code> Verzeichnis.
 </p>
@@ -295,9 +293,9 @@ Als Nächstes benötigen wir ein Konfigurationsverzeichnis für jeden Netzwerk-N
 </div>
 </div>
 
-<div id="outline-container-org5bb0980" class="outline-3">
-<h3 id="org5bb0980">Erstellen der Konfigurationsdateien für Bind</h3>
-<div class="outline-text-3" id="text-org5bb0980">
+<div id="outline-container-org667fccf" class="outline-3">
+<h3 id="org667fccf">Erstellen der Konfigurationsdateien für Bind</h3>
+<div class="outline-text-3" id="text-org667fccf">
 <p>
 Wir möchten den DNS im <code>blue</code> Namensraum ausführen. Daher erstellen wir zuerst das <code>bind</code> Verzeichnis in <code>/etc/netns/blue/</code>.
 </p>
@@ -341,9 +339,9 @@ Schließlich müssen wir DNSSEC deaktivieren, da wir keine Berechtigung für das
 </div>
 </div>
 
-<div id="outline-container-org197ea11" class="outline-4">
-<h4 id="org197ea11">Forward-Zone</h4>
-<div class="outline-text-4" id="text-org197ea11">
+<div id="outline-container-org8ea83a5" class="outline-4">
+<h4 id="org8ea83a5">Forward-Zone</h4>
+<div class="outline-text-4" id="text-org8ea83a5">
 <p>
 Wir müssen die tatsächlichen Zonendateien erstellen und bearbeiten. Zuerst <code>/etc/netns/blue/bind/zone/db.col.or</code>.
 </p>
@@ -371,9 +369,9 @@ blue   IN      CNAME   ns.col.or.
 </div>
 </div>
 
-<div id="outline-container-org10e8710" class="outline-4">
-<h4 id="org10e8710">Reverse Zone</h4>
-<div class="outline-text-4" id="text-org10e8710">
+<div id="outline-container-org02bbacf" class="outline-4">
+<h4 id="org02bbacf">Reverse Zone</h4>
+<div class="outline-text-4" id="text-org02bbacf">
 <p>
 Wir benötigen auch die Datei <code>/etc/netns/blue/bind/zone/db.0.0.10</code>.
 </p>
@@ -402,9 +400,9 @@ ns   IN      A       10.0.0.4
 </div>
 </div>
 
-<div id="outline-container-org87791a8" class="outline-3">
-<h3 id="org87791a8">(Wieder)Generieren des virtuellen Netzwerks</h3>
-<div class="outline-text-3" id="text-org87791a8">
+<div id="outline-container-org546fbaa" class="outline-3">
+<h3 id="org546fbaa">(Wieder)Generieren des virtuellen Netzwerks</h3>
+<div class="outline-text-3" id="text-org546fbaa">
 <p>
 Nun ist es an der Zeit, das virtuelle Netzwerk aus dem ersten Teil (neu) zu generieren. Dazu müssen wir <a href="https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh">ovs.sh</a> einbinden.
 </p>
@@ -427,9 +425,9 @@ blue named-checkzone col.or db.0.0.10
 </div>
 </div>
 
-<div id="outline-container-org86ce6c4" class="outline-3">
-<h3 id="org86ce6c4">Erstellen von resolv.conf-Dateien</h3>
-<div class="outline-text-3" id="text-org86ce6c4">
+<div id="outline-container-org99821d3" class="outline-3">
+<h3 id="org99821d3">Erstellen von resolv.conf-Dateien</h3>
+<div class="outline-text-3" id="text-org99821d3">
 <p>
 Schließlich müssen wir den virtuellen Hosts mitteilen, wo der Nameserver zu finden ist, indem wir <code>resolv.conf</code> in <code>/etc/netns/red/</code>, <code>/etc/netns/green/</code> und <code>/etc/netns/blue/</code> erstellen.
 </p>
@@ -441,9 +439,9 @@ Schließlich müssen wir den virtuellen Hosts mitteilen, wo der Nameserver zu fi
 </div>
 </div>
 
-<div id="outline-container-orga625455" class="outline-3">
-<h3 id="orga625455">Starten des named-Dienstes</h3>
-<div class="outline-text-3" id="text-orga625455">
+<div id="outline-container-org05b72c1" class="outline-3">
+<h3 id="org05b72c1">Starten des named-Dienstes</h3>
+<div class="outline-text-3" id="text-org05b72c1">
 <p>
 Es ist nun an der Zeit, den DNS-Server im blauen Namensraum zu starten und zu testen. Dafür müssen wir ihn aus einem global beschreibbaren Verzeichnis starten.
 </p>
@@ -465,18 +463,18 @@ blue named -c /etc/bind/named.conf.local
 </div>
 
 
-<div id="outline-container-org04cc10e" class="outline-2">
-<h2 id="org04cc10e">Anerkennung</h2>
-<div class="outline-text-2" id="text-org04cc10e">
+<div id="outline-container-orgb122c51" class="outline-2">
+<h2 id="orgb122c51">Anerkennung</h2>
+<div class="outline-text-2" id="text-orgb122c51">
 <p>
 Das meiste von dem, was ich in diesem Teil getan habe, basiert auf <a href="https://ba1ajinaidu.hashnode.dev/how-to-configure-bind-as-a-private-network-dns-server-on-linux-network-namespaces">Balajinaidus Blog</a> zu diesem Thema.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org277c9e4" class="outline-2">
-<h2 id="org277c9e4">Fußnoten</h2>
-<div class="outline-text-2" id="text-org277c9e4">
+<div id="outline-container-orgdd14828" class="outline-2">
+<h2 id="orgdd14828">Fußnoten</h2>
+<div class="outline-text-2" id="text-orgdd14828">
 </div>
 </div>
 <div id="footnotes">
@@ -492,7 +490,7 @@ Das meiste von dem, was ich in diesem Teil getan habe, basiert auf <a href="http
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2024-02-25 So 12:29</p>
+<p class="date">Created: 2024-02-25 So 15:24</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
