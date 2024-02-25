@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-25 So 16:44 -->
+<!-- 2024-02-25 So 17:39 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtualles Netzwerk mit Openswitch</title>
+<title>Virtuelles Netzwerk mit Open vSwitch</title>
 <meta name="author" content="Sebastian Meisel" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,17 +197,17 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Virtualles Netzwerk mit Openswitch</h1>
+<h1 class="title">Virtuelles Netzwerk mit Open vSwitch</h1>
 
 
-<div id="outline-container-orgd4698dc" class="outline-2">
-<h2 id="orgd4698dc">Virtuelles Netzwerk mit Openswitch</h2>
-<div class="outline-text-2" id="text-orgd4698dc">
+<div id="outline-container-orgce35142" class="outline-2">
+<h2 id="orgce35142">Virtuelles Netzwerk mit Open vSwitch</h2>
+<div class="outline-text-2" id="text-orgce35142">
 <input type="checkbox" id="darkmode-toggle">
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="orgb96914c">
+<div class="menu" id="orgda80c84">
 <p>
 <a href="NetworkNamespace.html">🇺🇸 EN</a>
 </p>
@@ -222,15 +222,15 @@ In diesem Projekt möchte ich zeigen, wie ein virtuelles Netzwerk unter Verwendu
 </p>
 </div>
 
-<div id="outline-container-orgf316341" class="outline-3">
-<h3 id="orgf316341">Der Plan</h3>
-<div class="outline-text-3" id="text-orgf316341">
+<div id="outline-container-org91d3469" class="outline-3">
+<h3 id="org91d3469">Der Plan</h3>
+<div class="outline-text-3" id="text-org91d3469">
 <p>
 Das folgende Diagramm veranschaulicht die virtuelle Netzwerkkonfiguration, die ich erreichen möchte: Der virtuelle Switch dient als zentraler Punkt und verbindet drei verschiedene Netzwerknamenräume, die durch rot, grün und blau dargestellt sind. Jeder Namespace erhält eine IP-Adresse (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) innerhalb des Subnetzes <code>10.0.0.0/24</code> und ist über virtuelle Ethernet-Schnittstellen (<code>veth-r</code>, <code>veth-g</code>, <code>veth-b</code>) mit dem vSwitch verbunden.
 </p>
 
 
-<div id="orgdf44c52" class="figure">
+<div id="org8a83d7b" class="figure">
 <p><img src="img/ovs-net.png" alt="Netzwerkschema, das die Beziehung zwischen den Namensräumen gemäß dem obigen Absatz zeigt." width="50%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Netzwerkschema</p>
@@ -238,9 +238,9 @@ Das folgende Diagramm veranschaulicht die virtuelle Netzwerkkonfiguration, die i
 </div>
 </div>
 
-<div id="outline-container-org1ba4123" class="outline-3">
-<h3 id="org1ba4123">Funktionen für jeden Namespace erstellen</h3>
-<div class="outline-text-3" id="text-org1ba4123">
+<div id="outline-container-orgc7c8853" class="outline-3">
+<h3 id="orgc7c8853">Funktionen für jeden Namespace erstellen</h3>
+<div class="outline-text-3" id="text-orgc7c8853">
 <p>
 Zu Beginn definieren wir Funktionen für jeden Netzwerk-Namespace: <code>red</code>, <code>green</code>, <code>orange</code> (als Ersatz für zukünftige Projekte) und <code>blue</code>. Diese Funktionen ermöglichen die Ausführung von Befehlen innerhalb der jeweiligen Namensräume mithilfe des Befehls <code>ip netns exec</code>. Jede Funktion ändert die Farbausgabe der ausgeführten Befehle zur besseren Visualisierung. Außerdem überprüft sie, ob der Namespace tatsächlich existiert, bevor sie versucht, einen Befehl darin auszuführen. Dies ist wichtig, weil jeder dieser Befehle mit <code>sudo</code> ausgeführt werden muss.
 </p>
@@ -329,9 +329,9 @@ Ich habe diese Funktionen sowie den gesamten anderen Code, der benötigt wird, u
 </div>
 
 
-<div id="outline-container-orgb1e0252" class="outline-3">
-<h3 id="orgb1e0252">Namespaces erstellen</h3>
-<div class="outline-text-3" id="text-orgb1e0252">
+<div id="outline-container-org3b21741" class="outline-3">
+<h3 id="org3b21741">Namespaces erstellen</h3>
+<div class="outline-text-3" id="text-org3b21741">
 <p>
 Der nächste Schritt besteht darin, die drei Netzwerk-Namespaces mit den Namen red, green und blue mithilfe des Befehls <code>ip netns add</code> zu initialisieren. Ich verwende eine for-Schleife, um über die Namespace-Namen zu iterieren. So ist es einfacher, später falls erforderlich neue Namespaces hinzuzufügen. Wo nötig, verweise ich mit der Variablen ${ns} darauf.
 </p>
@@ -379,9 +379,9 @@ Schließlich können wir den aktuellen Zustand der Netzwerkschnittstellen in jed
 </div>
 
 
-<div id="outline-container-org96cf835" class="outline-3">
-<h3 id="org96cf835">Tunnel erstellen</h3>
-<div class="outline-text-3" id="text-org96cf835">
+<div id="outline-container-orgd8ac793" class="outline-3">
+<h3 id="orgd8ac793">Tunnel erstellen</h3>
+<div class="outline-text-3" id="text-orgd8ac793">
 <p>
 Jetzt erstellen wir virtuelle Ethernet-Tunnel (veth) mit den Namen <code>veth-r</code>, <code>veth-g</code> und <code>veth-b</code>, die jeweils mit einer Schnittstelle in ihrem entsprechenden Netzwerk-Namespace (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) für die Kommunikation verbunden sind. Diese Tunnel erleichtern die Kommunikation zwischen dem vSwitch und den Netzwerk-Namespaces. Beachte, dass ich in den Gerätenamen nur den ersten Buchstaben verwende, um die Namespaces zu unterscheiden. Hierfür verwende ich den Mechanismus der Variablenersetzung von Bash mit ${ns::1}, um nur den ersten Buchstaben jeder Zeichenkette zu erhalten. Beachte, dass dies eine Bash-Funktion ist, wenn Du eine andere Shell verwendest.
 </p>
@@ -397,9 +397,9 @@ Jetzt erstellen wir virtuelle Ethernet-Tunnel (veth) mit den Namen <code>veth-r<
 </div>
 </div>
 
-<div id="outline-container-org222e050" class="outline-3">
-<h3 id="org222e050">Link in Namespaces platzieren</h3>
-<div class="outline-text-3" id="text-org222e050">
+<div id="outline-container-org71e6005" class="outline-3">
+<h3 id="org71e6005">Link in Namespaces platzieren</h3>
+<div class="outline-text-3" id="text-org71e6005">
 <p>
 Nachdem die Tunnel erstellt wurden, ist der nächste Schritt, die Schnittstellen ihren jeweiligen Namespaces zuzuweisen. Dies wird erreicht, indem jedem Endpunkt eines Tunnels (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) sein entsprechender Namespace (rot, grün, blau) zugeordnet wird.
 </p>
@@ -414,9 +414,9 @@ Nachdem die Tunnel erstellt wurden, ist der nächste Schritt, die Schnittstellen
 </div>
 </div>
 
-<div id="outline-container-orga190fb5" class="outline-3">
-<h3 id="orga190fb5">IPv4-Adressen hinzufügen</h3>
-<div class="outline-text-3" id="text-orga190fb5">
+<div id="outline-container-org38a73e6" class="outline-3">
+<h3 id="org38a73e6">IPv4-Adressen hinzufügen</h3>
+<div class="outline-text-3" id="text-org38a73e6">
 <p>
 Schließlich werden IPv4-Adressen den Schnittstellen in jedem Namespace zugewiesen, um die Netzwerkkommunikation zu ermöglichen. Die IP-Adressen <code>10.0.0.2</code>, <code>10.0.0.3</code> und <code>10.0.0.4</code> mit einer Subnetzmaske <code>/24</code> werden jeweils den Schnittstellen <code>eth0-r</code>, <code>eth0-g</code> und <code>eth0-b</code>  zugewiesen. Zusätzlich werden die Schnittstellen aktiviert, um die Netzwerkkonfiguration zu aktivieren.
 </p>
@@ -436,18 +436,18 @@ Schließlich werden IPv4-Adressen den Schnittstellen in jedem Namespace zugewies
 </div>
 </div>
 
-<div id="outline-container-org3336fa7" class="outline-2">
-<h2 id="org3336fa7">Virtuellen Switch öffnen</h2>
-<div class="outline-text-2" id="text-org3336fa7">
+<div id="outline-container-org9526ea2" class="outline-2">
+<h2 id="org9526ea2">Virtuellen Switch öffnen</h2>
+<div class="outline-text-2" id="text-org9526ea2">
 <p>
 Um den virtuellen Switch einzurichten, wird zunächst das Openvswitch-Paket mithilfe des entsprechenden Paketmanagers installiert. Anschließend wird der Dienst <code>ovs-vswitchd</code> gestartet, um den Switch zu verwalten.
 </p>
 </div>
 
 
-<div id="outline-container-orgfbd5a2b" class="outline-3">
-<h3 id="orgfbd5a2b">Installieren</h3>
-<div class="outline-text-3" id="text-orgfbd5a2b">
+<div id="outline-container-orgf0be24c" class="outline-3">
+<h3 id="orgf0be24c">Installieren</h3>
+<div class="outline-text-3" id="text-orgf0be24c">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b6a0ff;">if</span> [ -f /etc/os-release ]; <span style="color: #b6a0ff;">then</span>
     <span style="color: #f78fe7;">.</span> /etc/os-release
@@ -490,9 +490,9 @@ Um den virtuellen Switch einzurichten, wird zunächst das Openvswitch-Paket mith
 </div>
 </div>
 
-<div id="outline-container-org9c6d7ce" class="outline-3">
-<h3 id="org9c6d7ce">Switch hinzufügen</h3>
-<div class="outline-text-3" id="text-org9c6d7ce">
+<div id="outline-container-org560c22d" class="outline-3">
+<h3 id="org560c22d">Switch hinzufügen</h3>
+<div class="outline-text-3" id="text-org560c22d">
 <p>
 Nach der Installation erstelle ich einen virtuellen Switch mit dem Namen SW1 mithilfe des Befehls <code>ovs-vsctl add-br</code>.
 </p>
@@ -512,9 +512,9 @@ Die Switch-Konfiguration wird mithilfe von <code>ovs-vsctl show</code> angezeigt
 </div>
 
 
-<div id="outline-container-org2f4e4ab" class="outline-4">
-<h4 id="org2f4e4ab">Ports hinzufügen</h4>
-<div class="outline-text-4" id="text-org2f4e4ab">
+<div id="outline-container-org0ea2683" class="outline-4">
+<h4 id="org0ea2683">Ports hinzufügen</h4>
+<div class="outline-text-4" id="text-org0ea2683">
 <p>
 Als Nächstes fügen wir Ports zum virtuellen Switch hinzu, um ihn mit den Netzwerk-Namespaces zu verbinden. Jeder Port ist mit einer entsprechenden Tunnel-Schnittstelle (<code>veth-r</code>, <code>veth-g</code>, <code>veth-b</code>) verbunden.
 </p>
@@ -562,9 +562,9 @@ Ich überprüfe immer gerne noch einmal. Daher 'grepe' ich nach der <code>veth</
 </div>
 </div>
 
-<div id="outline-container-org8691d31" class="outline-3">
-<h3 id="org8691d31">Aufräumen</h3>
-<div class="outline-text-3" id="text-org8691d31">
+<div id="outline-container-org5e3c2f7" class="outline-3">
+<h3 id="org5e3c2f7">Aufräumen</h3>
+<div class="outline-text-3" id="text-org5e3c2f7">
 <p>
 Ein Neustart wird in der Regel den Großteil des Chaos hinter uns aufräumen, aber ich möchte ein gutes Kind sein und selbst aufräumen. Daher habe ich ein weiteres Skript erstellt, das genau das tut.
 </p>
@@ -623,9 +623,9 @@ sudo systemctl stop ovs-vswitchd.service
 </div>
 
 
-<div id="outline-container-orgbda0d4d" class="outline-2">
-<h2 id="orgbda0d4d">Fazit</h2>
-<div class="outline-text-2" id="text-orgbda0d4d">
+<div id="outline-container-org049e697" class="outline-2">
+<h2 id="org049e697">Fazit</h2>
+<div class="outline-text-2" id="text-org049e697">
 <p>
 Es ist überraschend einfach, dieses grundlegende Setup zu erstellen.
 </p>
@@ -648,9 +648,9 @@ Dies ist ein großartiger Spielplatz, um grundlegende Netzwerkfunktionalitäten 
 </div>
 
 
-<div id="outline-container-org4ac5837" class="outline-2">
-<h2 id="org4ac5837">Anerkennung</h2>
-<div class="outline-text-2" id="text-org4ac5837">
+<div id="outline-container-orgfd05e45" class="outline-2">
+<h2 id="orgfd05e45">Anerkennung</h2>
+<div class="outline-text-2" id="text-orgfd05e45">
 <p>
 Ich habe über Netzwerk-Namespaces in zwei fantastischen Videos gelernt:
 </p>
@@ -664,7 +664,7 @@ Ich habe über Netzwerk-Namespaces in zwei fantastischen Videos gelernt:
 <div id="postamble" class="status">
 <p class="date">Date: 2024-02-24 Sa 00:00</p>
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2024-02-25 So 16:44</p>
+<p class="date">Created: 2024-02-25 So 17:39</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

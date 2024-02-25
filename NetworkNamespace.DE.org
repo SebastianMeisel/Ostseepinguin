@@ -1,4 +1,4 @@
-#+TITLE: Virtualles Netzwerk mit Openswitch
+#+TITLE: Virtuelles Netzwerk mit Open vSwitch
 #+AUTHOR: Sebastian Meisel
 #+DATE: <2024-02-24 Sa>
 :HTML_PROPERTIES:
@@ -7,7 +7,7 @@
 :END:
 
 
-* Virtuelles Netzwerk mit Openswitch
+* Virtuelles Netzwerk mit Open vSwitch
   :PROPERTIES:
   :header-args:bash: :shebang #!/bin/bash :tangle files/ovs.sh :eval never :session OVS :exports code
   :header-args:mermaid: :tangle nil :results file :exports results
