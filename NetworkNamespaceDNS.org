@@ -24,6 +24,7 @@
 #+END_EXPORT
 
 #+begin_menu
+[[file:NetworkNamespaceDNS.DE.html][🇩🇪 DE]]
 - > [[file:index.html][Home]]
 - > [[file:NetworkNamespace.org][Part I]]
 #+end_menu
@@ -53,22 +54,28 @@ fi
 
 case ${ID_LIKE%% *} in
   debian|ubuntu)
-    sudo apt install -y bind9  # Replace with bind9 if permitted
+    sudo apt install -y bind  
     ;;
   fedora|rhel|centos)
-    sudo yum install -y bind9  # Replace with bind9 if permitted
+    sudo yum install -y bind
     ;;
   suse|opensuse)
-    sudo zypper install -y bind  # Replace with bind9 if permitted
+    sudo zypper install -y bind 
     ;;
   arch)
-    sudo pacman -Syu bind9  # Replace with bind9 if permitted
+    sudo pacman -Syu bind
     ;;
-  *)
-    echo "Unsupported distribution."
-    exit 1
+  ,*)
+      echo "Unsupported distribution."
+      exit 1
     ;;
 esac
+if  [[ $ID == arch ]]; then
+    sudo pacman -Syu bind
+else
+	  echo "Unsupported distribution."
+	  exit 1
+fi
 #+END_SRC
 
 
@@ -88,7 +95,6 @@ We want to run the DNS in the ~blue~ namespace. So we first create the =bind= di
 sudo mkdir -p /etc/netns/blue/bind/zones
 #+END_SRC
 
-#+RESULTS:
 
 Now we need to create and edit the file =/etc/netns/blue/bind/named.conf.local=, first adding a ~forward zone~.
 
@@ -139,6 +145,8 @@ green  IN      A       10.0.0.3
 blue   IN      CNAME   ns.col.or.
 #+END_SRC
 
+*** Reverse Zone
+
 We also need the =/etc/netns/blue/bind/zone/db.0.0.10= file.
 
 #+BEGIN_SRC config :tangle db.0.0.10
@@ -163,7 +171,6 @@ ns   IN      A       10.0.0.4
 
 
 
-
 ** (Re)generate virtual net
 
 Now it's time to (re)generate the virtual network from the first part. For that we need to source [[https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh][ovs.sh]].
@@ -173,14 +180,13 @@ CWD=$(dirname $(find /home/ -type f -name db.col.or))
 . ${CWD}/files/ovs.sh
 #+END_SRC
 
-
-
-We should check these files for syntax error, hoping to get no error messages:
+We can now the zone files for syntax error, hoping to get no error messages:
 
 #+BEGIN_SRC bash :results verbatim 
 blue named-checkzone col.or db.col.or
 blue named-checkzone col.or db.0.0.10
 #+END_SRC
+
 
 ** Creating resolv.conf files
 
@@ -190,9 +196,6 @@ We finally need to tell the virtual hosts, where to find the name server, by cre
 nameserver 10.0.0.4
 #+END_SRC
 
-
-
-#+RESULTS:
 
 ** Start the named Service
 

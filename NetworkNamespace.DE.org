@@ -1,165 +1,179 @@
-#+TITLE: Virtual network with Openswitch
+#+TITLE: Virtualles Netzwerk mit Openswitch
 #+AUTHOR: Sebastian Meisel
-
+#+DATE: <2024-02-24 Sa>
 :HTML_PROPERTIES:
 #+OPTIONS: num:nil toc:nil
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
 :END:
 
 
-* Virtuelle Netzwerke mit Openswitch und Linux Netzwerk-Namespaces
-:PROPERTIES:
-:header-args:bash: :shebang #!/bin/bash :tangle files/ovs.sh :eval never :session OVS :exports code
-:header-args:mermaid: :tangle nil :results file :exports results
-:header-args:javascript: :tangle script.js :exports none
-:header-args:css: :tangle mystyle.css :exports none
-:END:
+* Virtuelles Netzwerk mit Openswitch
+  :PROPERTIES:
+  :header-args:bash: :shebang #!/bin/bash :tangle files/ovs.sh :eval never :session OVS :exports code
+  :header-args:mermaid: :tangle nil :results file :exports results
+  :header-args:javascript: :tangle script.js :exports none
+  :header-args:css: :tangle mystyle.css :exports none
+  :END:
 
-#+NAME: toggle-mode-script
-#+BEGIN_EXPORT HTML
-<input type="checkbox" id="darkmode-toggle">
-<label for="darkmode-toggle"></label></input>
-<script src="script.js"></script>
-#+END_EXPORT
+  #+NAME: toggle-mode-script
+  #+BEGIN_EXPORT HTML
+  <input type="checkbox" id="darkmode-toggle">
+  <label for="darkmode-toggle"></label></input>
+  <script src="script.js"></script>
+  #+END_EXPORT
 
-#+BEGIN_SRC javascript
+  #+BEGIN_SRC javascript
+  document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  });
 
-document.addEventListener('DOMContentLoaded', function() {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
+  // Dunkelmodus umschalten
+  function toggleDarkMode() {
+    console.log("hallo");
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
   }
-});
 
-// Toggle dark mode
-function toggleDarkMode() {
-  console.log("hallo");
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-}
-
-const body = document.querySelector('#darkmode-toggle').addEventListener('click', toggleDarkMode)
-#+END_SRC
+  const body = document.querySelector('#darkmode-toggle').addEventListener('click', toggleDarkMode)
+  #+END_SRC
 
 
 
-#+NAME: toggle-mode-css
-#+BEGIN_SRC css
-:root {
-  /* Light mode colors */
-  --background-color: #ffffff;
-  --text-color: #000000;
-  --primary-color: #0000ff;
-  --secondary-color: #008000;
-  --highlight-color: #ff0000;
-  --code-background-color: #f0f0f0;
-  --border-color: #cccccc;
-  --tag-background-color: #cccccc;
-  --code-color: #ff00ff;
-}
+  #+NAME: toggle-mode-css
+  #+BEGIN_SRC css
+  :root {
+    /* Farben im Hellmodus */
+    --background-color: #ffffff;
+    --text-color: #000000;
+    --primary-color: #0000ff;
+    --secondary-color: #008000;
+    --highlight-color: #ff0000;
+    --code-background-color: #f0f0f0;
+    --border-color: #cccccc;
+    --tag-background-color: #cccccc;
+    --code-color: #ff00ff;
+  }
 
-:root[data-theme="dark"] {
-  --background-color: #1f1f1f;
-  --text-color: #c7c7c7;
-  --primary-color: #6a9fb5;
-  --secondary-color: #b5b5b5;
-  --highlight-color: #f0c674;
-  --code-background-color: #262626;
-  --border-color: #333333;
-  --tag-background-color: #3f3f3f;
-  --code-color: #d80ffc;
-}
+  :root[data-theme="dark"] {
+    --background-color: #1f1f1f;
+    --text-color: #c7c7c7;
+    --primary-color: #6a9fb5;
+    --secondary-color: #b5b5b5;
+    --highlight-color: #f0c674;
+    --code-background-color: #262626;
+    --border-color: #333333;
+    --tag-background-color: #3f3f3f;
+    --code-color: #d80ffc;
+  }
 
-/* Default to light mode */
-body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-
-
-.title  { color: var(--primary-color);}
-.subtitle { color: var(--secondary-color); }
-.todo   { color: red; } /* Keeping specific colors for statuses */
-.done   { color: green; }
-.priority { color: orange; }
-.tag    { background-color: var(--tag-background-color); }
-
-.timestamp, .timestamp-kwd { color: var(--highlight-color); }
-
-pre {
-  border: 1px solid var(--border-color);
-  background-color: var(--code-background-color);
-  color: var(--code-color);
-  font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
-  font-size: 16px;
-}
-
-code {
-  color: var(--code-color);
-  font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
-  font-size: 16px;
-}
-
-label {
-    width: 50px;
-    height: 20px;
-    position: absolute;
-    top: 50px;
-    left: 100px;
-    display: block;
-    background: #ebebeb;
-    border-radius: 20px;
-    box-shadow: inset 0px 1px 2px rgba(0,0,0,0.4), inset 0px -1px 2px rgba(255,255,255,0.4);
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-label:after {
-    content: "";
-    width: 18px;
-    height: 18px;
-    position: absolute;
-    top: 1px;
-    left:1px;
-    background: linear-gradient(180deg, #ffcc89, #d8860b);
-    border-radius: 18px;
-    box-shadow: 0px 1px 2px rgba(0,0,0,0.2);
-    transition: 0.3s;t
-}
+  /* Standardmäßig Hellmodus */
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
 
 
-input {
-    width: 0;
-    height: 0;
-    visibility: hidden;
-    position: absolute;
-    top: 50px;
-    left: 100px;
-}
+  .title  { color: var(--primary-color);}
+  .subtitle { color: var(--secondary-color); }
+  .todo   { color: red; } /* Spezifische Farben für Status beibehalten */
+  .done   { color: green; }
+  .priority { color: orange; }
+  .tag    { background-color: var(--tag-background-color); }
 
-input:checked + label {
-    background: #242424;
-}
-input:checked +label::after {
-    left: 49px;
-    transform: translateX(-100%);
-    background: linear-gradient(180deg, #777, #3a3a3a);
-}
-#+END_SRC
+  .timestamp, .timestamp-kwd { color: var(--highlight-color); }
+
+  .menu {
+      position: absolute;
+      display: block
+      width: 300px;
+      height: 200px;
+      left: 75px;
+      top: 100px;
+      color: var(--primary-color);
+  }
+
+  pre {
+    border: 1px solid var(--border-color);
+    background-color: var(--code-background-color);
+    color: var(--code-color);
+    font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
+    font-size: 16px;
+  }
+
+  code {
+    color: var(--code-color);
+    font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
+    font-size: 16px;
+  }
+
+  label {
+      width: 50px;
+      height: 20px;
+      position: absolute;
+      top: 50px;
+      left: 100px;
+      display: block;
+      background: #ebebeb;
+      border-radius: 20px;
+      box-shadow: inset 0px 1px 2px rgba(0,0,0,0.4), inset 0px -1px 2px rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: 0.3s;
+  }
+
+  label:after {
+      content: "";
+      width: 18px;
+      height: 18px;
+      position: absolute;
+      top: 1px;
+      left:1px;
+      background: linear-gradient(180deg, #ffcc89, #d8860b);
+      border-radius: 18px;
+      box-shadow: 0px 1px 2px rgba(0,0,0,0.2);
+      transition: 0.3s;t
+  }
 
 
-In diesem Projekt möchte ich zeigen, wie man ein virtuelles Netzwerk unter Linux mithilfe von Openvswitch und Netzwerk-Namespaces entwirft und implementiert. Durch die Nutzung virtueller Ethernet-Tunnel und eines zentralen virtuellen Switches schaffen wir eine flexible und skalierbare Netzwerkumgebung. Dieses Projekt zielt darauf ab, die Möglichkeiten virtueller Netzwerktechnologien zu demonstrieren und ein praktisches Beispiel für Bildungszwecke bereitzustellen.
+  input {
+      width: 0;
+      height: 0;
+      visibility: hidden;
+      position: absolute;
+      top: 50px;
+      left: 100px;
+  }
 
-Das folgende Diagramm veranschaulicht den Aufbau eines virtuellen Netzwerks unter Verwendung von Openswitch. Der vSwitch dient als zentraler Punkt und verbindet drei verschiedene Netzwerk-Namespaces: red, green, blue. Jeder Namespace erhält eine IP-Adresse (=eth0-r=, =eth0-g=, =eth0-b=) innerhalb des Subnetzes =10.0.0.0/24= und ist über virtuelle Ethernet-Schnittstellen (=veth-r=, =veth-g=, =veth-b=) mit dem vSwitch verbunden.
+  input:checked + label {
+      background: #242424;
+  }
+  input:checked +label::after {
+      left: 49px;
+      transform: translateX(-100%);
+      background: linear-gradient(180deg, #777, #3a3a3a);
+  }
+  #+END_SRC
 
+
+  #+begin_menu
+  [[file:NetworkNamespace.html][🇺🇸 EN]]
+  - > [[file:index.DE.html][Home]]
+  - > [[file:NetworkNamespaceDNS.DE.html][Teil II]]
+  #+end_menu
+In diesem Projekt möchte ich zeigen, wie ein virtuelles Netzwerk unter Verwendung von Openvswitch und Netzwerknamenräumen unter Linux entworfen und implementiert werden kann. Durch die Nutzung virtueller Ethernet-Tunnel und eines zentralen virtuellen Switches erstellen wir eine flexible und skalierbare Netzwerkumgebung. Mein Hauptziel ist dabei - neben einem besseren Verständnis der Linux-Namenspaces - eine isolierte Netzwerkumgebung zu haben. Als Lehrer möchte ich manchmal meinen Schülern zeigen, wie ein einzelnes Netzwerkprotokoll funktioniert oder was passiert, wenn ich eine Domain pinge. Doch selbst in einer virtuellen Maschine laufen oft viele andere Netzwerkverbindungen im Hintergrund, sodass es schwierig ist, herauszufiltern, woran ich interessiert bin. In der Konfiguration, die ich hier erstelle, ist das einzige Rauschen im virtuellen Netzwerk das IPv6-Router-Solicitation.
+
+** Der Plan
+Das folgende Diagramm veranschaulicht die virtuelle Netzwerkkonfiguration, die ich erreichen möchte: Der virtuelle Switch dient als zentraler Punkt und verbindet drei verschiedene Netzwerknamenräume, die durch rot, grün und blau dargestellt sind. Jeder Namespace erhält eine IP-Adresse (=eth0-r=, =eth0-g=, =eth0-b=) innerhalb des Subnetzes =10.0.0.0/24= und ist über virtuelle Ethernet-Schnittstellen (=veth-r=, =veth-g=, =veth-b=) mit dem vSwitch verbunden.
 
 #+BEGIN_SRC mermaid :file img/ovs-net.png
-graph TD;
+graph LR;
    subgraph "default"
-     direction BT
-     SW[(vSwitch)]  o--o veth-r & veth-g & veth-b
+     direction RL
+     veth-r & veth-g & veth-b o--o SW[(SW1)]
    end
 
    subgraph redNS
@@ -182,31 +196,36 @@ graph TD;
   class redNS,veth-r red
   classDef blue fill:#69f,stroke:#333,stroke-width:2px;
   class blueNS,veth-b blue
- #+END_SRC
+#+END_SRC
 
-#+CAPTION: Network Diagram 
+#+CAPTION: Netzwerkschema 
 #+NAME: fig:netdiag
-#+ATTR_HTML: :width 50% :alt Netzwerkdiagramm, das die Beziehung zwischen den Namensräumen wie oben beschriebenen zeigt.
+#+ATTR_HTML: :width 50% :alt Netzwerkschema, das die Beziehung zwischen den Namensräumen gemäß dem obigen Absatz zeigt.
 #+ATTR_LATEX: :width .65\linewidth
 #+ATTR_ORG: :width 700
 #+RESULTS:
 [[file:img/ovs-net.png]]
+ 
+** Funktionen für jeden Namespace erstellen
 
-** Eine Funktion für jeden Namespace
+Zu Beginn definieren wir Funktionen für jeden Netzwerk-Namespace: =red=, =green=, =orange= (als Ersatz für zukünftige Projekte) und =blue=. Diese Funktionen ermöglichen die Ausführung von Befehlen innerhalb der jeweiligen Namensräume mithilfe des Befehls =ip netns exec=. Jede Funktion ändert die Farbausgabe der ausgeführten Befehle zur besseren Visualisierung. Außerdem überprüft sie, ob der Namespace tatsächlich existiert, bevor sie versucht, einen Befehl darin auszuführen. Dies ist wichtig, weil jeder dieser Befehle mit =sudo= ausgeführt werden muss.
 
-Zunächst definieren wir Funktionen für jeden Netzwerk-Namensraum: grün, rot, orange (als Reserve für zukünftige Projekte) und blau. Diese Funktionen ermöglichen das Ausführen von Befehlen innerhalb der jeweiligen Namensräume unter Verwendung des Befehls =ip netns exec=. Jede Funktion ändert die Farbausgabe der ausgeführten Befehle zur besseren visuellen Identifizierung.
-
-
+Ich habe diese Funktionen sowie den gesamten anderen Code, der benötigt wird, um das virtuelle Netzwerk zu erstellen, in einer Datei namens =ovs.sh= im Unterverzeichnis =./files/= abgelegt. Um das virtuelle Netzwerk später neu zu erstellen, muss ich diese Datei mit =source= laden, wenn ich diese Funktionen verwenden möchte.
 
 #+BEGIN_SRC bash
-function green () {
+function red () {
     if [[ $1 = "bash" ]]
     then
-	echo "To risky for my taste"
+	echo "Zu riskant für meinen Geschmack"
     else
-	echo -ne '\e[32m'
-	ip netns exec green $@
-	echo -ne '\e[0m'
+	if [[ $(ip netns list | grep -o "red") == red ]]
+	then
+	    echo -ne '\e[32m'
+	    sudo ip netns exec red $@
+	    echo -ne '\e[0m'
+	else
+	    echo "Namenspace red existiert nicht"
+	fi
     fi
     }
 #+END_SRC
@@ -214,14 +233,19 @@ function green () {
 #+RESULTS:
 
 #+BEGIN_SRC bash
-function red () {
+function green () {
     if [[ $1 = "bash" ]]
     then
-	echo "To risky for my taste"
+	echo "Zu riskant für meinen Geschmack"
     else
-	echo -ne '\e[31m'
-	ip netns exec red $@
-	echo -ne '\e[0m'
+	if [[ $(ip netns list | grep -o "green") == green ]]
+	then
+	    echo -ne '\e[32m'
+	    sudo ip netns exec green $@
+	    echo -ne '\e[0m'
+	else
+	    echo "Namespace green existiert nicht"
+	fi
     fi
     }
 #+END_SRC
@@ -232,11 +256,16 @@ function red () {
 function orange () {
     if [[ $1 = "bash" ]]
     then
-	echo "To risky for my taste"
+	echo "Zu riskant für meinen Geschmack"
     else
-	echo -ne '\e[33m'
-	ip netns exec orange $@
-	echo -ne '\e[0m'
+	if [[ $(ip netns list | grep -o "orange") == orange ]]
+	then
+	    echo -ne '\e[32m'
+	    sudo ip netns exec orange $@
+	    echo -ne '\e[0m'
+	else
+	    echo "Namespace orange existiert nicht"
+	fi
     fi
     }
 #+END_SRC
@@ -248,154 +277,262 @@ function orange () {
 function blue () {
     if [[ $1 = "bash" ]]
     then
-	echo "To risky for my taste"
+	echo "Zu riskant für meinen Geschmack"
     else
-	echo -ne '\e[34m'
-	ip netns exec blue $@
-	echo -ne '\e[0m'
+	if [[ $(ip netns list | grep -o "blue") == blue ]]
+	then
+	    echo -ne '\e[32m'
+	    sudo ip netns exec blue $@
+	    echo -ne '\e[0m'
+	else
+	    echo "Namespace blue existiert nicht"
+	fi
     fi
     }
 #+END_SRC
 
-** Namensräume erstellen
 
-Der nächste Schritt besteht darin, die drei Netzwerk-Namensräume namens rot, grün und blau mit dem Befehl =ip netns add= zu initialisieren. Anschließend wird die Loopback-Schnittstelle innerhalb jedes Namensraums mit dem Befehl =ip l dev lo up= aktiviert, um die lokale Kommunikation innerhalb des Namensraums zu ermöglichen. Schließlich wird der aktuelle Zustand der Netzwerkschnittstellen innerhalb jedes Namensraums mit dem Befehl =ip l= angezeigt.
+** Namespaces erstellen
 
-#+BEGIN_SRC bash
-ip netns add red
-ip netns add green
-ip netns add blue
-#+END_SRC
+Der nächste Schritt besteht darin, die drei Netzwerk-Namespaces mit den Namen red, green und blue mithilfe des Befehls =ip netns add= zu initialisieren. Ich verwende eine for-Schleife, um über die Namespace-Namen zu iterieren. So ist es einfacher, später falls erforderlich neue Namespaces hinzuzufügen. Wo nötig, verweise ich mit der Variablen ${ns} darauf.
 
 #+BEGIN_SRC bash
-red ip l dev lo up
-green ip l dev lo up
-blue ip l dev lo up
+namespaces=(red green blue)
+for ns in ${namespaces[@]}
+do
+    if [[ ! -n $(ip netns list | grep -q ${ns}) ]]
+    then
+	sudo ip netns add ${ns}
+	echo "${ns} Namespace hinzugefügt."	
+    fi
+done
+ip netns list
+sleep 1
 #+END_SRC
 
+Anschließend wird das Loopback-Gerät in jedem Namespace mithilfe des Befehls =ip l dev lo up= aktiviert, um eine lokale Kommunikation innerhalb des Namespaces zu ermöglichen.
+
 #+BEGIN_SRC bash
-red ip l
-green ip l
-blue ip l
+for ns in ${namespaces[@]}
+do
+  ${ns} ip link lo up
+  echo "Loopback-Device in ${ns} ist aktiviert."
+done
 #+END_SRC
+
+Schließlich können wir den aktuellen Zustand der Netzwerkschnittstellen in jedem Namespace mithilfe des Befehls =ip l= überprüfen.
+
+#+BEGIN_SRC bash :tangle no
+for ns in ${namespaces[@]}
+do
+    ${ns} ip link
+done
+#+END_SRC
+
 
 ** Tunnel erstellen
 
-Nun erstellen wir virtuelle Ethernet-Tunnel (veth) namens =veth-r=, =veth-g= und =veth-b=, die jeweils mit einer Schnittstelle in ihrem jeweiligen Netzwerk-Namensraum (=eth0-r=, =eth0-g=, =eth0-b=) für die Kommunikation gekoppelt sind. Diese Tunnel erleichtern die Kommunikation zwischen dem vSwitch und den Netzwerk-Namensräumen.
+Jetzt erstellen wir virtuelle Ethernet-Tunnel (veth) mit den Namen =veth-r=, =veth-g= und =veth-b=, die jeweils mit einer Schnittstelle in ihrem entsprechenden Netzwerk-Namespace (=eth0-r=, =eth0-g=, =eth0-b=) für die Kommunikation verbunden sind. Diese Tunnel erleichtern die Kommunikation zwischen dem vSwitch und den Netzwerk-Namespaces. Beachte, dass ich in den Gerätenamen nur den ersten Buchstaben verwende, um die Namespaces zu unterscheiden. Hierfür verwende ich den Mechanismus der Variablenersetzung von Bash mit ${ns::1}, um nur den ersten Buchstaben jeder Zeichenkette zu erhalten. Beachte, dass dies eine Bash-Funktion ist, wenn Du eine andere Shell verwendest.
 
 #+BEGIN_SRC bash
-ip link add veth-r type veth peer eth0-r
-ip link add veth-g type veth peer eth0-g
-ip link add veth-b type veth peer eth0-b
+for ns in ${namespaces[@]}
+do
+    sudo ip link add veth-${ns::1} type veth peer eth0-${ns::1}
+    echo "Verknüpfe veth-${ns} mit eth0-${ns}."
+done
 #+END_SRC
 
-** Verknüpfung in Namensräume platzieren
+** Link in Namespaces platzieren
 
-Nachdem die Tunnel erstellt wurden, ist der nächste Schritt, die Schnittstellen ihren jeweiligen Namensräumen zuzuweisen. Dies wird erreicht, indem jedem Endpunkt eines Tunnels (=eth0-r=, =eth0-g=, =eth0-b=) sein entsprechender Namensraum (red, green, blue) zugeordnet wird.
-
+Nachdem die Tunnel erstellt wurden, ist der nächste Schritt, die Schnittstellen ihren jeweiligen Namespaces zuzuweisen. Dies wird erreicht, indem jedem Endpunkt eines Tunnels (=eth0-r=, =eth0-g=, =eth0-b=) sein entsprechender Namespace (rot, grün, blau) zugeordnet wird.
 
 #+BEGIN_SRC bash
-ip link set eth0-r netns red
-ip link set eth0-g netns green
-ip link set eth0-b netns blue
+for ns in ${namespaces[@]}
+do
+    sudo ip link set eth0-${ns::1} netns ${ns}
+done
 #+END_SRC
 
 ** IPv4-Adressen hinzufügen
 
-Schließlich werden IPv4-Adressen den Schnittstellen innerhalb jedes Namensraums zugewiesen, um die Netzwerkkommunikation zu ermöglichen. Die IP-Adressen =10.0.0.2=, =10.0.0.3= und =10.0.0.4= mit einer =/24= Subnetzmaske werden den Schnittstellen =eth0-r=, =eth0-g= und =eth0-b= jeweils zugewiesen. Zusätzlich werden die Schnittstellen aktiviert, um die Netzwerkkonfiguration zu aktivieren.
-
+Schließlich werden IPv4-Adressen den Schnittstellen in jedem Namespace zugewiesen, um die Netzwerkkommunikation zu ermöglichen. Die IP-Adressen =10.0.0.2=, =10.0.0.3= und =10.0.0.4= mit einer Subnetzmaske =/24= werden jeweils den Schnittstellen =eth0-r=, =eth0-g= und =eth0-b=  zugewiesen. Zusätzlich werden die Schnittstellen aktiviert, um die Netzwerkkonfiguration zu aktivieren.
 
 #+BEGIN_SRC bash
-red ip address add 10.0.0.2/24 dev eth0-r
-red ip link set dev eth0-r up
-green ip address add 10.0.0.3/24 dev eth0-g
-green ip link set dev eth0-g up
-blue ip address add 10.0.0.4/24 dev eth0-b
-blue ip link set dev eth0-b up
+ip=1
+for ns in ${namespaces[@]}
+do
+    ip=$((ip+1))
+    ${ns} ip address add 10.0.0.${ip}/24 dev eth0-${ns::1}
+    ${ns} ip link set dev eth0-${ns:0:1} up
+    echo "Füge IP 10.0.0.${ip} zu eth0-${ns::1} hinzu."
+done
 #+END_SRC
 
+* Virtuellen Switch öffnen
 
-** Open Virtual Switch
-
-*** Installieren
-Um den virtuellen Switch einzurichten, wird zunächst das Openvswitch-Paket mithilfe des passenden Paketmanagers installiert. Anschließend wird der =ovs-vswitchd= Dienst gestartet, um den Switch zu verwalten.
+Um den virtuellen Switch einzurichten, wird zunächst das Openvswitch-Paket mithilfe des entsprechenden Paketmanagers installiert. Anschließend wird der Dienst =ovs-vswitchd= gestartet, um den Switch zu verwalten.
 
 
-#+BEGIN_SRC bash :eval never :tangle files/install_ovs.sh
+** Installieren
+
+#+BEGIN_SRC bash :eval never :tangle no
 if [ -f /etc/os-release ]; then
     . /etc/os-release
 else
-    echo "Cannot determine the Linux distribution."
+    echo "Die Linux-Distribution kann nicht bestimmt werden."
     exit 1
 fi
 case $ID_LIKE in
     debian|ubuntu)
-        apt install -y openvswitch-switch
+        sudo apt install -y openvswitch-switch
         ;;
     fedora|rhel|centos)
-        yum install -y openvswitch
+        sudo yum install -y openvswitch
         ;;
     suse)
-        zypper install -y openvswitch
+        sudo zypper install -y openvswitch
         ;;
     arch)
-        pacman -Syu openvswitch
+        sudo pacman -Syu openvswitch
         ;;
-    *)
-        echo "Unsupported distribution."
-        exit 1
+    ,*)
+        echo "Nicht unterstützte Distribution."
+	exit 1
         ;;
 esac
+if  [[ $ID == arch ]]; then
+    sudo pacman -Syu openvswitch
+else
+    echo "Nicht unterstützte Distribution."
+    exit 1
+fi
 #+END_SRC
 
 #+BEGIN_SRC bash
-systemctl start ovs-vswitchd.service
+sudo systemctl start ovs-vswitchd.service
+echo "ovs-vswitchd gestartet"
 #+END_SRC
 
-**** Virtuellen Switch hinzufügen
+** Switch hinzufügen
 
-Nach der Installation wird ein virtueller Switch mit dem Namen =SW1= mithilfe des Befehls =ovs-vsctl add-br= erstellt. Die Switch-Konfiguration wird mithilfe des Befehls =ovs-vsctl show= angezeigt.
+Nach der Installation erstelle ich einen virtuellen Switch mit dem Namen SW1 mithilfe des Befehls =ovs-vsctl add-br=.
 
 #+BEGIN_SRC bash
-ovs-vsctl add-br SW1
-ovs-vsctl show
+sudo ovs-vsctl add-br SW1
 #+END_SRC
+
+Die Switch-Konfiguration wird mithilfe von =ovs-vsctl show= angezeigt.
+#+BEGIN_SRC bash :tangle no
+sudo ovs-vsctl show
+#+END_SRC
+
 
 *** Ports hinzufügen
 
-Als nächstes werden Ports zum virtuellen Switch hinzugefügt, um ihn mit den Netzwerk-Namensräumen zu verbinden. Jeder Port ist mit einer entsprechenden Tunnel-Schnittstelle (=veth-r=, =veth-g=, =veth-b=) verbunden.
-
-
-#+BEGIN_SRC bash
-ovs-vsctl add-port SW1 veth-r
-ovs-vsctl add-port SW1 veth-b
-ovs-vsctl add-port SW1 veth-g
-ovs-vsctl show
-#+END_SRC
-
-Diese Ports müssen nun noch aktiviert werden.
+Als Nächstes fügen wir Ports zum virtuellen Switch hinzu, um ihn mit den Netzwerk-Namespaces zu verbinden. Jeder Port ist mit einer entsprechenden Tunnel-Schnittstelle (=veth-r=, =veth-g=, =veth-b=) verbunden.
 
 #+BEGIN_SRC bash
-ip link set veth-r up
-ip link set veth-g up
-ip link set veth-b up
-ip a | grep veth -A3
+for ns in {r,g,b}
+do
+    sudo ovs-vsctl add-port SW1 veth-${ns}
+    echo "veth-${ns} zu SW1 hinzugefügt."
+done
 #+END_SRC
 
-Conclusion
+Erneut können wir bestätigen, dass alles wie beabsichtigt funktioniert hat:
 
-Zusammenfassend zeigt unsere virtuelle Netzwerkkonfiguration die Vielseitigkeit und Effizienz von softwaredefinierten Netzwerk (SDN)-Lösungen. Durch die Abstraktion von Netzwerkfunktionalitäten in virtualisierte Komponenten ermöglichen wir eine einfachere Verwaltung, erhöhte Flexibilität und eine bessere Ressourcennutzung. Dieses Projekt dient als Grundlage für weitere Erkundungen und Experimente im Bereich virtualisierter Netzwerkumgebungen.
+#+BEGIN_SRC bash  :tangle no
+sudo ovs-vsctl show
+#+END_SRC
 
-Jetzt können Sie die verschiedenen Namensräume erkunden, indem Sie netzwerkbezogene Befehle mit den Funktionen =red()=, =blue()= und =green()= aufrufen, wie:
+Diese Ports müssen nun aktiviert werden.
 
 #+BEGIN_SRC bash
-blue ip route
-red ping 10.0.0.3 -c 5
-green nstat -s | grep -i icmp
+for ns in {r,g,b}
+do
+    sudo ip link set veth-${ns} up
+    echo "Link veth-{ns} ist aktiviert."
+done
+#+END_SRC
+
+Ich überprüfe immer gerne noch einmal. Daher 'grepe' ich nach der =veth=-Schnittstelle und verwende die =-A=-Option, um immer die ersten 3 Zeilen jeder Schnittstellenkonfiguration anzuzeigen.
+
+#+BEGIN_SRC bash :tangle no
+sudo ip a | grep veth -A3
+#+END_SRC
+
+** Aufräumen
+
+Ein Neustart wird in der Regel den Großteil des Chaos hinter uns aufräumen, aber ich möchte ein gutes Kind sein und selbst aufräumen. Daher habe ich ein weiteres Skript erstellt, das genau das tut.
+
+#+BEGIN_SRC bash :tangle files/ovs_cleanup.sh 
+# Liste der von Ihrem vorherigen Skript erstellten Namespaces
+target_namespaces=(red green blue)
+
+# Liste der von Ihrem vorherigen Skript erstellten veth-Schnittstellen
+target_interfaces=(veth-r veth-g veth-b)
+
+# Überprüfen Sie auf vorhandene Namespaces
+if [[ -n $(ip netns list) ]]; then
+  echo "Netzwerk-Namespaces werden entfernt..."
+
+  # Durchlaufen Sie jeden Namespace und entfernen Sie nur passende
+  for ns in $(ip netns list | awk '{print $1}'); do
+    if [[ "${target_namespaces[@]}" =~ "$ns" ]]; then
+      sudo ip netns del $ns
+      echo "Namespace entfernt: $ns"
+    fi
+  done
+else
+  echo "Keine Netzwerk-Namespaces gefunden."
+fi
+
+# Überprüfen Sie auf vorhandene veth-Schnittstellen
+if [[ $(ip link show | grep veth -c) -gt 0 ]]; then
+  echo "Veth-Schnittstellen werden entfernt..."
+
+  # Durchlaufen Sie jede veth-Schnittstelle und entfernen Sie nur passende
+  for veth in $(ip link show | grep veth | awk '{print $2}' |sed 's/@.*$//g'); do
+    if [[ "${target_interfaces[@]}" =~ "$veth" ]]; then
+      sudo ip link del $veth
+      echo "Schnittstelle entfernt: $veth"
+    fi
+  done
+else
+  echo "Keine veth-Schnittstellen gefunden."
+fi
+
+echo "Open vSwitch wird gestoppt und deaktiviert..."
+sudo systemctl stop ovs-vswitchd.service
+
+# Überprüfen, ob das benannte Ausführungsverzeichnis für den blauen Namespace vorhanden ist
+if [[ -d $(ls -d blue_named_run_?????) ]]; then 
+    rm -rf blue_named_run_?????
+    echo "Ausführungsverzeichnis für den benannten Dienst im blauen Namespace entfernt".
+fi
+
+echo "Aufräumen abgeschlossen!"
 #+END_SRC
 
 
+* Fazit
 
-# Local Variables:
-# jinx-languages: "de_DE"
-# End:
+Es ist überraschend einfach, dieses grundlegende Setup zu erstellen.
+
+Wir können jetzt die verschiedenen Namensräume erkunden, indem wir netzwerkbezogene Befehle mit den =red()=, =blue()= und =green()= Funktionen aufrufen, z. B.:
+
+#+BEGIN_SRC bash :tangle nil
+sudo blue ip route
+sudo red ping 10.0.0.3 -c 5
+sudo green nstat -s | grep -i icmp
+#+END_SRC
+
+Dies ist ein großartiger Spielplatz, um grundlegende Netzwerkfunktionalitäten zu erkunden.
+
+
+* Anerkennung
+
+
+Ich habe über Netzwerk-Namespaces in zwei fantastischen Videos gelernt:
+- [[https://www.youtube.com/watch?v=_WgUwUf1d34&t=940s][Introduction to Linux Network Namespaces by David Mahler (YouTube)]]
+- [[https://www.youtube.com/watch?v=iN2RnYaFn-0][Linux Network Namespaces with ip netns by Andrew Mallet (YouTube)]]

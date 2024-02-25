@@ -1,0 +1,229 @@
+TITLE: Virtuelle Netzwerke (Teil II): DNS 
+#+AUTHOR: Sebastian Meisel
+
+:HTML_PROPERTIES:
+#+OPTIONS: num:nil toc:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
+:END:
+
+
+* DNS zum virtuellen Netzwerk hinzufügen
+:PROPERTIES:
+:header-args:bash: :shebang #!/bin/bash  :eval never :session OVS :exports code
+:header-args:mermaid: :tangle nil :results file :exports results :eval t
+:header-args:javascript: :tangle script.js :exports none :eval never
+:header-args:css: :tangle mystyle.css :exports none :eval never
+:header-args:config: :exports both :eval never
+:END:
+
+#+NAME: toggle-mode-script
+#+BEGIN_EXPORT HTML
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+#+END_EXPORT
+
+#+begin_menu
+[[file:NetworkNamespaceDNS.html][🇺🇸 EN]]
+- > [[file:index.DE.html][Home]]
+- > [[file:NetworkNamespace.DE.org][Part I]]
+#+end_menu
+
+
+In Teil I haben wir ein kleines geswitchtes Netzwerk zwischen drei virtuellen Geräten erstellt, von denen jedes in seiner eigenen Namensraum (~red~, ~green~ und ~blue~) platziert wurde. Wir haben sie mit einem (Open) Virtual Switch mit drei Ports (~veth-r~, ~veth-g~ und ~veth-b~) verbunden. Die gesamte Topologie sieht wie folgt aus:
+
+#+CAPTION: Netzwerkdiagramm 
+#+NAME: fig:netdiag
+#+ATTR_HTML: :width 50% :alt Netzwerkdiagramm, das die Beziehung zwischen den Namensräumen gemäß des obigen Absatzes zeigt.
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 700
+[[file:img/ovs-net.png]]
+
+Nun möchten wir DNS[fn:1] hinzufügen.
+
+** Installation von Bind
+
+Dafür müssen wir zuerst einen DNS-Server installieren. Es gibt einige Optionen wie [[https://thekelleys.org.uk/dnsmasq/doc.html][dnsmasq]] oder [[https://cr.yp.to/djbdns/][djbdns]], aber wir bleiben bei [[https://www.isc.org/bind/][bind9]] als dem quasi Standard für DNS-Server.
+
+#+BEGIN_SRC bash :eval never-export :tangle no :async :results file :file install.log
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+else
+    echo "Die Linux-Distribution konnte nicht bestimmt werden."
+    exit 1
+fi
+
+case ${ID_LIKE%% *} in
+  debian|ubuntu)
+      sudo apt install -y bind  
+      ;;
+  fedora|rhel|centos)
+      sudo yum install -y bind
+      ;;
+  suse|opensuse)
+      sudo zypper install -y bind 
+      ;;
+  arch)
+      sudo pacman -Syu bind
+      ;;
+  ,*)
+      echo "Nicht unterstützte Distribution."
+      exit 1
+    ;;
+esac
+if  [[ $ID == arch ]]; then
+    sudo pacman -Syu bind
+else	
+    echo "Nicht unterstützte Distribution."
+    exit 1
+fi
+#+END_SRC
+
+** Erstellen von Konfigurationsverzeichnissen für Namensräume
+
+Als Nächstes benötigen wir ein Konfigurationsverzeichnis für jeden Netzwerk-Namensraum. Darin suchen alle Anwendungen, die Netzwerk-Namensräume kennen, nach Konfigurationsdateien, relativ zu ihrem 'normalen' Platz im =/etc/= Verzeichnis.
+
+#+BEGIN_SRC bash 
+sudo mkdir -p /etc/netns/{red,green,blue}
+#+END_SRC
+
+** Erstellen der Konfigurationsdateien für Bind
+
+Wir möchten den DNS im ~blue~ Namensraum ausführen. Daher erstellen wir zuerst das =bind= Verzeichnis in =/etc/netns/blue/=.
+
+#+BEGIN_SRC bash 
+sudo mkdir -p /etc/netns/blue/bind/zones
+#+END_SRC
+
+Jetzt müssen wir die Datei =/etc/netns/blue/bind/named.conf.local= erstellen und bearbeiten, zuerst eine ~forward zone~ hinzufügen.
+
+#+BEGIN_SRC config :tangle named.conf 
+zone "col.or" {
+    type master;
+    file "/etc/bind/zones/db.col.or";
+};
+#+END_SRC
+
+Jetzt fügen wir die ~reverse zone~ für unser virtuelles Netzwerk (~10.0.0.0/24~) hinzu:
+
+#+BEGIN_SRC config :tangle named.conf 
+zone "0.0.10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.0.0.10";
+};
+#+END_SRC
+
+Schließlich müssen wir DNSSEC deaktivieren, da wir keine Berechtigung für das zugehörige Schlüsselverzeichnis haben.
+
+#+BEGIN_SRC config :tangle named.conf
+dnssec-enable no
+#+END_SRC
+
+*** Forward-Zone 
+
+Wir müssen die tatsächlichen Zonendateien erstellen und bearbeiten. Zuerst =/etc/netns/blue/bind/zone/db.col.or=.
+
+#+BEGIN_SRC config :tangle db.col.or 
+; BIND-Datendatei für die lokale Loopback-Schnittstelle
+
+$TTL    604800
+@       IN      SOA           col.or. admin.col.or. (
+                            205         ; Seriennummer
+                         604800         ; Aktualisierung
+                          86400         ; Wiederholung
+                        2419200         ; Ablauf
+                         604800 )       ; Negative Cache-TTL
+
+@      IN      NS          ns.col.or.
+
+ns     IN      A       10.0.0.4
+
+red    IN      A       10.0.0.2
+green  IN      A       10.0.0.3
+blue   IN      CNAME   ns.col.or.
+#+END_SRC
+
+*** Reverse Zone
+
+Wir benötigen auch die Datei =/etc/netns/blue/bind/zone/db.0.0.10=.
+
+#+BEGIN_SRC config :tangle db.0.0.10
+; BIND-Reverse-Daten-Datei für die lokale Loopback-Schnittstelle
+
+$TTL    604800
+@    IN    SOA    col.or. admin.col.or. (
+                200        ; Seriennummer
+             604800        ; Aktualisierung
+              86400        ; Wiederholung
+            2419200        ; Ablauf
+             604800 )    ; Negative Cache-TTL
+
+
+@    IN      NS      ns.col.or.
+ns   IN      A       10.0.0.4
+
+4    IN      PTR     ns.col.or.
+2    IN      PTR     red.col.or.
+3    IN      PTR     green.col.or.
+#+END_SRC
+
+** (Wieder)Generieren des virtuellen Netzwerks
+
+Nun ist es an der Zeit, das virtuelle Netzwerk aus dem ersten Teil (neu) zu generieren. Dazu müssen wir [[https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh][ovs.sh]] einbinden.
+
+#+BEGIN_SRC bash :results verbatim :async :tangle no
+CWD=$(dirname $(find /home/ -type f -name db.col.or))
+. ${CWD}/files/ovs.sh
+#+END_SRC
+
+Wir können jetzt die Zonen-Dateien auf Syntaxfehler überprüfen und hoffen, keine Fehlermeldungen zu erhalten:
+
+#+BEGIN_SRC bash :results verbatim 
+blue named-checkzone col.or db.col.or
+blue named-checkzone col.or db.0.0.10
+#+END_SRC
+
+** Erstellen von resolv.conf-Dateien
+
+Schließlich müssen wir den virtuellen Hosts mitteilen, wo der Nameserver zu finden ist, indem wir =resolv.conf= in =/etc/netns/red/=, =/etc/netns/green/= und =/etc/netns/blue/= erstellen.
+
+#+BEGIN_SRC config :tangle resolv.conf
+nameserver 10.0.0.4
+#+END_SRC
+
+** Starten des named-Dienstes
+
+Es ist nun an der Zeit, den DNS-Server im blauen Namensraum zu starten und zu testen. Dafür müssen wir ihn aus einem global beschreibbaren Verzeichnis starten.
+
+#+BEGIN_SRC bash :tangle files/blue_named.sh
+RUNDIR=$(mktemp -d blue_named_run_XXXXX)
+chmod 777 ${RUNDIR}
+cd ${RUNDIR}
+blue named -c /etc/bind/named.conf.local
+#+END_SRC
+
+#+BEGIN_SRC bash
+red nslookup green.col.or
+#+END_SRC
+
+
+** COMMENT Dateien nach =/etc/= kopieren
+#+BEGIN_SRC bash :export none :dir /sudo::
+CWD=$(dirname $(find /home/ -type f -name db.col.or))
+cd $CWD
+sudo cp named.conf /etc/netns/blue/bind
+sudo cp db.* /etc/netns/blue/bind/zones
+for d in {red,green,blue}
+  do sudo cp resolv.conf /etc/netns/${d}
+done
+#+END_SRC
+
+#+RESULTS:
+
+* Anerkennung
+
+Das meiste von dem, was ich in diesem Teil getan habe, basiert auf [[https://ba1ajinaidu.hashnode.dev/how-to-configure-bind-as-a-private-network-dns-server-on-linux-network-namespaces][Balajinaidus Blog]] zu diesem Thema.
+
+* Fußnoten
+
+[fn:1] *Domain Name Service:* ordnet einem Full-Qualified-Domainnamen wie =www.kernel.org= eine IP-Adresse zu.

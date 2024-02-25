@@ -161,6 +161,7 @@ input:checked +label::after {
 
 
 #+begin_menu
+[[file:NetworkNamespace.DE.html][🇩🇪 DE]]
 - > [[file:index.html][Home]]
 - > [[file:NetworkNamespaceDNS.html][Part II]]
 #+end_menu
@@ -404,6 +405,12 @@ case $ID_LIKE in
         exit 1
         ;;
 esac
+if  [[ $ID == arch ]]; then
+    sudo pacman -Syu openvswitch
+else
+    echo "Unsupported distribution."
+    exit 1
+fi
 #+END_SRC
 
 #+BEGIN_SRC bash

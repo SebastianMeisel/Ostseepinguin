@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-25 So 12:25 -->
+<!-- 2024-02-25 So 12:29 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual network (Part II): DNS</title>
+<title>&lrm;</title>
 <meta name="author" content="Sebastian Meisel" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,93 +197,95 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Virtual network (Part II): DNS</h1>
+<p>
+TITLE: Virtuelle Netzwerke (Teil II): DNS 
+</p>
 
 
-<div id="outline-container-orge1d9a93" class="outline-2">
-<h2 id="orge1d9a93">Add DNS to Virtual network</h2>
-<div class="outline-text-2" id="text-orge1d9a93">
+<div id="outline-container-orgd17c350" class="outline-2">
+<h2 id="orgd17c350">DNS zum virtuellen Netzwerk hinzufügen</h2>
+<div class="outline-text-2" id="text-orgd17c350">
 <input type="checkbox" id="darkmode-toggle">
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="orgb8d0830">
+<div class="menu" id="org1c92c0a">
 <p>
-<a href="NetworkNamespaceDNS.DE.html">🇩🇪 DE</a>
+<a href="NetworkNamespaceDNS.html">🇺🇸 EN</a>
 </p>
 <ul class="org-ul">
-<li>&gt; <a href="index.html">Home</a></li>
-<li>&gt; <a href="NetworkNamespace.html">Part I</a></li>
+<li>&gt; <a href="index.DE.html">Home</a></li>
+<li>&gt; <a href="NetworkNamespace.DE.html">Part I</a></li>
 </ul>
 
 </div>
 
+
 <p>
-In the <a href="NetworkNamespace.html">first part</a> we created a little switched network between three virtual devices, each of which we placed in it's own namespace (<code>red</code>, <code>green</code> and <code>blue</code>). We connect them with an (Open) Virtual Switch with three ports (<code>veth-r</code>, <code>veth-g</code> and <code>veth-b</code>). The whole toology looks like this:
+In Teil I haben wir ein kleines geswitchtes Netzwerk zwischen drei virtuellen Geräten erstellt, von denen jedes in seiner eigenen Namensraum (<code>red</code>, <code>green</code> und <code>blue</code>) platziert wurde. Wir haben sie mit einem (Open) Virtual Switch mit drei Ports (<code>veth-r</code>, <code>veth-g</code> und <code>veth-b</code>) verbunden. Die gesamte Topologie sieht wie folgt aus:
 </p>
 
 
-<div id="org2aaaf03" class="figure">
-<p><img src="img/ovs-net.png" alt="Network Diagram showing the relationship between the namespaces as described in the paragraph above." width="50%" />
+<div id="org256e7cf" class="figure">
+<p><img src="img/ovs-net.png" alt="Netzwerkdiagramm, das die Beziehung zwischen den Namensräumen gemäß des obigen Absatzes zeigt." width="50%" />
 </p>
-<p><span class="figure-number">Figure 1: </span>Network Diagram</p>
+<p><span class="figure-number">Figure 1: </span>Netzwerkdiagramm</p>
 </div>
 
 <p>
-Now we want to add DNS<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> to the mix.
+Nun möchten wir DNS<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> hinzufügen.
 </p>
 </div>
 
-<div id="outline-container-org92648c1" class="outline-3">
-<h3 id="org92648c1">Installing Bind</h3>
-<div class="outline-text-3" id="text-org92648c1">
+<div id="outline-container-orgc5742aa" class="outline-3">
+<h3 id="orgc5742aa">Installation von Bind</h3>
+<div class="outline-text-3" id="text-orgc5742aa">
 <p>
-For this we first need to install an DNS server. There are a few options like <a href="https://thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> or <a href="https://cr.yp.to/djbdns/">djbdns</a> but we stick with <a href="https://www.isc.org/bind/">bind9</a> as the quasi standard for DNS servers.
+Dafür müssen wir zuerst einen DNS-Server installieren. Es gibt einige Optionen wie <a href="https://thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> oder <a href="https://cr.yp.to/djbdns/">djbdns</a>, aber wir bleiben bei <a href="https://www.isc.org/bind/">bind9</a> als dem quasi Standard für DNS-Server.
 </p>
 
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b6a0ff;">if</span> [ -f /etc/os-release ]; <span style="color: #b6a0ff;">then</span>
-  <span style="color: #f78fe7;">.</span> /etc/os-release
+    <span style="color: #f78fe7;">.</span> /etc/os-release
 <span style="color: #b6a0ff;">else</span>
-  <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Cannot determine the Linux distribution."</span>
-  <span style="color: #b6a0ff;">exit</span> 1
+    <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Die Linux-Distribution konnte nicht bestimmt werden."</span>
+    <span style="color: #b6a0ff;">exit</span> 1
 <span style="color: #b6a0ff;">fi</span>
 
 <span style="color: #b6a0ff;">case</span> ${<span style="color: #00d3d0;">ID_LIKE</span>%% *} <span style="color: #b6a0ff;">in</span>
   debian|ubuntu)
-    sudo apt install -y bind  
-    ;;
+      sudo apt install -y bind  
+      ;;
   fedora|rhel|centos)
-    sudo yum install -y bind
-    ;;
+      sudo yum install -y bind
+      ;;
   suse|opensuse)
-    sudo zypper install -y bind 
-    ;;
+      sudo zypper install -y bind 
+      ;;
   arch)
-    sudo pacman -Syu bind
-    ;;
+      sudo pacman -Syu bind
+      ;;
   *)
-      <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Unsupported distribution."</span>
+      <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Nicht unterst&#252;tzte Distribution."</span>
       <span style="color: #b6a0ff;">exit</span> 1
     ;;
 <span style="color: #b6a0ff;">esac</span>
 <span style="color: #b6a0ff;">if</span>  [[ $<span style="color: #00d3d0;">ID</span> == arch ]]; <span style="color: #b6a0ff;">then</span>
     sudo pacman -Syu bind
-<span style="color: #b6a0ff;">else</span>
-          <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Unsupported distribution."</span>
-          <span style="color: #b6a0ff;">exit</span> 1
+<span style="color: #b6a0ff;">else</span>    
+    <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Nicht unterst&#252;tzte Distribution."</span>
+    <span style="color: #b6a0ff;">exit</span> 1
 <span style="color: #b6a0ff;">fi</span>
 </pre>
 </div>
 </div>
 </div>
 
-
-<div id="outline-container-org8146522" class="outline-3">
-<h3 id="org8146522">Creating configuration directories for namespaces</h3>
-<div class="outline-text-3" id="text-org8146522">
+<div id="outline-container-org867c8c3" class="outline-3">
+<h3 id="org867c8c3">Erstellen von Konfigurationsverzeichnissen für Namensräume</h3>
+<div class="outline-text-3" id="text-org867c8c3">
 <p>
-Next we need a configuration directory for each network namespace. This is where all applications aware of network namespaces look for configuration files, relative to there 'general' place in the <code>/etc/</code> directory.
+Als Nächstes benötigen wir ein Konfigurationsverzeichnis für jeden Netzwerk-Namensraum. Darin suchen alle Anwendungen, die Netzwerk-Namensräume kennen, nach Konfigurationsdateien, relativ zu ihrem 'normalen' Platz im <code>/etc/</code> Verzeichnis.
 </p>
 
 <div class="org-src-container">
@@ -293,11 +295,11 @@ Next we need a configuration directory for each network namespace. This is where
 </div>
 </div>
 
-<div id="outline-container-orgb13f641" class="outline-3">
-<h3 id="orgb13f641">Creating the configuration files for bind</h3>
-<div class="outline-text-3" id="text-orgb13f641">
+<div id="outline-container-org5bb0980" class="outline-3">
+<h3 id="org5bb0980">Erstellen der Konfigurationsdateien für Bind</h3>
+<div class="outline-text-3" id="text-org5bb0980">
 <p>
-We want to run the DNS in the <code>blue</code> namespace. So we first create the <code>bind</code> directory in <code>/etc/netns/blue/</code>.
+Wir möchten den DNS im <code>blue</code> Namensraum ausführen. Daher erstellen wir zuerst das <code>bind</code> Verzeichnis in <code>/etc/netns/blue/</code>.
 </p>
 
 <div class="org-src-container">
@@ -305,9 +307,8 @@ We want to run the DNS in the <code>blue</code> namespace. So we first create th
 </pre>
 </div>
 
-
 <p>
-Now we need to create and edit the file <code>/etc/netns/blue/bind/named.conf.local</code>, first adding a <code>forward zone</code>.
+Jetzt müssen wir die Datei <code>/etc/netns/blue/bind/named.conf.local</code> erstellen und bearbeiten, zuerst eine <code>forward zone</code> hinzufügen.
 </p>
 
 <div class="org-src-container">
@@ -319,7 +320,7 @@ Now we need to create and edit the file <code>/etc/netns/blue/bind/named.conf.lo
 </div>
 
 <p>
-Now we add the <code>reverse zone</code> for our virtual network (<code>10.0.0.0/24</code>):
+Jetzt fügen wir die <code>reverse zone</code> für unser virtuelles Netzwerk (<code>10.0.0.0/24</code>) hinzu:
 </p>
 
 <div class="org-src-container">
@@ -331,7 +332,7 @@ Now we add the <code>reverse zone</code> for our virtual network (<code>10.0.0.0
 </div>
 
 <p>
-Finaly we need to deactivate DNSSEC, as we don't have permission for the associated key directory.
+Schließlich müssen wir DNSSEC deaktivieren, da wir keine Berechtigung für das zugehörige Schlüsselverzeichnis haben.
 </p>
 
 <div class="org-src-container">
@@ -340,24 +341,23 @@ Finaly we need to deactivate DNSSEC, as we don't have permission for the associa
 </div>
 </div>
 
-
-<div id="outline-container-org78bd036" class="outline-4">
-<h4 id="org78bd036">Forward zone file</h4>
-<div class="outline-text-4" id="text-org78bd036">
+<div id="outline-container-org197ea11" class="outline-4">
+<h4 id="org197ea11">Forward-Zone</h4>
+<div class="outline-text-4" id="text-org197ea11">
 <p>
-We need to created and edit the actual zone files. First <code>/etc/netns/blue/bind/zone/db.col.or</code>.
+Wir müssen die tatsächlichen Zonendateien erstellen und bearbeiten. Zuerst <code>/etc/netns/blue/bind/zone/db.col.or</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-config">; BIND data file for local loopback interface
+<pre class="src src-config">; BIND-Datendatei für die lokale Loopback-Schnittstelle
 
 $TTL    604800
 @       IN      SOA           col.or. admin.col.or. (
-                            205         ; Serial
-                         604800         ; Refresh
-                          86400         ; Retry
-                        2419200         ; Expire
-                         604800 )       ; Negative Cache TTL
+                            205         ; Seriennummer
+                         604800         ; Aktualisierung
+                          86400         ; Wiederholung
+                        2419200         ; Ablauf
+                         604800 )       ; Negative Cache-TTL
 
 @      IN      NS          ns.col.or.
 
@@ -371,23 +371,23 @@ blue   IN      CNAME   ns.col.or.
 </div>
 </div>
 
-<div id="outline-container-orgea090c0" class="outline-4">
-<h4 id="orgea090c0">Reverse Zone</h4>
-<div class="outline-text-4" id="text-orgea090c0">
+<div id="outline-container-org10e8710" class="outline-4">
+<h4 id="org10e8710">Reverse Zone</h4>
+<div class="outline-text-4" id="text-org10e8710">
 <p>
-We also need the <code>/etc/netns/blue/bind/zone/db.0.0.10</code> file.
+Wir benötigen auch die Datei <code>/etc/netns/blue/bind/zone/db.0.0.10</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-config">; BIND reverse data file for local loopback interface
+<pre class="src src-config">; BIND-Reverse-Daten-Datei für die lokale Loopback-Schnittstelle
 
 $TTL    604800
 @    IN    SOA    col.or. admin.col.or. (
-                200        ; Serial
-             604800        ; Refresh
-              86400        ; Retry
-            2419200        ; Expire
-             604800 )    ; Negative Cache TTL
+                200        ; Seriennummer
+             604800        ; Aktualisierung
+              86400        ; Wiederholung
+            2419200        ; Ablauf
+             604800 )    ; Negative Cache-TTL
 
 
 @    IN      NS      ns.col.or.
@@ -402,13 +402,11 @@ ns   IN      A       10.0.0.4
 </div>
 </div>
 
-
-
-<div id="outline-container-org1364c7c" class="outline-3">
-<h3 id="org1364c7c">(Re)generate virtual net</h3>
-<div class="outline-text-3" id="text-org1364c7c">
+<div id="outline-container-org87791a8" class="outline-3">
+<h3 id="org87791a8">(Wieder)Generieren des virtuellen Netzwerks</h3>
+<div class="outline-text-3" id="text-org87791a8">
 <p>
-Now it's time to (re)generate the virtual network from the first part. For that we need to source <a href="https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh">ovs.sh</a>.
+Nun ist es an der Zeit, das virtuelle Netzwerk aus dem ersten Teil (neu) zu generieren. Dazu müssen wir <a href="https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh">ovs.sh</a> einbinden.
 </p>
 
 <div class="org-src-container">
@@ -418,7 +416,7 @@ Now it's time to (re)generate the virtual network from the first part. For that 
 </div>
 
 <p>
-We can now the zone files for syntax error, hoping to get no error messages:
+Wir können jetzt die Zonen-Dateien auf Syntaxfehler überprüfen und hoffen, keine Fehlermeldungen zu erhalten:
 </p>
 
 <div class="org-src-container">
@@ -429,12 +427,11 @@ blue named-checkzone col.or db.0.0.10
 </div>
 </div>
 
-
-<div id="outline-container-orgc127b78" class="outline-3">
-<h3 id="orgc127b78">Creating resolv.conf files</h3>
-<div class="outline-text-3" id="text-orgc127b78">
+<div id="outline-container-org86ce6c4" class="outline-3">
+<h3 id="org86ce6c4">Erstellen von resolv.conf-Dateien</h3>
+<div class="outline-text-3" id="text-org86ce6c4">
 <p>
-We finally need to tell the virtual hosts, where to find the name server, by creating <code>resolv.conf</code> in both <code>/etc/netns/red/</code>, <code>/etc/netns/green/</code> and <code>/etc/netns/blue/</code>.
+Schließlich müssen wir den virtuellen Hosts mitteilen, wo der Nameserver zu finden ist, indem wir <code>resolv.conf</code> in <code>/etc/netns/red/</code>, <code>/etc/netns/green/</code> und <code>/etc/netns/blue/</code> erstellen.
 </p>
 
 <div class="org-src-container">
@@ -444,12 +441,11 @@ We finally need to tell the virtual hosts, where to find the name server, by cre
 </div>
 </div>
 
-
-<div id="outline-container-orgbe14524" class="outline-3">
-<h3 id="orgbe14524">Start the named Service</h3>
-<div class="outline-text-3" id="text-orgbe14524">
+<div id="outline-container-orga625455" class="outline-3">
+<h3 id="orga625455">Starten des named-Dienstes</h3>
+<div class="outline-text-3" id="text-orga625455">
 <p>
-It is now time to start and test the DNS server in the blue name space. For this to work, to start it from a globaly writeable directory. 
+Es ist nun an der Zeit, den DNS-Server im blauen Namensraum zu starten und zu testen. Dafür müssen wir ihn aus einem global beschreibbaren Verzeichnis starten.
 </p>
 
 <div class="org-src-container">
@@ -469,12 +465,18 @@ blue named -c /etc/bind/named.conf.local
 </div>
 
 
-<div id="outline-container-orgff543e6" class="outline-2">
-<h2 id="orgff543e6">Acknowledgment</h2>
-<div class="outline-text-2" id="text-orgff543e6">
+<div id="outline-container-org04cc10e" class="outline-2">
+<h2 id="org04cc10e">Anerkennung</h2>
+<div class="outline-text-2" id="text-org04cc10e">
 <p>
-Most of what I have done in this part builds on <a href="https://ba1ajinaidu.hashnode.dev/how-to-configure-bind-as-a-private-network-dns-server-on-linux-network-namespaces">Balajinaidu's Blog</a> on this topic. 
+Das meiste von dem, was ich in diesem Teil getan habe, basiert auf <a href="https://ba1ajinaidu.hashnode.dev/how-to-configure-bind-as-a-private-network-dns-server-on-linux-network-namespaces">Balajinaidus Blog</a> zu diesem Thema.
 </p>
+</div>
+</div>
+
+<div id="outline-container-org277c9e4" class="outline-2">
+<h2 id="org277c9e4">Fußnoten</h2>
+<div class="outline-text-2" id="text-org277c9e4">
 </div>
 </div>
 <div id="footnotes">
@@ -482,7 +484,7 @@ Most of what I have done in this part builds on <a href="https://ba1ajinaidu.has
 <div id="text-footnotes">
 
 <div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
-<b>Domaine Name Service:</b> associates a full qualified domain name like <code>www.kernel.org</code> with an IP address.
+<b>Domain Name Service:</b> ordnet einem Full-Qualified-Domainnamen wie <code>www.kernel.org</code> eine IP-Adresse zu.
 </p></div></div>
 
 
@@ -490,7 +492,7 @@ Most of what I have done in this part builds on <a href="https://ba1ajinaidu.has
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2024-02-25 So 12:25</p>
+<p class="date">Created: 2024-02-25 So 12:29</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
