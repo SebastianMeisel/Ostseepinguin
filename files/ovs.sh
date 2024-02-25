@@ -66,10 +66,10 @@ function blue () {
 namespaces=(red green blue)
 for ns in ${namespaces[@]}
 do
-    if [[ ! -n $(ip netns list | grep -q ${ns}) ]]
+    if [[ ! $(ip netns list | grep -q ${ns}) == ${ns} ]]
     then
 	sudo ip netns add ${ns}
-	echo "${ns} namespace added."	
+	echo "${ns} namespace added."
     fi
 done
 ip netns list
@@ -77,7 +77,7 @@ sleep 1
 
 for ns in ${namespaces[@]}
 do
-  ${ns} ip link lo up
+  ${ns} ip link set lo up
   echo "Loopback in ${ns} is up."
 done
 

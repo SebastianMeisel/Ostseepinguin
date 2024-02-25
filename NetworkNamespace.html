@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-25 So 12:27 -->
+<!-- 2024-02-25 So 16:45 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual network with Openswitch</title>
@@ -200,14 +200,14 @@
 <h1 class="title">Virtual network with Openswitch</h1>
 
 
-<div id="outline-container-org3db33db" class="outline-2">
-<h2 id="org3db33db">Virtual network with Openswitch</h2>
-<div class="outline-text-2" id="text-org3db33db">
+<div id="outline-container-org631bb14" class="outline-2">
+<h2 id="org631bb14">Virtual network with Openswitch</h2>
+<div class="outline-text-2" id="text-org631bb14">
 <input type="checkbox" id="darkmode-toggle">
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="orgce65f95">
+<div class="menu" id="org3bc9e7e">
 <p>
 <a href="NetworkNamespace.DE.html">🇩🇪 DE</a>
 </p>
@@ -224,15 +224,15 @@ In this project, I want to show, how to designed and implemented a virtual netwo
 </p>
 </div>
 
-<div id="outline-container-org322fc6e" class="outline-3">
-<h3 id="org322fc6e">The plan</h3>
-<div class="outline-text-3" id="text-org322fc6e">
+<div id="outline-container-orgb4a3227" class="outline-3">
+<h3 id="orgb4a3227">The plan</h3>
+<div class="outline-text-3" id="text-orgb4a3227">
 <p>
 The following diagram illustrates a virtual network setup I want to achieve: The virtual Switch serves as the central point, connecting three distinct network namespaces represented by red, green, and blue. Each namespace is allocated an IP address (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) within the <code>10.0.0.0/24</code> subnet and is connected to the vSwitch via virtual Ethernet interfaces (<code>veth-r</code>, <code>veth-g</code>, <code>veth-b</code>).
 </p>
 
 
-<div id="orgc8378a6" class="figure">
+<div id="org0b7097e" class="figure">
 <p><img src="img/ovs-net.png" alt="Network Diagram showing the relationship between the namespaces as described in the paragraph above." width="50%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Network Diagram</p>
@@ -240,9 +240,9 @@ The following diagram illustrates a virtual network setup I want to achieve: The
 </div>
 </div>
 
-<div id="outline-container-orgdc3ef73" class="outline-3">
-<h3 id="orgdc3ef73">Create functions for each name space</h3>
-<div class="outline-text-3" id="text-orgdc3ef73">
+<div id="outline-container-org27d04b7" class="outline-3">
+<h3 id="org27d04b7">Create functions for each name space</h3>
+<div class="outline-text-3" id="text-org27d04b7">
 <p>
 To begin with we define functions for each network namespace: green, red, orange (as a spare for future projects), and blue. These functions allow executing commands within the respective namespaces using the <code>ip netns exec</code> command. Each function changes the color output of the executed commands for better visual identification. It also checks if the namespace does actually exist, before trying to run a command in it. This is important because each of these command must be run with <code>sudo</code>.
 </p>
@@ -332,9 +332,9 @@ I put these functions as well as all the other code needed to create the virtual
 
 
 
-<div id="outline-container-org5952369" class="outline-3">
-<h3 id="org5952369">Create namespaces</h3>
-<div class="outline-text-3" id="text-org5952369">
+<div id="outline-container-org58e20bf" class="outline-3">
+<h3 id="org58e20bf">Create namespaces</h3>
+<div class="outline-text-3" id="text-org58e20bf">
 <p>
 The next step is initializing the three network namespaces named red, green, and blue using the <code>ip netns add</code> command. I use a for loop to iterate over the namespace names. So it's easy to add new namespaces later on, if needed. Where needed I refer to them with the ${ns} variable.
 </p>
@@ -343,10 +343,10 @@ The next step is initializing the three network namespaces named red, green, and
 <pre class="src src-bash"><span style="color: #00d3d0;">namespaces</span>=(red green blue)
 <span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
 <span style="color: #b6a0ff;">do</span>
-    <span style="color: #b6a0ff;">if</span> [[ <span style="color: #d0bc00;">!</span> -n $(<span style="color: #f78fe7;">ip netns list | grep -q ${ns}</span>) ]]
+    <span style="color: #b6a0ff;">if</span> [[ <span style="color: #d0bc00;">!</span> $(<span style="color: #f78fe7;">ip netns list | grep -q ${ns}</span>) == ${<span style="color: #00d3d0;">ns</span>} ]]
     <span style="color: #b6a0ff;">then</span>
         sudo ip netns add ${<span style="color: #00d3d0;">ns</span>}
-        <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"${ns} namespace added."</span>   
+        <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"${ns} namespace added."</span>
     <span style="color: #b6a0ff;">fi</span>
 <span style="color: #b6a0ff;">done</span>
 ip netns list
@@ -361,7 +361,7 @@ Subsequently, the loopback interface within each namespace is brought up using t
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
 <span style="color: #b6a0ff;">do</span>
-  ${<span style="color: #00d3d0;">ns</span>} ip link lo up
+  ${<span style="color: #00d3d0;">ns</span>} ip link set lo up
   <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Loopback in ${ns} is up."</span>
 <span style="color: #b6a0ff;">done</span>
 </pre>
@@ -381,9 +381,9 @@ Finally, we can check the current state of network interfaces within each namesp
 </div>
 </div>
 
-<div id="outline-container-org05972ea" class="outline-3">
-<h3 id="org05972ea">Create tunnels</h3>
-<div class="outline-text-3" id="text-org05972ea">
+<div id="outline-container-org63437a2" class="outline-3">
+<h3 id="org63437a2">Create tunnels</h3>
+<div class="outline-text-3" id="text-org63437a2">
 <p>
 Now we create virtual Ethernet tunnels (veth) named <code>veth-r</code>, <code>veth-g</code>, and <code>veth-b</code>, each paired with an interface in its respective network namespace (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) for communication. These tunnels facilitate communication between the vSwitch and the network namespaces. Note that in the device names, I only use the first letter to distinguish the namespaces. For this I use bash's variable substitution mechanism with ${ns::1}, I get just the first letter of each string. Be aware, that this is a bash feature, when your using another shell. 
 </p>
@@ -399,9 +399,9 @@ Now we create virtual Ethernet tunnels (veth) named <code>veth-r</code>, <code>v
 </div>
 </div>
 
-<div id="outline-container-org6eb3ff7" class="outline-3">
-<h3 id="org6eb3ff7">Place link in namespaces</h3>
-<div class="outline-text-3" id="text-org6eb3ff7">
+<div id="outline-container-orge37ad43" class="outline-3">
+<h3 id="orge37ad43">Place link in namespaces</h3>
+<div class="outline-text-3" id="text-orge37ad43">
 <p>
 After creating the tunnels, the next step is to assign the interfaces to their respective namespaces. This is achieved by associating each tunnel's endpoint (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) with its corresponding namespace (red, green, blue).
 </p>
@@ -417,9 +417,9 @@ After creating the tunnels, the next step is to assign the interfaces to their r
 </div>
 </div>
 
-<div id="outline-container-orgcca1ed2" class="outline-3">
-<h3 id="orgcca1ed2">Add IPv4-Addresses</h3>
-<div class="outline-text-3" id="text-orgcca1ed2">
+<div id="outline-container-org72fa2e8" class="outline-3">
+<h3 id="org72fa2e8">Add IPv4-Addresses</h3>
+<div class="outline-text-3" id="text-org72fa2e8">
 <p>
 Finally, IPv4 addresses are assigned to the interfaces within each namespace to enable network communication. The IP addresses <code>10.0.0.2</code>, <code>10.0.0.3</code>, and <code>10.0.0.4</code> with a <code>/24</code> subnet mask are allocated to <code>eth0-r</code>, <code>eth0-g</code>, and <code>eth0-b</code> interfaces, respectively. Additionally, the interfaces are brought up to activate the network configuration.
 </p>
@@ -439,18 +439,18 @@ Finally, IPv4 addresses are assigned to the interfaces within each namespace to 
 </div>
 </div>
 
-<div id="outline-container-org5c9dc2c" class="outline-3">
-<h3 id="org5c9dc2c">Open virtual switch</h3>
-<div class="outline-text-3" id="text-org5c9dc2c">
+<div id="outline-container-org1ea45cc" class="outline-3">
+<h3 id="org1ea45cc">Open virtual switch</h3>
+<div class="outline-text-3" id="text-org1ea45cc">
 <p>
 To set up the virtual switch, first, the Openvswitch package is installed using the appropriate package manager, followed by starting the <code>ovs-vswitchd</code> service to manage the switch.
 </p>
 </div>
 
 
-<div id="outline-container-orgb52d78c" class="outline-4">
-<h4 id="orgb52d78c">Install</h4>
-<div class="outline-text-4" id="text-orgb52d78c">
+<div id="outline-container-org74d338b" class="outline-4">
+<h4 id="org74d338b">Install</h4>
+<div class="outline-text-4" id="text-org74d338b">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b6a0ff;">if</span> [ -f /etc/os-release ]; <span style="color: #b6a0ff;">then</span>
     <span style="color: #f78fe7;">.</span> /etc/os-release
@@ -493,9 +493,9 @@ To set up the virtual switch, first, the Openvswitch package is installed using 
 </div>
 </div>
 
-<div id="outline-container-orgb70628f" class="outline-4">
-<h4 id="orgb70628f">Add Switch</h4>
-<div class="outline-text-4" id="text-orgb70628f">
+<div id="outline-container-org64e17b4" class="outline-4">
+<h4 id="org64e17b4">Add Switch</h4>
+<div class="outline-text-4" id="text-org64e17b4">
 <p>
 After installation, I create  a virtual switch named SW1 using the <code>ovs-vsctl add-br</code> command. 
 </p>
@@ -516,9 +516,9 @@ The switch configuration is displayed using <code>ovs-vsctl show</code>.
 </div>
 
 
-<div id="outline-container-org43a29ef" class="outline-4">
-<h4 id="org43a29ef">Add ports</h4>
-<div class="outline-text-4" id="text-org43a29ef">
+<div id="outline-container-org3b4e955" class="outline-4">
+<h4 id="org3b4e955">Add ports</h4>
+<div class="outline-text-4" id="text-org3b4e955">
 <p>
 Next, we add ports to the virtual switch to connect it with the network namespaces. Each port is associated with a corresponding tunnel interface (<code>veth-r</code>, <code>veth-g</code>, <code>veth-b</code>).
 </p>
@@ -566,9 +566,9 @@ I always like to double check. So I grep for the <code>veth</code> interface and
 </div>
 </div>
 
-<div id="outline-container-orgf2d00d2" class="outline-3">
-<h3 id="orgf2d00d2">Cleanup</h3>
-<div class="outline-text-3" id="text-orgf2d00d2">
+<div id="outline-container-orgc2dabde" class="outline-3">
+<h3 id="orgc2dabde">Cleanup</h3>
+<div class="outline-text-3" id="text-orgc2dabde">
 <p>
 A reboot will always clean most of the mess behind us, but I want to be a good child and clean up for my self, so I created another script to do exactly this.
 </p>
@@ -627,9 +627,9 @@ sudo systemctl stop ovs-vswitchd.service
 </div>
 
 
-<div id="outline-container-org7f022d0" class="outline-2">
-<h2 id="org7f022d0">Conclusion</h2>
-<div class="outline-text-2" id="text-org7f022d0">
+<div id="outline-container-orgc9b0412" class="outline-2">
+<h2 id="orgc9b0412">Conclusion</h2>
+<div class="outline-text-2" id="text-orgc9b0412">
 <p>
 It is surprisingly easy to create this basic setup. 
 </p>
@@ -652,9 +652,9 @@ This is a great playground to explore basic network functionality.
 </div>
 
 
-<div id="outline-container-orgef8b862" class="outline-2">
-<h2 id="orgef8b862">Acknowledgment</h2>
-<div class="outline-text-2" id="text-orgef8b862">
+<div id="outline-container-orga470f45" class="outline-2">
+<h2 id="orga470f45">Acknowledgment</h2>
+<div class="outline-text-2" id="text-orga470f45">
 <p>
 I learned on network namespaces with this to fantastic videos:
 </p>
@@ -668,7 +668,7 @@ I learned on network namespaces with this to fantastic videos:
 <div id="postamble" class="status">
 <p class="date">Date: 2024-02-24 Sa 00:00</p>
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2024-02-25 So 12:27</p>
+<p class="date">Created: 2024-02-25 So 16:45</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

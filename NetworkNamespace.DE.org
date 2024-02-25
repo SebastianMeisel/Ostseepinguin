@@ -300,7 +300,7 @@ Der nächste Schritt besteht darin, die drei Netzwerk-Namespaces mit den Namen r
 namespaces=(red green blue)
 for ns in ${namespaces[@]}
 do
-    if [[ ! -n $(ip netns list | grep -q ${ns}) ]]
+    if [[ ! $(ip netns list | grep -o ${ns}) == ${ns} ]]
     then
 	sudo ip netns add ${ns}
 	echo "${ns} Namespace hinzugefügt."	
@@ -315,7 +315,7 @@ Anschließend wird das Loopback-Gerät in jedem Namespace mithilfe des Befehls =
 #+BEGIN_SRC bash
 for ns in ${namespaces[@]}
 do
-  ${ns} ip link lo up
+  ${ns} ip link set lo up
   echo "Loopback-Device in ${ns} ist aktiviert."
 done
 #+END_SRC
