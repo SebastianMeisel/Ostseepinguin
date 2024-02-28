@@ -163,6 +163,14 @@
   [[file:NetworkNamespace.html][🇺🇸 EN]]
   - > [[file:index.DE.html][Home]]
   - > [[file:NetworkNamespaceDNS.DE.html][Teil II]]
+
+--------
+#+ATTR_HTML: :width 16px :alt Mastodon
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 20
+[[file:img/Mastodon.png]] https://emacs.ch/@SebasTEAan
+
+📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
   #+end_menu
 In diesem Projekt möchte ich zeigen, wie ein virtuelles Netzwerk unter Verwendung von Openvswitch und Netzwerknamenräumen unter Linux entworfen und implementiert werden kann. Durch die Nutzung virtueller Ethernet-Tunnel und eines zentralen virtuellen Switches erstellen wir eine flexible und skalierbare Netzwerkumgebung. Mein Hauptziel ist dabei - neben einem besseren Verständnis der Linux-Namenspaces - eine isolierte Netzwerkumgebung zu haben. Als Lehrer möchte ich manchmal meinen Schülern zeigen, wie ein einzelnes Netzwerkprotokoll funktioniert oder was passiert, wenn ich eine Domain pinge. Doch selbst in einer virtuellen Maschine laufen oft viele andere Netzwerkverbindungen im Hintergrund, sodass es schwierig ist, herauszufiltern, woran ich interessiert bin. In der Konfiguration, die ich hier erstelle, ist das einzige Rauschen im virtuellen Netzwerk das IPv6-Router-Solicitation.
 

@@ -27,6 +27,14 @@
 [[file:NetworkNamespaceDNS.DE.html][🇩🇪 DE]]
 - > [[file:index.html][Home]]
 - > [[file:NetworkNamespace.org][Part I]]
+
+--------
+#+ATTR_HTML: :width 16px :alt Mastodon
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 20
+[[file:img/Mastodon.png]] https://emacs.ch/@SebasTEAan
+
+📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
 #+end_menu
 
 In the [[file:NetworkNamespace.org][first part]] we created a little switched network between three virtual devices, each of which we placed in it's own namespace (~red~, ~green~ and ~blue~). We connect them with an (Open) Virtual Switch with three ports (~veth-r~, ~veth-g~ and ~veth-b~). The whole toology looks like this:

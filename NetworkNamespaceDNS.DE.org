@@ -27,6 +27,14 @@
 [[file:NetworkNamespaceDNS.html][🇺🇸 EN]]
 - > [[file:index.DE.html][Home]]
 - > [[file:NetworkNamespace.DE.org][Part I]]
+
+--------
+#+ATTR_HTML: :width 16px :alt Mastodon
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 20
+[[file:img/Mastodon.png]] https://emacs.ch/@SebasTEAan
+
+📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
 #+end_menu
 
 

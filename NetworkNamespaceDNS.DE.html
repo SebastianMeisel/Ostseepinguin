@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-28 Mi 20:27 -->
+<!-- 2024-02-28 Mi 21:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtuelle Netzwerke (Teil II): DNS</title>
@@ -200,14 +200,14 @@
 <h1 class="title">Virtuelle Netzwerke (Teil II): DNS</h1>
 
 
-<div id="outline-container-orgf0f0910" class="outline-2">
-<h2 id="orgf0f0910">DNS zum virtuellen Netzwerk hinzufügen</h2>
-<div class="outline-text-2" id="text-orgf0f0910">
+<div id="outline-container-org711bd8e" class="outline-2">
+<h2 id="org711bd8e">DNS zum virtuellen Netzwerk hinzufügen</h2>
+<div class="outline-text-2" id="text-org711bd8e">
 <input type="checkbox" id="darkmode-toggle">
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="org116dc08">
+<div class="menu" id="org232de04">
 <p>
 <a href="NetworkNamespaceDNS.html">🇺🇸 EN</a>
 </p>
@@ -215,6 +215,15 @@
 <li>&gt; <a href="index.DE.html">Home</a></li>
 <li>&gt; <a href="NetworkNamespace.DE.html">Part I</a></li>
 </ul>
+
+<hr />
+<p width="16px" alt="Mastodon">
+<img src="img/Mastodon.png" alt="Mastodon" width="16px" /> <a href="https://emacs.ch/@SebasTEAan">https://emacs.ch/@SebasTEAan</a>
+</p>
+
+<p>
+📧 <a href="mailto:sebastian.meisel+ostseepinguin@gmail.com">sebastian.meisel at gmail.com</a>
+</p>
 
 </div>
 
@@ -224,7 +233,7 @@ In Teil I haben wir ein kleines geswitchtes Netzwerk zwischen drei virtuellen Ge
 </p>
 
 
-<div id="orgf2f758e" class="figure">
+<div id="org677b80b" class="figure">
 <p><img src="img/ovs-net.png" alt="Netzwerkdiagramm, das die Beziehung zwischen den Namensräumen gemäß des obigen Absatzes zeigt." width="50%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Netzwerkdiagramm</p>
@@ -235,9 +244,9 @@ Nun möchten wir DNS<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-ba
 </p>
 </div>
 
-<div id="outline-container-org3732359" class="outline-3">
-<h3 id="org3732359">Installation von Bind</h3>
-<div class="outline-text-3" id="text-org3732359">
+<div id="outline-container-orgb3420ba" class="outline-3">
+<h3 id="orgb3420ba">Installation von Bind</h3>
+<div class="outline-text-3" id="text-orgb3420ba">
 <p>
 Dafür müssen wir zuerst einen DNS-Server installieren. Es gibt einige Optionen wie <a href="https://thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> oder <a href="https://cr.yp.to/djbdns/">djbdns</a>, aber wir bleiben bei <a href="https://www.isc.org/bind/">bind9</a> als dem quasi Standard für DNS-Server.
 </p>
@@ -279,9 +288,9 @@ Dafür müssen wir zuerst einen DNS-Server installieren. Es gibt einige Optionen
 </div>
 </div>
 
-<div id="outline-container-orgccf4045" class="outline-3">
-<h3 id="orgccf4045">Erstellen von Konfigurationsverzeichnissen für Namensräume</h3>
-<div class="outline-text-3" id="text-orgccf4045">
+<div id="outline-container-org6e7ac25" class="outline-3">
+<h3 id="org6e7ac25">Erstellen von Konfigurationsverzeichnissen für Namensräume</h3>
+<div class="outline-text-3" id="text-org6e7ac25">
 <p>
 Als Nächstes benötigen wir ein Konfigurationsverzeichnis für jeden Netzwerk-Namensraum. Darin suchen alle Anwendungen, die Netzwerk-Namensräume kennen, nach Konfigurationsdateien, relativ zu ihrem 'normalen' Platz im <code>/etc/</code> Verzeichnis.
 </p>
@@ -293,9 +302,9 @@ Als Nächstes benötigen wir ein Konfigurationsverzeichnis für jeden Netzwerk-N
 </div>
 </div>
 
-<div id="outline-container-org78f669a" class="outline-3">
-<h3 id="org78f669a">Erstellen der Konfigurationsdateien für Bind</h3>
-<div class="outline-text-3" id="text-org78f669a">
+<div id="outline-container-orga93338b" class="outline-3">
+<h3 id="orga93338b">Erstellen der Konfigurationsdateien für Bind</h3>
+<div class="outline-text-3" id="text-orga93338b">
 <p>
 Wir möchten den DNS im <code>blue</code> Namensraum ausführen. Daher erstellen wir zuerst das <code>bind</code> Verzeichnis in <code>/etc/netns/blue/</code>.
 </p>
@@ -339,9 +348,9 @@ Schließlich müssen wir DNSSEC deaktivieren, da wir keine Berechtigung für das
 </div>
 </div>
 
-<div id="outline-container-org0f82761" class="outline-4">
-<h4 id="org0f82761">Forward-Zone</h4>
-<div class="outline-text-4" id="text-org0f82761">
+<div id="outline-container-org8f8f8ef" class="outline-4">
+<h4 id="org8f8f8ef">Forward-Zone</h4>
+<div class="outline-text-4" id="text-org8f8f8ef">
 <p>
 Wir müssen die tatsächlichen Zonendateien erstellen und bearbeiten. Zuerst <code>/etc/netns/blue/bind/zone/db.col.or</code>.
 </p>
@@ -369,9 +378,9 @@ blue   IN      CNAME   ns.col.or.
 </div>
 </div>
 
-<div id="outline-container-org9a92f67" class="outline-4">
-<h4 id="org9a92f67">Reverse Zone</h4>
-<div class="outline-text-4" id="text-org9a92f67">
+<div id="outline-container-org9868e6c" class="outline-4">
+<h4 id="org9868e6c">Reverse Zone</h4>
+<div class="outline-text-4" id="text-org9868e6c">
 <p>
 Wir benötigen auch die Datei <code>/etc/netns/blue/bind/zone/db.0.0.10</code>.
 </p>
@@ -400,9 +409,9 @@ ns   IN      A       10.0.0.4
 </div>
 </div>
 
-<div id="outline-container-orgb1ce053" class="outline-3">
-<h3 id="orgb1ce053">(Wieder)Generieren des virtuellen Netzwerks</h3>
-<div class="outline-text-3" id="text-orgb1ce053">
+<div id="outline-container-org8642157" class="outline-3">
+<h3 id="org8642157">(Wieder)Generieren des virtuellen Netzwerks</h3>
+<div class="outline-text-3" id="text-org8642157">
 <p>
 Nun ist es an der Zeit, das virtuelle Netzwerk aus dem ersten Teil (neu) zu generieren. Dazu müssen wir <a href="https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh">ovs.sh</a> einbinden.
 </p>
@@ -425,9 +434,9 @@ blue named-checkzone col.or db.0.0.10
 </div>
 </div>
 
-<div id="outline-container-org1cafb6e" class="outline-3">
-<h3 id="org1cafb6e">Erstellen von resolv.conf-Dateien</h3>
-<div class="outline-text-3" id="text-org1cafb6e">
+<div id="outline-container-orgae3bde3" class="outline-3">
+<h3 id="orgae3bde3">Erstellen von resolv.conf-Dateien</h3>
+<div class="outline-text-3" id="text-orgae3bde3">
 <p>
 Schließlich müssen wir den virtuellen Hosts mitteilen, wo der Nameserver zu finden ist, indem wir <code>resolv.conf</code> in <code>/etc/netns/red/</code>, <code>/etc/netns/green/</code> und <code>/etc/netns/blue/</code> erstellen.
 </p>
@@ -439,9 +448,9 @@ Schließlich müssen wir den virtuellen Hosts mitteilen, wo der Nameserver zu fi
 </div>
 </div>
 
-<div id="outline-container-org2a6e3c8" class="outline-3">
-<h3 id="org2a6e3c8">Starten des named-Dienstes</h3>
-<div class="outline-text-3" id="text-org2a6e3c8">
+<div id="outline-container-orge27ae9e" class="outline-3">
+<h3 id="orge27ae9e">Starten des named-Dienstes</h3>
+<div class="outline-text-3" id="text-orge27ae9e">
 <p>
 Es ist nun an der Zeit, den DNS-Server im blauen Namensraum zu starten und zu testen. Dafür müssen wir ihn aus einem global beschreibbaren Verzeichnis starten.
 </p>
@@ -463,18 +472,18 @@ blue named -c /etc/bind/named.conf.local
 </div>
 
 
-<div id="outline-container-orge134bc3" class="outline-2">
-<h2 id="orge134bc3">Anerkennung</h2>
-<div class="outline-text-2" id="text-orge134bc3">
+<div id="outline-container-org4105c54" class="outline-2">
+<h2 id="org4105c54">Anerkennung</h2>
+<div class="outline-text-2" id="text-org4105c54">
 <p>
 Das meiste von dem, was ich in diesem Teil getan habe, basiert auf <a href="https://ba1ajinaidu.hashnode.dev/how-to-configure-bind-as-a-private-network-dns-server-on-linux-network-namespaces">Balajinaidus Blog</a> zu diesem Thema.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org9434311" class="outline-2">
-<h2 id="org9434311">Fußnoten</h2>
-<div class="outline-text-2" id="text-org9434311">
+<div id="outline-container-org008a0cb" class="outline-2">
+<h2 id="org008a0cb">Fußnoten</h2>
+<div class="outline-text-2" id="text-org008a0cb">
 </div>
 </div>
 <div id="footnotes">
@@ -490,7 +499,7 @@ Das meiste von dem, was ich in diesem Teil getan habe, basiert auf <a href="http
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2024-02-28 Mi 20:27</p>
+<p class="date">Created: 2024-02-28 Mi 21:08</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
