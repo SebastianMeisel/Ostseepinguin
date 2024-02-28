@@ -212,88 +212,51 @@ graph LR;
 
 ** Create functions for each name space
 
-To begin with we define functions for each network namespace: green, red, orange (as a spare for future projects), and blue. These functions allow executing commands within the respective namespaces using the =ip netns exec= command. Each function changes the color output of the executed commands for better visual identification. It also checks if the namespace does actually exist, before trying to run a command in it. This is important because each of these command must be run with =sudo=.
+To begin with we define two variables to setup the intended namespaces and there associated color. The first variable is a simple index list, with the name ~red~, ~green~, and ~blue~. The second variable is create with the bash-builtin =declare= with the option =-x= for export and =-A= for associated list. Here we associate escape codes for the color output in the terminal with the colorful namespace names. We put this definition in the file =files/ovs_setup.sh=.
+#+BEGIN_SRC bash :tangle files/ovs_setup.sh
+export namespaces=(red green blue)
+declare -xA colorlist=(red '\e[31m'
+		      green '\e[32m'
+		      orange '\e[33m'
+		      blue '\e[34m'
+		      magenta '\e[35m'
+		      cyan '\e[36m')
+#+END_SRC
 
-I put these functions as well as all the other code needed to create the virtual network in a file called =ovs.sh= in the =./files/= subdirectory. To recreate the virtual network later, I have to =source= this file, if I want to be able to use these functions. 
+We source this file in the second script =files/ovs.sh= to which we add all the following code. So we can easily recreate and even adopt this setup in the future. Within this script we first create a convenience function =netns()=. It takes a namespace name and the commands to be run in the namespace as input and excutes the command in the assigned namespace while color coding the output in the color associated with the name space. This way later on, we can easily see in which namespace a command was run.
 
 #+BEGIN_SRC bash
-function red () {
-    if [[ $1 = "bash" ]]
+script_dir="$(dirname ${BASH_SOURCE[0]})"
+. ${script_dir}/ovs_setup.sh
+function netns () {
+    color=$1
+    shift
+    args=$@
+    if [[ ${args[0]} = "bash" ]]
     then
 	echo "To risky for my taste"
     else
-	if [[ $(ip netns list | grep -o "red") == red ]]
+	if [[ $(ip netns list | grep -o ${color}) == ${color} ]]
 	then
-	    echo -ne '\e[32m'
-	    sudo ip netns exec red $@
+	    echo -ne ${colorlist[$color]}
+	    sudo ip netns exec ${color} ${args[@]}
 	    echo -ne '\e[0m'
 	else
-	    echo "namespace red does not exist"
+	    echo "namespace ${color} does not exist"
 	fi
     fi
     }
 #+END_SRC
 
-#+RESULTS:
+For even more convenience we create aliases for each namespace, so that a simple =red=, =green= or =blue= followed by the command will call the =netns= function for each of these namespaces.
 
 #+BEGIN_SRC bash
-function green () {
-    if [[ $1 = "bash" ]]
-    then
-	echo "To risky for my taste"
-    else
-	if [[ $(ip netns list | grep -o "green") == green ]]
-	then
-	    echo -ne '\e[32m'
-	    sudo ip netns exec green $@
-	    echo -ne '\e[0m'
-	else
-	    echo "namespace green does not exist"
-	fi
-    fi
-    }
+for ns in ${namespaces[@]}
+do
+    alias ${ns}="netns ${ns}" && alias ${ns} && export ${ns} 
+done
 #+END_SRC
 
-#+RESULTS:
-
-#+BEGIN_SRC bash
-function orange () {
-    if [[ $1 = "bash" ]]
-    then
-	echo "To risky for my taste"
-    else
-	if [[ $(ip netns list | grep -o "orange") == orange ]]
-	then
-	    echo -ne '\e[32m'
-	    sudo ip netns exec orange $@
-	    echo -ne '\e[0m'
-	else
-	    echo "namespace orange does not exist"
-	fi
-    fi
-    }
-#+END_SRC
-
-#+RESULTS:
-
-
-#+BEGIN_SRC bash
-function blue () {
-    if [[ $1 = "bash" ]]
-    then
-	echo "To risky for my taste"
-    else
-	if [[ $(ip netns list | grep -o "blue") == blue ]]
-	then
-	    echo -ne '\e[32m'
-	    sudo ip netns exec blue $@
-	    echo -ne '\e[0m'
-	else
-	    echo "namespace blue does not exist"
-	fi
-    fi
-    }
-#+END_SRC
 
 
 
@@ -302,10 +265,9 @@ function blue () {
 The next step is initializing the three network namespaces named red, green, and blue using the =ip netns add= command. I use a for loop to iterate over the namespace names. So it's easy to add new namespaces later on, if needed. Where needed I refer to them with the ${ns} variable.
 
 #+BEGIN_SRC bash
-namespaces=(red green blue)
 for ns in ${namespaces[@]}
 do
-    if [[ ! $(ip netns list | grep -q ${ns}) == ${ns} ]]
+    if [[ ! $(ip netns list | grep -o ${ns}) == ${ns} ]]
     then
 	sudo ip netns add ${ns}
 	echo "${ns} namespace added."
@@ -320,8 +282,8 @@ Subsequently, the loopback interface within each namespace is brought up using t
 #+BEGIN_SRC bash
 for ns in ${namespaces[@]}
 do
-  ${ns} ip link set lo up
-  echo "Loopback in ${ns} is up."
+  netns ${ns} ip link set lo up
+    echo "Loopback in ${ns} is up."
 done
 #+END_SRC
 
@@ -330,7 +292,7 @@ Finally, we can check the current state of network interfaces within each namesp
 #+BEGIN_SRC bash :tangle no
 for ns in ${namespaces[@]}
 do
-    ${ns} ip link
+  netns ${ns} ip link
 done
 #+END_SRC
 
@@ -368,8 +330,8 @@ ip=1
 for ns in ${namespaces[@]}
 do
     ip=$((ip+1))
-    ${ns} ip address add 10.0.0.${ip}/24 dev eth0-${ns::1}
-    ${ns} ip link set dev eth0-${ns:0:1} up
+  netns ${ns} ip address add 10.0.0.${ip}/24 dev eth0-${ns::1}
+  netns ${ns} ip link set dev eth0-${ns:0:1} up
     echo "Add IP 10.0.0.${ip} to eth0-${ns::1}."
 done
 #+END_SRC
@@ -470,11 +432,15 @@ sudo ip a | grep veth -A3
 A reboot will always clean most of the mess behind us, but I want to be a good child and clean up for my self, so I created another script to do exactly this.
 
 #+BEGIN_SRC bash :tangle files/ovs_cleanup.sh 
-# List of namespaces created by your previous script
-target_namespaces=(red green blue)
+script_dir="$(dirname ${BASH_SOURCE[0]})"
+#Source Setup
+. ${script_dir}/ovs_setup.sh
 
-# List of veth interfaces created by your previous script
-target_interfaces=(veth-r veth-g veth-b)
+# Create a list of target interfaces
+for ns in ${namespaces[@]}
+do
+    target_interfaces=(${target_interfaces[@]} veth-${ns::1})
+done
 
 # Check for existing namespaces
 if [[ -n $(ip netns list) ]]; then
@@ -482,7 +448,7 @@ if [[ -n $(ip netns list) ]]; then
 
   # Loop through each namespace and remove only matching ones
   for ns in $(ip netns list | awk '{print $1}'); do
-    if [[ "${target_namespaces[@]}" =~ "$ns" ]]; then
+    if [[ "${namespaces[@]}" =~ "$ns" ]]; then
       sudo ip netns del $ns
       echo "Removed namespace: $ns"
     fi

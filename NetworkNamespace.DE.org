@@ -200,7 +200,7 @@ graph LR;
 
 #+CAPTION: Netzwerkschema 
 #+NAME: fig:netdiag
-#+ATTR_HTML: :width 50% :alt Netzwerkschema, das die Beziehung zwischen den Namensräumen gemäß dem obigen Absatz zeigt.
+#+ATTR_HTML: :width 50% :alt Netzwerkschema, das die Beziehung zwischen den Namespacesn gemäß dem obigen Absatz zeigt.
 #+ATTR_LATEX: :width .65\linewidth
 #+ATTR_ORG: :width 700
 #+RESULTS:
@@ -208,88 +208,57 @@ graph LR;
  
 ** Funktionen für jeden Namespace erstellen
 
-Zu Beginn definieren wir Funktionen für jeden Netzwerk-Namespace: =red=, =green=, =orange= (als Ersatz für zukünftige Projekte) und =blue=. Diese Funktionen ermöglichen die Ausführung von Befehlen innerhalb der jeweiligen Namensräume mithilfe des Befehls =ip netns exec=. Jede Funktion ändert die Farbausgabe der ausgeführten Befehle zur besseren Visualisierung. Außerdem überprüft sie, ob der Namespace tatsächlich existiert, bevor sie versucht, einen Befehl darin auszuführen. Dies ist wichtig, weil jeder dieser Befehle mit =sudo= ausgeführt werden muss.
+Zunächst definieren wir zwei Variablen, um die beabsichtigten Namespaces und ihre zugehörigen Farben einzurichten. Die erste Variable ist eine einfache Indexliste mit den Namen ~red~, ~green~ und ~blue~. Die zweite Variable wird mit dem Bash-Befehl =declare= mit der Option =-x= für Export und =-A= für assoziative Liste erstellt. Hier verknüpfen wir Escape-Codes für die Farbausgabe im Terminal mit den farbigen Namespace-Namen. Diese Definition legen wir in der Datei =files/ovs_setup.sh= ab.
 
-Ich habe diese Funktionen sowie den gesamten anderen Code, der benötigt wird, um das virtuelle Netzwerk zu erstellen, in einer Datei namens =ovs.sh= im Unterverzeichnis =./files/= abgelegt. Um das virtuelle Netzwerk später neu zu erstellen, muss ich diese Datei mit =source= laden, wenn ich diese Funktionen verwenden möchte.
+*** Umgebungsvariablen und Farbliste definieren
+
+Der folgende Bash-Skript definiert Umgebungsvariablen und eine Farbliste, die für das Einrichten des virtuellen Netzwerks erforderlich sind.
+
+#+BEGIN_SRC bash :tangle files/ovs_setup.sh
+export namespaces=(red green blue)
+declare -xA colorlist=(red '\e[31m'
+		      green '\e[32m'
+		      orange '\e[33m'
+		      blue '\e[34m'
+		      magenta '\e[35m'
+		      cyan '\e[36m')
+#+END_SRC
+
+Wir verwenden die =source=-Funktion, um diese Datei im zweiten Skript =files/ovs.sh= einzubinden, zu dem wir all den folgenden Code hinzufügen. So können wir dieses Setup leicht reproduzieren und sogar in Zukunft anpassen. Innerhalb dieses Skripts erstellen wir zunächst eine Funktion namens =netns()=. Sie nimmt einen Namespace-Namen und die auszuführenden Befehle im Namespace als Eingabe entgegen und führt den Befehl im zugewiesenen Namespace aus, wobei die Ausgabe in der Farbe des Namespaces kodiert wird. Auf diese Weise können wir später leicht erkennen, in welchem Namespace ein Befehl ausgeführt wurde.
 
 #+BEGIN_SRC bash
-function red () {
-    if [[ $1 = "bash" ]]
+script_dir="$(dirname ${BASH_SOURCE[0]})"
+. ${script_dir}/ovs_setup.sh
+function netns () {
+    color=$1
+    shift
+    args=$@
+    if [[ ${args[0]} = "bash" ]]
     then
 	echo "Zu riskant für meinen Geschmack"
     else
-	if [[ $(ip netns list | grep -o "red") == red ]]
+	if [[ $(ip netns list | grep -o ${color}) == ${color} ]]
 	then
-	    echo -ne '\e[32m'
-	    sudo ip netns exec red $@
+	    echo -ne ${colorlist[$color]}
+	    sudo ip netns exec ${color} ${args[@]}
 	    echo -ne '\e[0m'
 	else
-	    echo "Namenspace red existiert nicht"
+	    echo "Namespace ${color} existiert nicht"
 	fi
     fi
     }
 #+END_SRC
 
-#+RESULTS:
+Für noch mehr Bequemlichkeit erstellen wir Aliasse für jeden Namespace, sodass ein einfaches =red=, =green= oder =blue= gefolgt von dem Befehl die =netns=-Funktion für jeden dieser Namespaces aufruft.
 
 #+BEGIN_SRC bash
-function green () {
-    if [[ $1 = "bash" ]]
-    then
-	echo "Zu riskant für meinen Geschmack"
-    else
-	if [[ $(ip netns list | grep -o "green") == green ]]
-	then
-	    echo -ne '\e[32m'
-	    sudo ip netns exec green $@
-	    echo -ne '\e[0m'
-	else
-	    echo "Namespace green existiert nicht"
-	fi
-    fi
-    }
+for ns in ${namespaces[@]}
+do
+    alias ${ns}="netns ${ns}" && alias ${ns} && export ${ns} 
+done
 #+END_SRC
 
-#+RESULTS:
 
-#+BEGIN_SRC bash
-function orange () {
-    if [[ $1 = "bash" ]]
-    then
-	echo "Zu riskant für meinen Geschmack"
-    else
-	if [[ $(ip netns list | grep -o "orange") == orange ]]
-	then
-	    echo -ne '\e[32m'
-	    sudo ip netns exec orange $@
-	    echo -ne '\e[0m'
-	else
-	    echo "Namespace orange existiert nicht"
-	fi
-    fi
-    }
-#+END_SRC
-
-#+RESULTS:
-
-
-#+BEGIN_SRC bash
-function blue () {
-    if [[ $1 = "bash" ]]
-    then
-	echo "Zu riskant für meinen Geschmack"
-    else
-	if [[ $(ip netns list | grep -o "blue") == blue ]]
-	then
-	    echo -ne '\e[32m'
-	    sudo ip netns exec blue $@
-	    echo -ne '\e[0m'
-	else
-	    echo "Namespace blue existiert nicht"
-	fi
-    fi
-    }
-#+END_SRC
 
 
 ** Namespaces erstellen
@@ -297,7 +266,6 @@ function blue () {
 Der nächste Schritt besteht darin, die drei Netzwerk-Namespaces mit den Namen red, green und blue mithilfe des Befehls =ip netns add= zu initialisieren. Ich verwende eine for-Schleife, um über die Namespace-Namen zu iterieren. So ist es einfacher, später falls erforderlich neue Namespaces hinzuzufügen. Wo nötig, verweise ich mit der Variablen ${ns} darauf.
 
 #+BEGIN_SRC bash
-namespaces=(red green blue)
 for ns in ${namespaces[@]}
 do
     if [[ ! $(ip netns list | grep -o ${ns}) == ${ns} ]]
@@ -315,8 +283,8 @@ Anschließend wird das Loopback-Gerät in jedem Namespace mithilfe des Befehls =
 #+BEGIN_SRC bash
 for ns in ${namespaces[@]}
 do
-  ${ns} ip link set lo up
-  echo "Loopback-Device in ${ns} ist aktiviert."
+  netns ${ns} ip link set lo up
+    echo "Loopback in ${ns} is up."
 done
 #+END_SRC
 
@@ -325,7 +293,7 @@ Schließlich können wir den aktuellen Zustand der Netzwerkschnittstellen in jed
 #+BEGIN_SRC bash :tangle no
 for ns in ${namespaces[@]}
 do
-    ${ns} ip link
+  netns ${ns} ip link
 done
 #+END_SRC
 
@@ -362,9 +330,9 @@ ip=1
 for ns in ${namespaces[@]}
 do
     ip=$((ip+1))
-    ${ns} ip address add 10.0.0.${ip}/24 dev eth0-${ns::1}
-    ${ns} ip link set dev eth0-${ns:0:1} up
-    echo "Füge IP 10.0.0.${ip} zu eth0-${ns::1} hinzu."
+  netns ${ns} ip address add 10.0.0.${ip}/24 dev eth0-${ns::1}
+  netns ${ns} ip link set dev eth0-${ns:0:1} up
+    echo "Add IP 10.0.0.${ip} to eth0-${ns::1}."
 done
 #+END_SRC
 
@@ -466,11 +434,15 @@ sudo ip a | grep veth -A3
 Ein Neustart wird in der Regel den Großteil des Chaos hinter uns aufräumen, aber ich möchte ein gutes Kind sein und selbst aufräumen. Daher habe ich ein weiteres Skript erstellt, das genau das tut.
 
 #+BEGIN_SRC bash :tangle files/ovs_cleanup.sh 
-# Liste der von Ihrem vorherigen Skript erstellten Namespaces
-target_namespaces=(red green blue)
+script_dir="$(dirname ${BASH_SOURCE[0]})"
+#Source Setup
+. ${script_dir}/ovs_setup.sh
 
-# Liste der von Ihrem vorherigen Skript erstellten veth-Schnittstellen
-target_interfaces=(veth-r veth-g veth-b)
+# Create a list of target interfaces
+for ns in ${namespaces[@]}
+do
+    target_interfaces=(${target_interfaces[@]} veth-${ns::1})
+done
 
 # Überprüfen Sie auf vorhandene Namespaces
 if [[ -n $(ip netns list) ]]; then
@@ -478,7 +450,7 @@ if [[ -n $(ip netns list) ]]; then
 
   # Durchlaufen Sie jeden Namespace und entfernen Sie nur passende
   for ns in $(ip netns list | awk '{print $1}'); do
-    if [[ "${target_namespaces[@]}" =~ "$ns" ]]; then
+    if [[ "${namespaces[@]}" =~ "$ns" ]]; then
       sudo ip netns del $ns
       echo "Namespace entfernt: $ns"
     fi
@@ -519,7 +491,7 @@ echo "Aufräumen abgeschlossen!"
 
 Es ist überraschend einfach, dieses grundlegende Setup zu erstellen.
 
-Wir können jetzt die verschiedenen Namensräume erkunden, indem wir netzwerkbezogene Befehle mit den =red()=, =blue()= und =green()= Funktionen aufrufen, z. B.:
+Wir können jetzt die verschiedenen Namespaces erkunden, indem wir netzwerkbezogene Befehle mit den =red()=, =blue()= und =green()= Funktionen aufrufen, z. B.:
 
 #+BEGIN_SRC bash :tangle nil
 sudo blue ip route

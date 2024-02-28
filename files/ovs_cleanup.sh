@@ -1,9 +1,13 @@
 #!/bin/bash
-# List of namespaces created by your previous script
-target_namespaces=(red green blue)
+script_dir="$(dirname ${BASH_SOURCE[0]})"
+#Source Setup
+. ${script_dir}/ovs_setup.sh
 
-# List of veth interfaces created by your previous script
-target_interfaces=(veth-r veth-g veth-b)
+# Create a list of target interfaces
+for ns in ${namespaces[@]}
+do
+    target_interfaces=(${target_interfaces[@]} veth-${ns::1})
+done
 
 # Check for existing namespaces
 if [[ -n $(ip netns list) ]]; then
@@ -11,7 +15,7 @@ if [[ -n $(ip netns list) ]]; then
 
   # Loop through each namespace and remove only matching ones
   for ns in $(ip netns list | awk '{print $1}'); do
-    if [[ "${target_namespaces[@]}" =~ "$ns" ]]; then
+    if [[ "${namespaces[@]}" =~ "$ns" ]]; then
       sudo ip netns del $ns
       echo "Removed namespace: $ns"
     fi
