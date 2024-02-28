@@ -483,6 +483,19 @@ if [[ -d $(ls -d blue_named_run_?????) ]]; then
     echo "Ausführungsverzeichnis für den benannten Dienst im blauen Namespace entfernt".
 fi
 
+for ns in ${namespaces[@]}
+do
+    if [[ $(alias ${ns}) ]] ; then
+	unalias ${ns}
+	"${ns} entaliasiert."
+    fi
+done
+
+echo "Unseting netns function and variables"
+unset -f netns
+unset namespaces
+unset colorlist
+
 echo "Aufräumen abgeschlossen!"
 #+END_SRC
 

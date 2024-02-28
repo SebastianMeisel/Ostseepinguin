@@ -195,7 +195,7 @@ nameserver 10.0.0.4
 
 Es ist nun an der Zeit, den DNS-Server im blauen Namensraum zu starten und zu testen. Dafür müssen wir ihn aus einem global beschreibbaren Verzeichnis starten.
 
-#+BEGIN_SRC bash :tangle files/blue_named.sh
+#+BEGIN_SRC bash :tangle files/ovs_named.sh
 RUNDIR=$(mktemp -d blue_named_run_XXXXX)
 chmod 777 ${RUNDIR}
 cd ${RUNDIR}

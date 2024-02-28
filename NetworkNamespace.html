@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-25 So 17:39 -->
+<!-- 2024-02-28 Mi 20:35 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual network with Open vSwitch</title>
@@ -200,14 +200,14 @@
 <h1 class="title">Virtual network with Open vSwitch</h1>
 
 
-<div id="outline-container-orgaf36af6" class="outline-2">
-<h2 id="orgaf36af6">Virtual network with Open vSwitch</h2>
-<div class="outline-text-2" id="text-orgaf36af6">
+<div id="outline-container-orgc761301" class="outline-2">
+<h2 id="orgc761301">Virtual network with Open vSwitch</h2>
+<div class="outline-text-2" id="text-orgc761301">
 <input type="checkbox" id="darkmode-toggle">
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="org4c5b80a">
+<div class="menu" id="org285c073">
 <p>
 <a href="NetworkNamespace.DE.html">🇩🇪 DE</a>
 </p>
@@ -224,15 +224,15 @@ In this project, I want to show, how to designed and implemented a virtual netwo
 </p>
 </div>
 
-<div id="outline-container-org521b9e9" class="outline-3">
-<h3 id="org521b9e9">The plan</h3>
-<div class="outline-text-3" id="text-org521b9e9">
+<div id="outline-container-orgda9bfad" class="outline-3">
+<h3 id="orgda9bfad">The plan</h3>
+<div class="outline-text-3" id="text-orgda9bfad">
 <p>
 The following diagram illustrates a virtual network setup I want to achieve: The virtual Switch serves as the central point, connecting three distinct network namespaces represented by red, green, and blue. Each namespace is allocated an IP address (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) within the <code>10.0.0.0/24</code> subnet and is connected to the vSwitch via virtual Ethernet interfaces (<code>veth-r</code>, <code>veth-g</code>, <code>veth-b</code>).
 </p>
 
 
-<div id="orgee80ac9" class="figure">
+<div id="org97a58f8" class="figure">
 <p><img src="img/ovs-net.png" alt="Network Diagram showing the relationship between the namespaces as described in the paragraph above." width="50%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Network Diagram</p>
@@ -240,91 +240,60 @@ The following diagram illustrates a virtual network setup I want to achieve: The
 </div>
 </div>
 
-<div id="outline-container-org0f5a384" class="outline-3">
-<h3 id="org0f5a384">Create functions for each name space</h3>
-<div class="outline-text-3" id="text-org0f5a384">
+<div id="outline-container-org8aa144e" class="outline-3">
+<h3 id="org8aa144e">Create functions for each name space</h3>
+<div class="outline-text-3" id="text-org8aa144e">
 <p>
-To begin with we define functions for each network namespace: green, red, orange (as a spare for future projects), and blue. These functions allow executing commands within the respective namespaces using the <code>ip netns exec</code> command. Each function changes the color output of the executed commands for better visual identification. It also checks if the namespace does actually exist, before trying to run a command in it. This is important because each of these command must be run with <code>sudo</code>.
+To begin with we define two variables to setup the intended namespaces and there associated color. The first variable is a simple index list, with the name <code>red</code>, <code>green</code>, and <code>blue</code>. The second variable is create with the bash-builtin <code>declare</code> with the option <code>-x</code> for export and <code>-A</code> for associated list. Here we associate escape codes for the color output in the terminal with the colorful namespace names. We put this definition in the file <code>files/ovs_setup.sh</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #f78fe7;">export</span> <span style="color: #00d3d0;">namespaces</span>=(red green blue)
+<span style="color: #f78fe7;">declare</span> -xA <span style="color: #00d3d0;">colorlist</span>=(red <span style="color: #79a8ff;">'\e[31m'</span>
+                      green <span style="color: #79a8ff;">'\e[32m'</span>
+                      orange <span style="color: #79a8ff;">'\e[33m'</span>
+                      blue <span style="color: #79a8ff;">'\e[34m'</span>
+                      magenta <span style="color: #79a8ff;">'\e[35m'</span>
+                      cyan <span style="color: #79a8ff;">'\e[36m'</span>)
+</pre>
+</div>
+
+<p>
+We source this file in the second script <code>files/ovs.sh</code> to which we add all the following code. So we can easily recreate and even adopt this setup in the future. Within this script we first create a convenience function <code>netns()</code>. It takes a namespace name and the commands to be run in the namespace as input and excutes the command in the assigned namespace while color coding the output in the color associated with the name space. This way later on, we can easily see in which namespace a command was run.
 </p>
 
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #00d3d0;">script_dir</span>=<span style="color: #79a8ff;">"$(</span><span style="color: #f78fe7;">dirname ${BASH_SOURCE[0]}</span><span style="color: #79a8ff;">)"</span>
+<span style="color: #f78fe7;">.</span> ${<span style="color: #00d3d0;">script_dir</span>}/ovs_setup.sh
+<span style="color: #b6a0ff;">function</span> <span style="color: #feacd0;">netns</span> () {
+    <span style="color: #00d3d0;">color</span>=$<span style="color: #00d3d0;">1</span>
+    <span style="color: #f78fe7;">shift</span>
+    <span style="color: #00d3d0;">args</span>=$<span style="color: #00d3d0;">@</span>
+    <span style="color: #b6a0ff;">if</span> [[ ${<span style="color: #00d3d0;">args</span>[0]} = <span style="color: #79a8ff;">"bash"</span> ]]
+    <span style="color: #b6a0ff;">then</span>
+        <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"To risky for my taste"</span>
+    <span style="color: #b6a0ff;">else</span>
+        <span style="color: #b6a0ff;">if</span> [[ $(<span style="color: #f78fe7;">ip netns list | grep -o ${color}</span>) == ${<span style="color: #00d3d0;">color</span>} ]]
+        <span style="color: #b6a0ff;">then</span>
+            <span style="color: #f78fe7;">echo</span> -ne ${<span style="color: #00d3d0;">colorlist</span>[$<span style="color: #00d3d0;">color</span>]}
+            sudo ip netns exec ${<span style="color: #00d3d0;">color</span>} ${<span style="color: #00d3d0;">args</span>[@]}
+            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[0m'</span>
+        <span style="color: #b6a0ff;">else</span>
+            <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"namespace ${color} does not exist"</span>
+        <span style="color: #b6a0ff;">fi</span>
+    <span style="color: #b6a0ff;">fi</span>
+    }
+</pre>
+</div>
+
 <p>
-I put these functions as well as all the other code needed to create the virtual network in a file called <code>ovs.sh</code> in the <code>./files/</code> subdirectory. To recreate the virtual network later, I have to <code>source</code> this file, if I want to be able to use these functions. 
+For even more convenience we create aliases for each namespace, so that a simple <code>red</code>, <code>green</code> or <code>blue</code> followed by the command will call the <code>netns</code> function for each of these namespaces.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #b6a0ff;">function</span> <span style="color: #feacd0;">red</span> () {
-    <span style="color: #b6a0ff;">if</span> [[ $<span style="color: #00d3d0;">1</span> = <span style="color: #79a8ff;">"bash"</span> ]]
-    <span style="color: #b6a0ff;">then</span>
-        <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"To risky for my taste"</span>
-    <span style="color: #b6a0ff;">else</span>
-        <span style="color: #b6a0ff;">if</span> [[ $(<span style="color: #f78fe7;">ip netns list | grep -o "red"</span>) == red ]]
-        <span style="color: #b6a0ff;">then</span>
-            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[32m'</span>
-            sudo ip netns exec red $<span style="color: #00d3d0;">@</span>
-            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[0m'</span>
-        <span style="color: #b6a0ff;">else</span>
-            <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"namespace red does not exist"</span>
-        <span style="color: #b6a0ff;">fi</span>
-    <span style="color: #b6a0ff;">fi</span>
-    }
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-bash"><span style="color: #b6a0ff;">function</span> <span style="color: #feacd0;">green</span> () {
-    <span style="color: #b6a0ff;">if</span> [[ $<span style="color: #00d3d0;">1</span> = <span style="color: #79a8ff;">"bash"</span> ]]
-    <span style="color: #b6a0ff;">then</span>
-        <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"To risky for my taste"</span>
-    <span style="color: #b6a0ff;">else</span>
-        <span style="color: #b6a0ff;">if</span> [[ $(<span style="color: #f78fe7;">ip netns list | grep -o "green"</span>) == green ]]
-        <span style="color: #b6a0ff;">then</span>
-            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[32m'</span>
-            sudo ip netns exec green $<span style="color: #00d3d0;">@</span>
-            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[0m'</span>
-        <span style="color: #b6a0ff;">else</span>
-            <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"namespace green does not exist"</span>
-        <span style="color: #b6a0ff;">fi</span>
-    <span style="color: #b6a0ff;">fi</span>
-    }
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-bash"><span style="color: #b6a0ff;">function</span> <span style="color: #feacd0;">orange</span> () {
-    <span style="color: #b6a0ff;">if</span> [[ $<span style="color: #00d3d0;">1</span> = <span style="color: #79a8ff;">"bash"</span> ]]
-    <span style="color: #b6a0ff;">then</span>
-        <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"To risky for my taste"</span>
-    <span style="color: #b6a0ff;">else</span>
-        <span style="color: #b6a0ff;">if</span> [[ $(<span style="color: #f78fe7;">ip netns list | grep -o "orange"</span>) == orange ]]
-        <span style="color: #b6a0ff;">then</span>
-            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[32m'</span>
-            sudo ip netns exec orange $<span style="color: #00d3d0;">@</span>
-            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[0m'</span>
-        <span style="color: #b6a0ff;">else</span>
-            <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"namespace orange does not exist"</span>
-        <span style="color: #b6a0ff;">fi</span>
-    <span style="color: #b6a0ff;">fi</span>
-    }
-</pre>
-</div>
-
-
-<div class="org-src-container">
-<pre class="src src-bash"><span style="color: #b6a0ff;">function</span> <span style="color: #feacd0;">blue</span> () {
-    <span style="color: #b6a0ff;">if</span> [[ $<span style="color: #00d3d0;">1</span> = <span style="color: #79a8ff;">"bash"</span> ]]
-    <span style="color: #b6a0ff;">then</span>
-        <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"To risky for my taste"</span>
-    <span style="color: #b6a0ff;">else</span>
-        <span style="color: #b6a0ff;">if</span> [[ $(<span style="color: #f78fe7;">ip netns list | grep -o "blue"</span>) == blue ]]
-        <span style="color: #b6a0ff;">then</span>
-            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[32m'</span>
-            sudo ip netns exec blue $<span style="color: #00d3d0;">@</span>
-            <span style="color: #f78fe7;">echo</span> -ne <span style="color: #79a8ff;">'\e[0m'</span>
-        <span style="color: #b6a0ff;">else</span>
-            <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"namespace blue does not exist"</span>
-        <span style="color: #b6a0ff;">fi</span>
-    <span style="color: #b6a0ff;">fi</span>
-    }
+<pre class="src src-bash"><span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
+<span style="color: #b6a0ff;">do</span>
+    <span style="color: #f78fe7;">alias</span> ${<span style="color: #00d3d0;">ns</span>}=<span style="color: #79a8ff;">"netns ${ns}"</span> &amp;&amp; <span style="color: #f78fe7;">alias</span> ${<span style="color: #00d3d0;">ns</span>} &amp;&amp; <span style="color: #f78fe7;">export</span> ${<span style="color: #00d3d0;">ns</span>} 
+<span style="color: #b6a0ff;">done</span>
 </pre>
 </div>
 </div>
@@ -332,18 +301,18 @@ I put these functions as well as all the other code needed to create the virtual
 
 
 
-<div id="outline-container-org9cf785a" class="outline-3">
-<h3 id="org9cf785a">Create namespaces</h3>
-<div class="outline-text-3" id="text-org9cf785a">
+
+<div id="outline-container-org9fba0ce" class="outline-3">
+<h3 id="org9fba0ce">Create namespaces</h3>
+<div class="outline-text-3" id="text-org9fba0ce">
 <p>
 The next step is initializing the three network namespaces named red, green, and blue using the <code>ip netns add</code> command. I use a for loop to iterate over the namespace names. So it's easy to add new namespaces later on, if needed. Where needed I refer to them with the ${ns} variable.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #00d3d0;">namespaces</span>=(red green blue)
-<span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
+<pre class="src src-bash"><span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
 <span style="color: #b6a0ff;">do</span>
-    <span style="color: #b6a0ff;">if</span> [[ <span style="color: #d0bc00;">!</span> $(<span style="color: #f78fe7;">ip netns list | grep -q ${ns}</span>) == ${<span style="color: #00d3d0;">ns</span>} ]]
+    <span style="color: #b6a0ff;">if</span> [[ <span style="color: #d0bc00;">!</span> $(<span style="color: #f78fe7;">ip netns list | grep -o ${ns}</span>) == ${<span style="color: #00d3d0;">ns</span>} ]]
     <span style="color: #b6a0ff;">then</span>
         sudo ip netns add ${<span style="color: #00d3d0;">ns</span>}
         <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"${ns} namespace added."</span>
@@ -361,8 +330,8 @@ Subsequently, the loopback interface within each namespace is brought up using t
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
 <span style="color: #b6a0ff;">do</span>
-  ${<span style="color: #00d3d0;">ns</span>} ip link set lo up
-  <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Loopback in ${ns} is up."</span>
+  netns ${<span style="color: #00d3d0;">ns</span>} ip link set lo up
+    <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Loopback in ${ns} is up."</span>
 <span style="color: #b6a0ff;">done</span>
 </pre>
 </div>
@@ -374,16 +343,16 @@ Finally, we can check the current state of network interfaces within each namesp
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
 <span style="color: #b6a0ff;">do</span>
-    ${<span style="color: #00d3d0;">ns</span>} ip link
+  netns ${<span style="color: #00d3d0;">ns</span>} ip link
 <span style="color: #b6a0ff;">done</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgecd5064" class="outline-3">
-<h3 id="orgecd5064">Create tunnels</h3>
-<div class="outline-text-3" id="text-orgecd5064">
+<div id="outline-container-orgb9cfc11" class="outline-3">
+<h3 id="orgb9cfc11">Create tunnels</h3>
+<div class="outline-text-3" id="text-orgb9cfc11">
 <p>
 Now we create virtual Ethernet tunnels (veth) named <code>veth-r</code>, <code>veth-g</code>, and <code>veth-b</code>, each paired with an interface in its respective network namespace (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) for communication. These tunnels facilitate communication between the vSwitch and the network namespaces. Note that in the device names, I only use the first letter to distinguish the namespaces. For this I use bash's variable substitution mechanism with ${ns::1}, I get just the first letter of each string. Be aware, that this is a bash feature, when your using another shell. 
 </p>
@@ -399,9 +368,9 @@ Now we create virtual Ethernet tunnels (veth) named <code>veth-r</code>, <code>v
 </div>
 </div>
 
-<div id="outline-container-org8f47696" class="outline-3">
-<h3 id="org8f47696">Place link in namespaces</h3>
-<div class="outline-text-3" id="text-org8f47696">
+<div id="outline-container-org84acb2e" class="outline-3">
+<h3 id="org84acb2e">Place link in namespaces</h3>
+<div class="outline-text-3" id="text-org84acb2e">
 <p>
 After creating the tunnels, the next step is to assign the interfaces to their respective namespaces. This is achieved by associating each tunnel's endpoint (<code>eth0-r</code>, <code>eth0-g</code>, <code>eth0-b</code>) with its corresponding namespace (red, green, blue).
 </p>
@@ -417,9 +386,9 @@ After creating the tunnels, the next step is to assign the interfaces to their r
 </div>
 </div>
 
-<div id="outline-container-org47ac3bf" class="outline-3">
-<h3 id="org47ac3bf">Add IPv4-Addresses</h3>
-<div class="outline-text-3" id="text-org47ac3bf">
+<div id="outline-container-orgc3d26fa" class="outline-3">
+<h3 id="orgc3d26fa">Add IPv4-Addresses</h3>
+<div class="outline-text-3" id="text-orgc3d26fa">
 <p>
 Finally, IPv4 addresses are assigned to the interfaces within each namespace to enable network communication. The IP addresses <code>10.0.0.2</code>, <code>10.0.0.3</code>, and <code>10.0.0.4</code> with a <code>/24</code> subnet mask are allocated to <code>eth0-r</code>, <code>eth0-g</code>, and <code>eth0-b</code> interfaces, respectively. Additionally, the interfaces are brought up to activate the network configuration.
 </p>
@@ -430,8 +399,8 @@ Finally, IPv4 addresses are assigned to the interfaces within each namespace to 
 <span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
 <span style="color: #b6a0ff;">do</span>
     <span style="color: #00d3d0;">ip</span>=$(<span style="color: #f78fe7;">(ip+1</span>))
-    ${<span style="color: #00d3d0;">ns</span>} ip address add 10.0.0.${<span style="color: #00d3d0;">ip</span>}/24 dev eth0-${<span style="color: #00d3d0;">ns</span>::1}
-    ${<span style="color: #00d3d0;">ns</span>} ip link set dev eth0-${<span style="color: #00d3d0;">ns</span>:0:1} up
+  netns ${<span style="color: #00d3d0;">ns</span>} ip address add 10.0.0.${<span style="color: #00d3d0;">ip</span>}/24 dev eth0-${<span style="color: #00d3d0;">ns</span>::1}
+  netns ${<span style="color: #00d3d0;">ns</span>} ip link set dev eth0-${<span style="color: #00d3d0;">ns</span>:0:1} up
     <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Add IP 10.0.0.${ip} to eth0-${ns::1}."</span>
 <span style="color: #b6a0ff;">done</span>
 </pre>
@@ -439,18 +408,18 @@ Finally, IPv4 addresses are assigned to the interfaces within each namespace to 
 </div>
 </div>
 
-<div id="outline-container-orgf1e71b2" class="outline-3">
-<h3 id="orgf1e71b2">Open virtual switch</h3>
-<div class="outline-text-3" id="text-orgf1e71b2">
+<div id="outline-container-org6cf263c" class="outline-3">
+<h3 id="org6cf263c">Open virtual switch</h3>
+<div class="outline-text-3" id="text-org6cf263c">
 <p>
 To set up the virtual switch, first, the Openvswitch package is installed using the appropriate package manager, followed by starting the <code>ovs-vswitchd</code> service to manage the switch.
 </p>
 </div>
 
 
-<div id="outline-container-org58b32ca" class="outline-4">
-<h4 id="org58b32ca">Install</h4>
-<div class="outline-text-4" id="text-org58b32ca">
+<div id="outline-container-org773a556" class="outline-4">
+<h4 id="org773a556">Install</h4>
+<div class="outline-text-4" id="text-org773a556">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b6a0ff;">if</span> [ -f /etc/os-release ]; <span style="color: #b6a0ff;">then</span>
     <span style="color: #f78fe7;">.</span> /etc/os-release
@@ -493,9 +462,9 @@ To set up the virtual switch, first, the Openvswitch package is installed using 
 </div>
 </div>
 
-<div id="outline-container-org36104c7" class="outline-4">
-<h4 id="org36104c7">Add Switch</h4>
-<div class="outline-text-4" id="text-org36104c7">
+<div id="outline-container-org24a5121" class="outline-4">
+<h4 id="org24a5121">Add Switch</h4>
+<div class="outline-text-4" id="text-org24a5121">
 <p>
 After installation, I create  a virtual switch named SW1 using the <code>ovs-vsctl add-br</code> command. 
 </p>
@@ -516,9 +485,9 @@ The switch configuration is displayed using <code>ovs-vsctl show</code>.
 </div>
 
 
-<div id="outline-container-orgc3a9840" class="outline-4">
-<h4 id="orgc3a9840">Add ports</h4>
-<div class="outline-text-4" id="text-orgc3a9840">
+<div id="outline-container-orgdc81335" class="outline-4">
+<h4 id="orgdc81335">Add ports</h4>
+<div class="outline-text-4" id="text-orgdc81335">
 <p>
 Next, we add ports to the virtual switch to connect it with the network namespaces. Each port is associated with a corresponding tunnel interface (<code>veth-r</code>, <code>veth-g</code>, <code>veth-b</code>).
 </p>
@@ -566,19 +535,23 @@ I always like to double check. So I grep for the <code>veth</code> interface and
 </div>
 </div>
 
-<div id="outline-container-org20c4005" class="outline-3">
-<h3 id="org20c4005">Cleanup</h3>
-<div class="outline-text-3" id="text-org20c4005">
+<div id="outline-container-org78a8b65" class="outline-3">
+<h3 id="org78a8b65">Cleanup</h3>
+<div class="outline-text-3" id="text-org78a8b65">
 <p>
 A reboot will always clean most of the mess behind us, but I want to be a good child and clean up for my self, so I created another script to do exactly this.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #a8a8a8;"># </span><span style="color: #a8a8a8;">List of namespaces created by your previous script</span>
-<span style="color: #00d3d0;">target_namespaces</span>=(red green blue)
+<pre class="src src-bash"><span style="color: #00d3d0;">script_dir</span>=<span style="color: #79a8ff;">"$(</span><span style="color: #f78fe7;">dirname ${BASH_SOURCE[0]}</span><span style="color: #79a8ff;">)"</span>
+<span style="color: #a8a8a8;">#</span><span style="color: #a8a8a8;">Source Setup</span>
+<span style="color: #f78fe7;">.</span> ${<span style="color: #00d3d0;">script_dir</span>}/ovs_setup.sh
 
-<span style="color: #a8a8a8;"># </span><span style="color: #a8a8a8;">List of veth interfaces created by your previous script</span>
-<span style="color: #00d3d0;">target_interfaces</span>=(veth-r veth-g veth-b)
+<span style="color: #a8a8a8;"># </span><span style="color: #a8a8a8;">Create a list of target interfaces</span>
+<span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
+<span style="color: #b6a0ff;">do</span>
+    <span style="color: #00d3d0;">target_interfaces</span>=(${<span style="color: #00d3d0;">target_interfaces</span>[@]} veth-${<span style="color: #00d3d0;">ns</span>::1})
+<span style="color: #b6a0ff;">done</span>
 
 <span style="color: #a8a8a8;"># </span><span style="color: #a8a8a8;">Check for existing namespaces</span>
 <span style="color: #b6a0ff;">if</span> [[ -n $(<span style="color: #f78fe7;">ip netns list</span>) ]]; <span style="color: #b6a0ff;">then</span>
@@ -586,7 +559,7 @@ A reboot will always clean most of the mess behind us, but I want to be a good c
 
   <span style="color: #a8a8a8;"># </span><span style="color: #a8a8a8;">Loop through each namespace and remove only matching ones</span>
   <span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> $(<span style="color: #f78fe7;">ip netns list | awk '{print $1}'</span>); <span style="color: #b6a0ff;">do</span>
-    <span style="color: #b6a0ff;">if</span> [[ <span style="color: #79a8ff;">"${target_namespaces[@]}"</span> =~ <span style="color: #79a8ff;">"$ns"</span> ]]; <span style="color: #b6a0ff;">then</span>
+    <span style="color: #b6a0ff;">if</span> [[ <span style="color: #79a8ff;">"${namespaces[@]}"</span> =~ <span style="color: #79a8ff;">"$ns"</span> ]]; <span style="color: #b6a0ff;">then</span>
       sudo ip netns del $<span style="color: #00d3d0;">ns</span>
       <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Removed namespace: $ns"</span>
     <span style="color: #b6a0ff;">fi</span>
@@ -619,6 +592,20 @@ sudo systemctl stop ovs-vswitchd.service
     <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Removed run directory for named service in blue"</span>.
 <span style="color: #b6a0ff;">fi</span>
 
+<span style="color: #b6a0ff;">for</span> ns<span style="color: #b6a0ff;"> in</span> ${<span style="color: #00d3d0;">namespaces</span>[@]}
+<span style="color: #b6a0ff;">do</span>
+    <span style="color: #b6a0ff;">if</span> [[ $(<span style="color: #f78fe7;">alias ${ns}</span>) ]] ; <span style="color: #b6a0ff;">then</span>
+        <span style="color: #f78fe7;">unalias</span> ${<span style="color: #00d3d0;">ns</span>}
+        <span style="color: #79a8ff;">"Unaliased ${ns}."</span>
+    <span style="color: #b6a0ff;">fi</span>
+<span style="color: #b6a0ff;">done</span>
+
+
+<span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Unseting netns function and variables"</span>
+<span style="color: #f78fe7;">unset</span> -f netns
+<span style="color: #f78fe7;">unset</span> namespaces
+<span style="color: #f78fe7;">unset</span> colorlist
+
 <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Cleanup complete!"</span>
 </pre>
 </div>
@@ -627,9 +614,9 @@ sudo systemctl stop ovs-vswitchd.service
 </div>
 
 
-<div id="outline-container-org054e7e7" class="outline-2">
-<h2 id="org054e7e7">Conclusion</h2>
-<div class="outline-text-2" id="text-org054e7e7">
+<div id="outline-container-orgdf92aae" class="outline-2">
+<h2 id="orgdf92aae">Conclusion</h2>
+<div class="outline-text-2" id="text-orgdf92aae">
 <p>
 It is surprisingly easy to create this basic setup. 
 </p>
@@ -652,9 +639,9 @@ This is a great playground to explore basic network functionality.
 </div>
 
 
-<div id="outline-container-orgc649046" class="outline-2">
-<h2 id="orgc649046">Acknowledgment</h2>
-<div class="outline-text-2" id="text-orgc649046">
+<div id="outline-container-orgbadc2ec" class="outline-2">
+<h2 id="orgbadc2ec">Acknowledgment</h2>
+<div class="outline-text-2" id="text-orgbadc2ec">
 <p>
 I learned on network namespaces with this to fantastic videos:
 </p>
@@ -668,7 +655,7 @@ I learned on network namespaces with this to fantastic videos:
 <div id="postamble" class="status">
 <p class="date">Date: 2024-02-24 Sa 00:00</p>
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2024-02-25 So 17:39</p>
+<p class="date">Created: 2024-02-28 Mi 20:35</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

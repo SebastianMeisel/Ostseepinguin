@@ -481,6 +481,20 @@ if [[ -d $(ls -d blue_named_run_?????) ]]; then
     echo "Removed run directory for named service in blue".
 fi
 
+for ns in ${namespaces[@]}
+do
+    if [[ $(alias ${ns}) ]] ; then
+	unalias ${ns}
+	"Unaliased ${ns}."
+    fi
+done
+
+
+echo "Unseting netns function and variables"
+unset -f netns
+unset namespaces
+unset colorlist
+
 echo "Cleanup complete!"
 #+END_SRC
 

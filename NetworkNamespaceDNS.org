@@ -173,11 +173,12 @@ ns   IN      A       10.0.0.4
 
 ** (Re)generate virtual net
 
-Now it's time to (re)generate the virtual network from the first part. For that we need to source [[https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh][ovs.sh]].
+Now it's time to (re)generate the virtual network from the first part. For that we need to source [[https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs_setup.sh][ovs_setup.sh]] and [[https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh][ovs.sh]].
 
 #+BEGIN_SRC bash :results verbatim :async :tangle no
 CWD=$(dirname $(find /home/ -type f -name db.col.or))
-. ${CWD}/files/ovs.sh
+. ${script_dir}/ovs_setup.sh
+. ${script_dir}/ovs.sh
 #+END_SRC
 
 We can now the zone files for syntax error, hoping to get no error messages:
@@ -201,7 +202,7 @@ nameserver 10.0.0.4
 
 It is now time to start and test the DNS server in the blue name space. For this to work, to start it from a globaly writeable directory. 
 
-#+BEGIN_SRC bash :tangle files/blue_named.sh
+#+BEGIN_SRC bash :tangle files/ovs_named.sh
 RUNDIR=$(mktemp -d blue_named_run_XXXXX)
 chmod 777 ${RUNDIR}
 cd ${RUNDIR}

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-25 So 12:25 -->
+<!-- 2024-02-28 Mi 20:28 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual network (Part II): DNS</title>
@@ -200,14 +200,14 @@
 <h1 class="title">Virtual network (Part II): DNS</h1>
 
 
-<div id="outline-container-orge1d9a93" class="outline-2">
-<h2 id="orge1d9a93">Add DNS to Virtual network</h2>
-<div class="outline-text-2" id="text-orge1d9a93">
+<div id="outline-container-org13437d8" class="outline-2">
+<h2 id="org13437d8">Add DNS to Virtual network</h2>
+<div class="outline-text-2" id="text-org13437d8">
 <input type="checkbox" id="darkmode-toggle">
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="orgb8d0830">
+<div class="menu" id="org3a802a7">
 <p>
 <a href="NetworkNamespaceDNS.DE.html">🇩🇪 DE</a>
 </p>
@@ -223,7 +223,7 @@ In the <a href="NetworkNamespace.html">first part</a> we created a little switch
 </p>
 
 
-<div id="org2aaaf03" class="figure">
+<div id="org6f91cf4" class="figure">
 <p><img src="img/ovs-net.png" alt="Network Diagram showing the relationship between the namespaces as described in the paragraph above." width="50%" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Network Diagram</p>
@@ -234,9 +234,9 @@ Now we want to add DNS<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-
 </p>
 </div>
 
-<div id="outline-container-org92648c1" class="outline-3">
-<h3 id="org92648c1">Installing Bind</h3>
-<div class="outline-text-3" id="text-org92648c1">
+<div id="outline-container-orgc321036" class="outline-3">
+<h3 id="orgc321036">Installing Bind</h3>
+<div class="outline-text-3" id="text-orgc321036">
 <p>
 For this we first need to install an DNS server. There are a few options like <a href="https://thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> or <a href="https://cr.yp.to/djbdns/">djbdns</a> but we stick with <a href="https://www.isc.org/bind/">bind9</a> as the quasi standard for DNS servers.
 </p>
@@ -279,9 +279,9 @@ For this we first need to install an DNS server. There are a few options like <a
 </div>
 
 
-<div id="outline-container-org8146522" class="outline-3">
-<h3 id="org8146522">Creating configuration directories for namespaces</h3>
-<div class="outline-text-3" id="text-org8146522">
+<div id="outline-container-org79a5a13" class="outline-3">
+<h3 id="org79a5a13">Creating configuration directories for namespaces</h3>
+<div class="outline-text-3" id="text-org79a5a13">
 <p>
 Next we need a configuration directory for each network namespace. This is where all applications aware of network namespaces look for configuration files, relative to there 'general' place in the <code>/etc/</code> directory.
 </p>
@@ -293,9 +293,9 @@ Next we need a configuration directory for each network namespace. This is where
 </div>
 </div>
 
-<div id="outline-container-orgb13f641" class="outline-3">
-<h3 id="orgb13f641">Creating the configuration files for bind</h3>
-<div class="outline-text-3" id="text-orgb13f641">
+<div id="outline-container-org726e387" class="outline-3">
+<h3 id="org726e387">Creating the configuration files for bind</h3>
+<div class="outline-text-3" id="text-org726e387">
 <p>
 We want to run the DNS in the <code>blue</code> namespace. So we first create the <code>bind</code> directory in <code>/etc/netns/blue/</code>.
 </p>
@@ -341,9 +341,9 @@ Finaly we need to deactivate DNSSEC, as we don't have permission for the associa
 </div>
 
 
-<div id="outline-container-org78bd036" class="outline-4">
-<h4 id="org78bd036">Forward zone file</h4>
-<div class="outline-text-4" id="text-org78bd036">
+<div id="outline-container-orga5dbb10" class="outline-4">
+<h4 id="orga5dbb10">Forward zone file</h4>
+<div class="outline-text-4" id="text-orga5dbb10">
 <p>
 We need to created and edit the actual zone files. First <code>/etc/netns/blue/bind/zone/db.col.or</code>.
 </p>
@@ -371,9 +371,9 @@ blue   IN      CNAME   ns.col.or.
 </div>
 </div>
 
-<div id="outline-container-orgea090c0" class="outline-4">
-<h4 id="orgea090c0">Reverse Zone</h4>
-<div class="outline-text-4" id="text-orgea090c0">
+<div id="outline-container-org9a71fd4" class="outline-4">
+<h4 id="org9a71fd4">Reverse Zone</h4>
+<div class="outline-text-4" id="text-org9a71fd4">
 <p>
 We also need the <code>/etc/netns/blue/bind/zone/db.0.0.10</code> file.
 </p>
@@ -404,16 +404,17 @@ ns   IN      A       10.0.0.4
 
 
 
-<div id="outline-container-org1364c7c" class="outline-3">
-<h3 id="org1364c7c">(Re)generate virtual net</h3>
-<div class="outline-text-3" id="text-org1364c7c">
+<div id="outline-container-org2c54f89" class="outline-3">
+<h3 id="org2c54f89">(Re)generate virtual net</h3>
+<div class="outline-text-3" id="text-org2c54f89">
 <p>
-Now it's time to (re)generate the virtual network from the first part. For that we need to source <a href="https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh">ovs.sh</a>.
+Now it's time to (re)generate the virtual network from the first part. For that we need to source <a href="https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs_setup.sh">ovs<sub>setup.sh</sub></a> and <a href="https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs.sh">ovs.sh</a>.
 </p>
 
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #00d3d0;">CWD</span>=$(<span style="color: #f78fe7;">dirname $(find /home/ -type f -name db.col.or</span>))
-<span style="color: #f78fe7;">.</span> ${<span style="color: #00d3d0;">CWD</span>}/files/ovs.sh
+<span style="color: #f78fe7;">.</span> ${<span style="color: #00d3d0;">script_dir</span>}/ovs_setup.sh
+<span style="color: #f78fe7;">.</span> ${<span style="color: #00d3d0;">script_dir</span>}/ovs.sh
 </pre>
 </div>
 
@@ -430,9 +431,9 @@ blue named-checkzone col.or db.0.0.10
 </div>
 
 
-<div id="outline-container-orgc127b78" class="outline-3">
-<h3 id="orgc127b78">Creating resolv.conf files</h3>
-<div class="outline-text-3" id="text-orgc127b78">
+<div id="outline-container-org0673148" class="outline-3">
+<h3 id="org0673148">Creating resolv.conf files</h3>
+<div class="outline-text-3" id="text-org0673148">
 <p>
 We finally need to tell the virtual hosts, where to find the name server, by creating <code>resolv.conf</code> in both <code>/etc/netns/red/</code>, <code>/etc/netns/green/</code> and <code>/etc/netns/blue/</code>.
 </p>
@@ -445,9 +446,9 @@ We finally need to tell the virtual hosts, where to find the name server, by cre
 </div>
 
 
-<div id="outline-container-orgbe14524" class="outline-3">
-<h3 id="orgbe14524">Start the named Service</h3>
-<div class="outline-text-3" id="text-orgbe14524">
+<div id="outline-container-org4428f76" class="outline-3">
+<h3 id="org4428f76">Start the named Service</h3>
+<div class="outline-text-3" id="text-org4428f76">
 <p>
 It is now time to start and test the DNS server in the blue name space. For this to work, to start it from a globaly writeable directory. 
 </p>
@@ -469,9 +470,9 @@ blue named -c /etc/bind/named.conf.local
 </div>
 
 
-<div id="outline-container-orgff543e6" class="outline-2">
-<h2 id="orgff543e6">Acknowledgment</h2>
-<div class="outline-text-2" id="text-orgff543e6">
+<div id="outline-container-org38bd0fa" class="outline-2">
+<h2 id="org38bd0fa">Acknowledgment</h2>
+<div class="outline-text-2" id="text-org38bd0fa">
 <p>
 Most of what I have done in this part builds on <a href="https://ba1ajinaidu.hashnode.dev/how-to-configure-bind-as-a-private-network-dns-server-on-linux-network-namespaces">Balajinaidu's Blog</a> on this topic. 
 </p>
@@ -490,7 +491,7 @@ Most of what I have done in this part builds on <a href="https://ba1ajinaidu.has
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2024-02-25 So 12:25</p>
+<p class="date">Created: 2024-02-28 Mi 20:28</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
