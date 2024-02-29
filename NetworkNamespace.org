@@ -6,14 +6,11 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
 :END:
 
+#+ATTR_HTML: :width 100% :alt The Ostseepinguin banner showing a baltic penguin on the beach.
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 700
+[[file:img/Ostseepinguin.png]]
 
-* Virtual network with Open vSwitch
-:PROPERTIES:
-:header-args:bash: :shebang #!/bin/bash :tangle files/ovs.sh :eval never :session OVS :exports code
-:header-args:mermaid: :tangle nil :results file :exports results
-:header-args:javascript: :tangle script.js :exports none
-:header-args:css: :tangle mystyle.css :exports none
-:END:
 
 #+NAME: toggle-mode-script
 #+BEGIN_EXPORT HTML
@@ -22,7 +19,7 @@
 <script src="script.js"></script>
 #+END_EXPORT
 
-#+BEGIN_SRC javascript
+#+BEGIN_SRC javascript :exports none
 
 document.addEventListener('DOMContentLoaded', function() {
   const savedTheme = localStorage.getItem('theme');
@@ -46,7 +43,7 @@ const body = document.querySelector('#darkmode-toggle').addEventListener('click'
 
 
 #+NAME: toggle-mode-css
-#+BEGIN_SRC css
+#+BEGIN_SRC css  :exports none
 :root {
   /* Light mode colors */
   --background-color: #ffffff;
@@ -174,6 +171,14 @@ input:checked +label::after {
 📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
 #+end_menu
 
+
+* Virtual network with Open vSwitch
+:PROPERTIES:
+:header-args:bash: :shebang #!/bin/bash :tangle files/ovs.sh :eval never :session OVS :exports code
+:header-args:mermaid: :tangle nil :results file :exports results
+:header-args:javascript: :tangle script.js :exports none
+:header-args:css: :tangle mystyle.css :exports none
+:END:
 
 In this project, I want to show, how to designed and implemented a virtual network using Openvswitch and network namespaces under Linux. By leveraging virtual Ethernet tunnels and a central virtual switch, we create a flexible and scalable network environment. My main goal with this - besides understanding Linux namespaces better – is to have an isolated network environment. As a teacher I sometimes want to show my students how a single network protocol works, or what happens when I ping a domain. However even in a virtual machine there is often are many other network connection running in the background that it is difficult to filter to what I want I'm interested in. In that setup I create here the only noise in the virtual network is IPv6 Router Solicitation.
 

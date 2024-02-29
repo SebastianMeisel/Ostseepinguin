@@ -6,15 +6,11 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
 :END:
 
+#+ATTR_HTML: :width 100% :alt The Ostseepinguin banner showing a baltic penguin on the beach.
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 700
+[[file:img/Ostseepinguin.png]]
 
-* Add DNS to Virtual network
-:PROPERTIES:
-:header-args:bash: :shebang #!/bin/bash  :eval never :session OVS :exports code
-:header-args:mermaid: :tangle nil :results file :exports results :eval t
-:header-args:javascript: :tangle script.js :exports none :eval never
-:header-args:css: :tangle mystyle.css :exports none :eval never
-:header-args:config: :exports both :eval never
-:END:
 
 #+NAME: toggle-mode-script
 #+BEGIN_EXPORT HTML
@@ -36,6 +32,17 @@
 
 📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
 #+end_menu
+
+
+* Add DNS to Virtual network
+:PROPERTIES:
+:header-args:bash: :shebang #!/bin/bash  :eval never :session OVS :exports code
+:header-args:mermaid: :tangle nil :results file :exports results :eval t
+:header-args:javascript: :tangle script.js :exports none :eval never
+:header-args:css: :tangle mystyle.css :exports none :eval never
+:header-args:config: :exports both :eval never
+:END:
+
 
 In the [[file:NetworkNamespace.org][first part]] we created a little switched network between three virtual devices, each of which we placed in it's own namespace (~red~, ~green~ and ~blue~). We connect them with an (Open) Virtual Switch with three ports (~veth-r~, ~veth-g~ and ~veth-b~). The whole toology looks like this:
 

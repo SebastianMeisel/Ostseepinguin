@@ -30,6 +30,13 @@ body {
 }
 
 
+
+.content{
+    display: flex;
+    flex-direction: column;
+}
+
+
 .title  { color: var(--primary-color);}
 .subtitle { color: var(--secondary-color); }
 .todo   { color: red; } /* Keeping specific colors for statuses */
@@ -39,30 +46,23 @@ body {
 
 .timestamp, .timestamp-kwd { color: var(--highlight-color); }
 
-.menu {
+input {
+    width: 0;
+    height: 0;
+    visibility: hidden;
     position: absolute;
-    display: block
-    width: 300px;
-    height: 200px;
-    left: 75px;
-    top: 100px;
-    color: var(--primary-color);
+    top: 50px;
+    left: 100px;
 }
 
-pre {
-  border: 1px solid var(--border-color);
-  background-color: var(--code-background-color);
-  color: var(--code-color);
-  font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
-  font-size: 16px;
+input:checked + label {
+    background: #242424;
 }
-
-code {
-  color: var(--code-color);
-  font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
-  font-size: 16px;
+input:checked +label::after {
+    left: 49px;
+    transform: translateX(-100%);
+    background: linear-gradient(180deg, #777, #3a3a3a);
 }
-
 label {
     width: 50px;
     height: 20px;
@@ -90,21 +90,62 @@ label:after {
     transition: 0.3s;t
 }
 
-
-input {
-    width: 0;
-    height: 0;
-    visibility: hidden;
+.menu {
     position: absolute;
-    top: 50px;
-    left: 100px;
+    display: block
+    width: 300px;
+    height: 200px;
+    left: 75px;
+    top: 100px;
+    color: var(--primary-color);
 }
 
-input:checked + label {
-    background: #242424;
+@media screen and (max-width: 1660px) {
+  .menu {
+    position: relative; /* Change position to relative for smaller screens */
+    display: flex; /* Change display to flex for smaller screens */
+    flex-direction: column; /* Optional: Arrange items vertically */
+    align-items: left; /* Optional: Center items horizontally */
+    width: auto; /* Adjust width as needed */
+    height: auto; /* Adjust height as needed */
+    left: auto; /* Remove left positioning for relative positioning */
+    top: 5px; /* Remove top positioning for relative positioning */
+  }
+  .menu > p {
+      margin: 2px;
+  }
+  label {
+    position: relative; /* Change position to relative for smaller screens */
+    display: flex; /* Change display to flex for smaller screens */
+    flex-direction: column; /* Optional: Arrange items vertically */
+    left: 0px;
+    align-items: right;
+    top: 5px;
+  }
+  input {
+    position: relative;
+    display: flex; /* Change display to flex for smaller screens */
+    flex-direction: column; /* Optional: Arrange items vertically */
+    left: 0px;
+    align-items: right;
+    top: 5px;   
 }
-input:checked +label::after {
-    left: 49px;
-    transform: translateX(-100%);
-    background: linear-gradient(180deg, #777, #3a3a3a);
 }
+
+
+pre {
+  border: 1px solid var(--border-color);
+  background-color: var(--code-background-color);
+  color: var(--code-color);
+  font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
+  font-size: 16px;
+}
+
+code {
+  color: var(--code-color);
+  font-family: 'Source Code Pro', 'Courier New', 'Lucida Console', Monaco, monospace;
+  font-size: 16px;
+}
+
+
+

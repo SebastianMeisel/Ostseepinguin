@@ -12,6 +12,14 @@
 #+ATTR_ORG: :width 700
 [[file:img/Ostseepinguin.png]]
 
+#+NAME: toggle-mode-script
+#+BEGIN_EXPORT HTML
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+#+END_EXPORT
+
+
 #+BEGIN_menu
 [[file:index.html][🇺🇸 EN]]
 
@@ -34,13 +42,6 @@ Willkommen auf meinem Blog: "Ostseepinguin". Hier schreibe ich über das Leben, 
 :header-args:css: :tangle mystyle.css :exports none :eval never
 :header-args:config: :exports both :eval never
 :END:
-
-#+NAME: toggle-mode-script
-#+BEGIN_EXPORT HTML
-<input type="checkbox" id="darkmode-toggle">
-<label for="darkmode-toggle"></label></input>
-<script src="script.js"></script>
-#+END_EXPORT
 
 + Februar 2024
 

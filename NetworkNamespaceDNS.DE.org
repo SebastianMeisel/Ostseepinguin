@@ -6,15 +6,10 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
 :END:
 
-
-* DNS zum virtuellen Netzwerk hinzufügen
-:PROPERTIES:
-:header-args:bash: :shebang #!/bin/bash  :eval never :session OVS :exports code
-:header-args:mermaid: :tangle nil :results file :exports results :eval t
-:header-args:javascript: :tangle script.js :exports none :eval never
-:header-args:css: :tangle mystyle.css :exports none :eval never
-:header-args:config: :exports both :eval never
-:END:
+#+ATTR_HTML: :width 100% :alt Das Ostseepinguin-Banner zeigt einen Ostseepinguin am Strand.
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 700
+[[file:img/Ostseepinguin.png]]
 
 #+NAME: toggle-mode-script
 #+BEGIN_EXPORT HTML
@@ -37,6 +32,14 @@
 📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
 #+end_menu
 
+* DNS zum virtuellen Netzwerk hinzufügen
+:PROPERTIES:
+:header-args:bash: :shebang #!/bin/bash  :eval never :session OVS :exports code
+:header-args:mermaid: :tangle nil :results file :exports results :eval t
+:header-args:javascript: :tangle script.js :exports none :eval never
+:header-args:css: :tangle mystyle.css :exports none :eval never
+:header-args:config: :exports both :eval never
+:END:
 
 In Teil I haben wir ein kleines geswitchtes Netzwerk zwischen drei virtuellen Geräten erstellt, von denen jedes in seiner eigenen Namensraum (~red~, ~green~ und ~blue~) platziert wurde. Wir haben sie mit einem (Open) Virtual Switch mit drei Ports (~veth-r~, ~veth-g~ und ~veth-b~) verbunden. Die gesamte Topologie sieht wie folgt aus:
 

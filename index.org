@@ -12,6 +12,13 @@
 #+ATTR_ORG: :width 700
 [[file:img/Ostseepinguin.png]]
 
+#+NAME: toggle-mode-script
+#+BEGIN_EXPORT HTML
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+#+END_EXPORT
+
 #+begin_menu
 [[file:index.DE.html][🇩🇪 DE]]
 
@@ -35,12 +42,6 @@ Welcome to the blog of the "Ostseepinguin", which is German for "Baltic penguin"
 :header-args:config: :exports both :eval never
 :END:
 
-#+NAME: toggle-mode-script
-#+BEGIN_EXPORT HTML
-<input type="checkbox" id="darkmode-toggle">
-<label for="darkmode-toggle"></label></input>
-<script src="script.js"></script>
-#+END_EXPORT
 
 
 
