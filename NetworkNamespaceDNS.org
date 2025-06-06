@@ -20,10 +20,9 @@
 #+END_EXPORT
 
 #+begin_menu
-[[file:NetworkNamespaceDNS.DE.html][🇩🇪 DE]]
-- > [[file:index.html][Home]]
+[[file:NetworkNamespaceDNS.DE.org][🇩🇪 DE]]
+- > [[file:index.org][Home]]
 - > [[file:NetworkNamespace.org][Part I]]
-
 --------
 #+ATTR_HTML: :width 16px :alt Mastodon
 #+ATTR_LATEX: :width .65\linewidth

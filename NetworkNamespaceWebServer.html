@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2024-03-05 Di 19:53 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Adding a tiny webserver to the virtual network</title>
+<meta name="author" content="Sebastian Meisel" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="mystyle.css" />
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Adding a tiny webserver to the virtual network</h1>
+
+
+<div id="orgee552b5" class="figure">
+<p><img src="img/Ostseepinguin.png" alt="The Ostseepinguin banner showing a baltic penguin on the beach." width="100%" />
+</p>
+</div>
+
+
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+
+<div class="menu" id="org4a99981">
+<p>
+<a href="NetworkNamespaceWebServer.DE.html">🇩🇪 DE</a>
+</p>
+<ul class="org-ul">
+<li>&gt; <a href="index.html">Home</a></li>
+<li>&gt; <a href="NetworkNamespace.html">Part I</a></li>
+<li>&gt; <a href="NetworkNamespaceDNS.html">Part II</a></li>
+</ul>
+
+<hr />
+<p width="16px" alt="Mastodon">
+<img src="img/Mastodon.png" alt="Mastodon" width="16px" /> <a href="https://emacs.ch/@SebasTEAan">https://emacs.ch/@SebasTEAan</a>
+</p>
+
+<p>
+📧 <a href="mailto:sebastian.meisel+ostseepinguin@gmail.com">sebastian.meisel at gmail.com</a>
+</p>
+
+</div>
+
+
+<div id="outline-container-orgb2faa78" class="outline-2">
+<h2 id="orgb2faa78">Adding a tiny webserver to the virtual network</h2>
+<div class="outline-text-2" id="text-orgb2faa78">
+<p>
+In the two previous parts of the series, I created a <a href="NetworkNamespace.html">isolated virtual switched network</a> using Linux namespaces Open vSwitch and added a <a href="NetworkNamespaceDNS.html">DNS nameserver</a> to it. The idea behind it is to use this network to demonstrate the inner workings of network protocols in class.
+</p>
+
+<p>
+A very important and simple enough protocol for this use case is HTTP. To demonstrate how it works, all you actually need is the <code>nc</code> program, that can listen on answer to a TCP connection.
+</p>
+</div>
+
+<div id="outline-container-org72619f6" class="outline-3">
+<h3 id="org72619f6">Using <code>nc</code></h3>
+<div class="outline-text-3" id="text-org72619f6">
+<p>
+We could run it on any localhost address with a port &gt;=1024 like:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">nc 127.28.10.77 1024 -l
+</pre>
+</div>
+
+<p>
+When we than connect to this address and port, with a browser, we get back a GET-request, with some information, like the User-Agent (browser) used, the accepted content types, etc.
+</p>
+
+<pre class="example" id="org814995d">
+GET / HTTP/1.1
+Host: 127.28.10.77:1024
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Sec-GPC: 1
+</pre>
+
+<p>
+What we can't do is to listen on the well-known port for HTTP - port 80. Well we <i>could</i> by running <code>nc</code> with root privileges, but that would be unwise for at least to reasons:
+</p>
+
+<ol class="org-ol">
+<li>It's not unlikely there is already running a proper webserver on that port.</li>
+<li>IT IS A SECURITY THREAT!!!!</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org630c2eb" class="outline-3">
+<h3 id="org630c2eb">… in the virtual network</h3>
+<div class="outline-text-3" id="text-org630c2eb">
+<p>
+In our isolated virtual network, both this problems don't apply. So we recreate the network by sourcing the three files from the <code>files/</code> subdirectory:
+</p>
+
+<dl class="org-dl">
+<dt><a href="files/ovs_setup.sh"><code>ovs_setup.sh</code></a></dt><dd>defines the namespace names and colorcodes.</dd>
+<dt><a href="files/ovs.sh"><code>ovs.sh</code></a></dt><dd>is the main script that initializes all namespaces an devices.</dd>
+<dt><a href="files/ovs_named.sh"><code>ovs_named.sh</code></a></dt><dd>starts bind as a DNS nameserver.</dd>
+</dl>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #f78fe7;">.</span> files/ovs_setup.sh
+<span style="color: #f78fe7;">.</span> files/ovs.sh
+<span style="color: #f78fe7;">.</span> files/ovs_named.sh
+</pre>
+</div>
+
+<p>
+This also makes it possible to listen on port 80. It stick to the <code>blue</code> namespace as the server:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">blue nc -kl 10.0.0.4 80
+</pre>
+</div>
+
+<p>
+The <code>-k</code> option, just means, that the TCP session shall be kept alive.
+</p>
+
+<p>
+Now we need a second terminal to run a browser. In this terminal we only need to source <code>ovs_setup.sh</code> and <a href="https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs_netns.sh">ovs<sub>netns.sh</sub></a> which provides the convenience function and alias. Everything else is setup globally.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #f78fe7;">.</span> files/ovs_setup.sh
+<span style="color: #f78fe7;">.</span> files/ovs_netns.sh
+</pre>
+</div>
+
+<p>
+Now we can request content from the "webserver" in a browser (choose which ever browser you prefer). For a graphical browser we do need a display however. We can not just run:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-bash">red firefox http://blue.col.or
+</pre>
+</div>
+
+<p>
+Instead we need to first (temporarily) disable the securityacces controll of the X-server by running:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">xhost +
+</pre>
+</div>
+
+<p>
+We also need a little script, that sets the <code>DISPLAY</code> variable.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #00d3d0;">DISPLAY</span>=:0 firefox -private-window http://blue.col.or
+</pre>
+</div>
+
+<p>
+Now we can run a graphical browser from the namespace:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">red files/ovs_firefox.sh
+</pre>
+</div>
+
+<p>
+In the other terminal where <code>nc</code> is listening we should now be seeing the HTTP-GET-request again like this:
+</p>
+
+<pre class="example" id="orgec97b02">
+GET / HTTP/1.1
+Host: blue.col.or
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+DNT: 1
+Sec-GPC: 1
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+</pre>
+
+<p>
+To which we now can answer, the we accept the request and that we are about to serve content as text in the HTML format with a utf-8 charset.
+</p>
+
+<pre class="example" id="orgea0168b">
+HTTP/1.1 200 OK
+Content-Type
+
+</pre>
+
+<p>
+After a blank line we can now serve some content:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #b6a0ff;">!DOCTYPE</span> html&gt;
+&lt;<span style="color: #feacd0;">html</span> <span style="color: #00d3d0;">lang</span>=<span style="color: #79a8ff;">"en"</span>&gt;
+&lt;<span style="color: #feacd0;">head</span>&gt;
+&lt;<span style="color: #feacd0;">meta</span> <span style="color: #00d3d0;">charset</span>=<span style="color: #79a8ff;">"UTF-8"</span>&gt;
+&lt;<span style="color: #feacd0;">meta</span> <span style="color: #00d3d0;">name</span>=<span style="color: #79a8ff;">"viewport"</span> <span style="color: #00d3d0;">content</span>=<span style="color: #79a8ff;">"width=device-width, initial-scale=1.0"</span>&gt;
+&lt;<span style="color: #feacd0;">title</span>&gt;<span style="font-weight: bold; text-decoration: underline;">Send String</span>&lt;/<span style="color: #feacd0;">title</span>&gt;
+&lt;/<span style="color: #feacd0;">head</span>&gt;
+&lt;<span style="color: #feacd0;">body</span>&gt;
+  &lt;<span style="color: #feacd0;">h1</span>&gt;<span style="font-weight: bold; text-decoration: underline;">Send String with GET</span>&lt;/<span style="color: #feacd0;">h1</span>&gt;
+  &lt;<span style="color: #feacd0;">form</span> <span style="color: #00d3d0;">method</span>=<span style="color: #79a8ff;">"get"</span> <span style="color: #00d3d0;">id</span>=<span style="color: #79a8ff;">"sendForm"</span>&gt;
+    &lt;<span style="color: #feacd0;">label</span> <span style="color: #00d3d0;">for</span>=<span style="color: #79a8ff;">"inputString"</span>&gt;Enter String:&lt;/<span style="color: #feacd0;">label</span>&gt;
+    &lt;<span style="color: #feacd0;">input</span> <span style="color: #00d3d0;">type</span>=<span style="color: #79a8ff;">"text"</span> <span style="color: #00d3d0;">id</span>=<span style="color: #79a8ff;">"inputString"</span> <span style="color: #00d3d0;">name</span>=<span style="color: #79a8ff;">"inputString"</span>&gt;
+    &lt;<span style="color: #feacd0;">button</span> <span style="color: #00d3d0;">type</span>=<span style="color: #79a8ff;">"submit"</span>&gt;Send&lt;/<span style="color: #feacd0;">button</span>&gt;
+  &lt;/<span style="color: #feacd0;">form</span>&gt;
+  &lt;<span style="color: #feacd0;">h1</span>&gt;<span style="font-weight: bold; text-decoration: underline;">Send String with POST</span>&lt;/<span style="color: #feacd0;">h1</span>&gt;
+  &lt;<span style="color: #feacd0;">form</span> <span style="color: #00d3d0;">method</span>=<span style="color: #79a8ff;">"post"</span> <span style="color: #00d3d0;">id</span>=<span style="color: #79a8ff;">"sendForm"</span>&gt;
+    &lt;<span style="color: #feacd0;">label</span> <span style="color: #00d3d0;">for</span>=<span style="color: #79a8ff;">"inputString"</span>&gt;Enter String:&lt;/<span style="color: #feacd0;">label</span>&gt;
+    &lt;<span style="color: #feacd0;">input</span> <span style="color: #00d3d0;">type</span>=<span style="color: #79a8ff;">"text"</span> <span style="color: #00d3d0;">id</span>=<span style="color: #79a8ff;">"inputString"</span> <span style="color: #00d3d0;">name</span>=<span style="color: #79a8ff;">"inputString"</span>&gt;
+    &lt;<span style="color: #feacd0;">button</span> <span style="color: #00d3d0;">type</span>=<span style="color: #79a8ff;">"submit"</span>&gt;Send&lt;/<span style="color: #feacd0;">button</span>&gt;
+  &lt;/<span style="color: #feacd0;">form</span>&gt;
+
+&lt;/<span style="color: #feacd0;">body</span>&gt;
+&lt;/<span style="color: #feacd0;">html</span>&gt;
+</pre>
+</div>
+
+<p>
+We can even enter Text in the text fields and submit it with GET the string is returned in the GET-statement as part of the URL with <code>/?inputString=Does+it+work%3F</code>:
+</p>
+
+<pre class="example" id="org512aa55">
+GET /?inputString=Does+it+work%3F HTTP/1.1
+Host: blue.col.or
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+DNT: 1
+Sec-GPC: 1
+Connection: keep-alive
+Referer: http://blue.col.or/
+Upgrade-Insecure-Requests: 1
+</pre>
+
+<p>
+With POST the string is returned in the body as <code>inputString=It+does%21</code>
+</p>
+
+<pre class="example" id="org2623d14">
+POST / HTTP/1.1
+Host: blue.col.or
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 22
+Origin: http://blue.col.or
+DNT: 1
+Sec-GPC: 1
+Connection: keep-alive
+Referer: http://blue.col.or/
+Upgrade-Insecure-Requests: 1
+
+inputString=It+does%21
+</pre>
+
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #feacd0;">html</span>&gt;
+  &lt;<span style="color: #feacd0;">body</span>&gt;t
+    &lt;<span style="color: #feacd0;">h1</span>&gt;<span style="font-weight: bold; text-decoration: underline;">Good Morning!</span>&lt;/<span style="color: #feacd0;">h1</span>&gt;
+
+    &lt;<span style="color: #feacd0;">p</span>&gt;Let's start with a cat-pic:&lt;<span style="color: #feacd0;">br</span>&gt;
+      &lt;/<span style="color: #feacd0;">img</span> <span style="color: #00d3d0;">src</span>=<span style="color: #79a8ff;">"cat.jpg"</span>&gt;&lt;<span style="color: #feacd0;">br</span>&gt;
+      &#8230; and go on to a link:
+      &lt;<span style="color: #feacd0;">a</span> <span style="color: #00d3d0;">href</span>=<span style="color: #79a8ff;">"get_post.html"</span>&gt;Dubious link&lt;/<span style="color: #feacd0;">a</span>&gt;
+    &lt;/<span style="color: #feacd0;">p</span>&gt;
+    
+  &lt;/<span style="color: #feacd0;">body</span>&gt;
+&lt;/<span style="color: #feacd0;">html</span>&gt;
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org60cd035" class="outline-2">
+<h2 id="org60cd035">Acknowledgment</h2>
+<div class="outline-text-2" id="text-org60cd035">
+<p>
+Please watch the great video on the Computerphile YouTube channel:
+<a href="https://www.youtube.com/watch?v=7GBlCinu9yg">Coding a Web Server in 25 Lines - Computerphile (feat. Laurence Tratt)</a>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2024-02-24 Sa 00:00</p>
+<p class="author">Author: Sebastian Meisel</p>
+<p class="date">Created: 2024-03-05 Di 19:53</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

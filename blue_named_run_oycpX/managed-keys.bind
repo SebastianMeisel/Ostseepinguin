@@ -1,0 +1,9 @@
+$TTL 0	; 0 seconds
+.			IN SOA	. . (
+				13         ; serial
+				0          ; refresh (0 seconds)
+				0          ; retry (0 seconds)
+				0          ; expire (0 seconds)
+				0          ; minimum (0 seconds)
+				)
+			KEYDATA	20240814071523 19700101000000 19700101000000 0 0 0 ; placeholder

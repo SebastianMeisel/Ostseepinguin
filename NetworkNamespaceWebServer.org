@@ -1,0 +1,247 @@
+#+TITLE: Adding a tiny webserver to the virtual network
+#+AUTHOR: Sebastian Meisel
+#+DATE: <2024-02-24 Sa>
+:HTML_PROPERTIES:
+#+OPTIONS: num:nil toc:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
+:END:
+
+#+ATTR_HTML: :width 100% :alt The Ostseepinguin banner showing a baltic penguin on the beach.
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 700
+[[file:img/Ostseepinguin.png]]
+
+
+#+NAME: toggle-mode-script
+#+BEGIN_EXPORT HTML
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+#+END_EXPORT
+
+#+begin_menu
+[[file:NetworkNamespaceWebServer.DE.html][🇩🇪 DE]]
+- > [[file:index.html][Home]]
+- > [[file:NetworkNamespace.org][Part I]]
+- > [[file:NetworkNamespaceDNS.html][Part II]]
+
+--------
+#+ATTR_HTML: :width 16px :alt Mastodon
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 20
+[[file:img/Mastodon.png]] https://emacs.ch/@SebasTEAan
+
+📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
+#+end_menu
+
+
+* Adding a tiny webserver to the virtual network
+:PROPERTIES:
+:header-args:bash: :shebang #!/bin/bash :eval never :session OVS :exports code
+:header-args:mermaid: :tangle nil :results file :exports results
+:header-args:javascript: :tangle script.js :exports none
+:header-args:css: :tangle mystyle.css :exports none
+:END:
+In the two previous parts of the series, I created a [[file:NetworkNamespace.html][isolated virtual switched network]] using Linux namespaces Open vSwitch and added a [[file:NetworkNamespaceDNS.html][DNS nameserver]] to it. The idea behind it is to use this network to demonstrate the inner workings of network protocols in class.
+
+A very important and simple enough protocol for this use case is HTTP. To demonstrate how it works, all you actually need is the =nc= program, that can listen on answer to a TCP connection.
+
+** Using =nc=
+
+We could run it on any localhost address with a port >=1024 like:
+
+#+BEGIN_SRC bash :result verbatim :export src :eval no-export
+nc 127.28.10.77 1024 -l
+#+END_SRC
+
+When we than connect to this address and port, with a browser, we get back a GET-request, with some information, like the User-Agent (browser) used, the accepted content types, etc.
+
+#+BEGIN_EXAMPLE
+GET / HTTP/1.1
+Host: 127.28.10.77:1024
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Sec-GPC: 1
+#+END_EXAMPLE
+
+What we can't do is to listen on the well-known port for HTTP - port 80. Well we /could/ by running =nc= with root privileges, but that would be unwise for at least to reasons:
+
+1) It's not unlikely there is already running a proper webserver on that port.
+2) IT IS A SECURITY THREAT!!!!
+
+** … in the virtual network
+
+In our isolated virtual network, both this problems don't apply. So we recreate the network by sourcing the three files from the =files/= subdirectory:
+
+- [[file:files/ovs_setup.sh][=ovs_setup.sh=]] :: defines the namespace names and colorcodes.
+- [[file:files/ovs.sh][=ovs.sh=]] :: is the main script that initializes all namespaces an devices.
+- [[file:files/ovs_named.sh][=ovs_named.sh=]] :: starts bind as a DNS nameserver.
+
+#+BEGIN_SRC bash 
+. files/ovs_setup.sh
+. files/ovs.sh
+. files/ovs_named.sh
+#+END_SRC
+
+This also makes it possible to listen on port 80. I stick to the =blue= namespace as the server:
+
+#+BEGIN_SRC bash
+blue nc -kl 10.0.0.4 80
+#+END_SRC
+
+The =-k= option, just means, that the TCP session shall be kept alive.
+
+Now we need a second terminal to run a browser. In this terminal we only need to source =ovs_setup.sh= and [[https://github.com/SebastianMeisel/Ostseepinguin/blob/main/files/ovs_netns.sh][ovs_netns.sh]] which provides the convenience function and alias. Everything else is setup globally.
+
+#+BEGIN_SRC bash
+. files/ovs_setup.sh
+. files/ovs_netns.sh
+#+END_SRC
+
+Now we can request content from the "webserver" in a browser (choose which ever browser you prefer). For a graphical browser we do need a display however. We can not just run:
+
+
+#+BEGIN_SRC bash
+red firefox http://blue.col.or
+#+END_SRC
+
+Instead we need to first (temporarily) disable the securityacces controll of the X-server by running:
+
+#+BEGIN_SRC bash
+xhost +
+#+END_SRC
+
+We also need a little script, that sets the =DISPLAY= variable.
+
+#+BEGIN_SRC bash :tangle files/ovs_firefox.sh
+DISPLAY=:0 firefox -private-window http://blue.col.or
+#+END_SRC
+
+Now we can run a graphical browser from the namespace:
+
+#+BEGIN_SRC bash
+red files/ovs_firefox.sh
+#+END_SRC
+
+In the other terminal where =nc= is listening we should now be seeing the HTTP-GET-request again like this:
+
+#+BEGIN_EXAMPLE
+GET / HTTP/1.1
+Host: blue.col.or
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+DNT: 1
+Sec-GPC: 1
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+#+END_EXAMPLE
+
+To which we now can answer, the we accept the request and that we are about to serve content as text in the HTML format with a utf-8 charset.
+
+#+BEGIN_EXAMPLE
+HTTP/1.1 200 OK
+Content-Type
+
+#+END_EXAMPLE
+
+After a blank line we can now serve some content:
+
+#+BEGIN_SRC html :tangle webserver/htdocs/get_post.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Send String</title>
+</head>
+<body>
+  <h1>Send String with GET</h1>
+  <form method="get" id="sendForm">
+    <label for="inputString">Enter String:</label>
+    <input type="text" id="inputString" name="inputString">
+    <button type="submit">Send</button>
+  </form>
+  <h1>Send String with POST</h1>
+  <form method="post" id="sendForm">
+    <label for="inputString">Enter String:</label>
+    <input type="text" id="inputString" name="inputString">
+    <button type="submit">Send</button>
+  </form>
+
+</body>
+</html>
+#+END_SRC
+
+We can even enter Text in the text fields and submit it with GET the string is returned in the GET-statement as part of the URL with =/?inputString=Does+it+work%3F=:
+
+#+BEGIN_EXAMPLE
+GET /?inputString=Does+it+work%3F HTTP/1.1
+Host: blue.col.or
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+DNT: 1
+Sec-GPC: 1
+Connection: keep-alive
+Referer: http://blue.col.or/
+Upgrade-Insecure-Requests: 1
+#+END_EXAMPLE
+
+With POST the string is returned in the body as =inputString=It+does%21=
+
+#+BEGIN_EXAMPLE
+POST / HTTP/1.1
+Host: blue.col.or
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 22
+Origin: http://blue.col.or
+DNT: 1
+Sec-GPC: 1
+Connection: keep-alive
+Referer: http://blue.col.or/
+Upgrade-Insecure-Requests: 1
+
+inputString=It+does%21
+#+END_EXAMPLE
+
+#+BEGIN_SRC html :tangle webserver/htdocs/index.html
+<html>
+  <body>
+    <h1>Good Morning!</h1>
+
+    <p>Let's start with a cat-pic:<br>
+      <img src="./cat.jpg" width=50%></img><br>
+      … and go on to a link:
+      <a href="get_post.html">Dubious link</a>
+    </p>
+    
+  </body>
+</html>
+#+END_SRC
+
+
+* Acknowledgment
+
+Please watch the great video on the Computerphile YouTube channel:
+[[https://www.youtube.com/watch?v=7GBlCinu9yg][Coding a Web Server in 25 Lines - Computerphile (feat. Laurence Tratt)]]
+
+
+
+# Local Variables:
+# jinx-languages: "en_US"
+# End:
