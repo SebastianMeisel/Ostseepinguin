@@ -1,0 +1,20 @@
+[Match]
+Name=WLAN
+Type=vlan
+
+[VLAN]
+Id=20
+
+[Network]
+Description=WLAN VLAN interface
+DHCP=ipv6
+IPv6SendRA=yes
+IPv6AcceptRA=no
+DHCPPrefixDelegation=yes
+
+[Address]
+Address=172.16.20.1/24
+
+[IPv6PrefixDelegation]
+ULA=true
+SubnetId=0x3

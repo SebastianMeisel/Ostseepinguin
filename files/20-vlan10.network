@@ -1,0 +1,20 @@
+[Match]
+Name=Office
+Type=vlan
+
+[VLAN]
+Id=10
+
+[Network]
+Description=Office VLAN interface
+DHCP=ipv6
+IPv6SendRA=yes
+IPv6AcceptRA=no
+DHCPPrefixDelegation=yes
+
+[Address]
+Address=172.16.10.1/24
+
+[IPv6PrefixDelegation]
+ULA=true
+SubnetId=0x2

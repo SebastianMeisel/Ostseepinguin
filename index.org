@@ -44,14 +44,14 @@ Welcome to the blog of the "Ostseepinguin", which is German for "Baltic penguin"
 
 
 
-
 + February 2024
 
   + [[file:NetworkNamespace.html][Linux network namesspaces with OpenVSwitch (part I)]] ::
     I explore network name spaces under Linux, creating three network namespaces "red", "green" and "blue" that I connect with an virtual switch.
   + [[file:NetworkNamespaceDNS.html][Linux network namesspaces (part II): Adding a nameserver]] ::
     In part II of the series I add a nameserver to the blue namespace.
-  + To Come :: Linux network namesspaces (part II): Adding a tiny webserver to the mix.
+
+
 
 
 # Local Variables:

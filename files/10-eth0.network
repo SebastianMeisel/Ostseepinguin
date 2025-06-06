@@ -1,0 +1,26 @@
+[Match]
+Name=eth0
+Type=ether
+
+[Network]
+Description=Outbound Ethernet port
+
+DHCP=ipv6
+IPv6AcceptRA=yes
+
+VLAN=Office
+VLAN=WLAN
+
+[Address]
+Address=192.168.178.254
+Gateway=192.168.178.1
+
+[DHCPv6]
+PrefixDelegationHint=::/60
+UseDelegatedPrefix=yes
+UseAddress=no
+
+
+[Route]
+Gateway=192.168.178.1
+
