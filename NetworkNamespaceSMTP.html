@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-06-06 Fr 20:05 -->
+<!-- 2025-06-06 Fr 20:06 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ostseepinguin</title>
+<title>Virtual network (Part II): DNS</title>
 <meta name="author" content="Sebastian Meisel" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
@@ -197,27 +197,27 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Ostseepinguin</h1>
+<h1 class="title">Virtual network (Part II): DNS</h1>
 
 
-<div id="org7b76003" class="figure">
-<p><img src="img/Ostseepinguin.png" alt="Das Ostseepinguin-Banner zeigt einen Ostseepinguin am Strand." width="100%" />
+<div id="orgc5ce0bf" class="figure">
+<p><img src="img/Ostseepinguin.png" alt="The Ostseepinguin banner showing a baltic penguin on the beach." width="100%" />
 </p>
 </div>
 
-<input type="checkbox" id="darkmode-toggle">
-<label for="darkmode-toggle"></label></input>
-<script src="script.js"></script>
 
-
-<div class="menu" id="org4866ecb">
+<div class="menu" id="org9657b13">
 <p>
-<a href="index.html">🇺🇸 EN</a>
+<a href="NetworkNamespaceDNS.DE.html">🇩🇪 DE</a>
 </p>
-
+<ul class="org-ul">
+<li>&gt; <a href="index.html">Home</a></li>
+<li>&gt; <a href="NetworkNamespace.html">Part I</a></li>
+<li>&gt; <a href="NetworkNamespaceDNS.html">Part II</a></li>
+</ul>
 <hr />
 <p width="16px" alt="Mastodon">
-<img src="img/Mastodon.png" alt="Mastodon" width="16px" /> <a href="https://linuxrocks.online/@SebasTEAan">https://linuxrocks.online/@SebasTEAan</a>
+<img src="img/Mastodon.png" alt="Mastodon" width="16px" /> <a href="https://emacs.ch/@SebasTEAan">https://emacs.ch/@SebasTEAan</a>
 </p>
 
 <p>
@@ -226,27 +226,181 @@
 
 </div>
 
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+<div id="outline-container-orgf2f61cb" class="outline-2">
+<h2 id="orgf2f61cb">Adding a SMTP-Server (Exim4)</h2>
+<div class="outline-text-2" id="text-orgf2f61cb">
 <p>
-Willkommen auf meinem Blog: "Ostseepinguin". Hier schreibe ich über das Leben, Linux und den ganzen Rest.
+In the <a href="NetworkNamespace.html">first part</a> we created a little switched network between three virtual devices, each of which we placed in it's own namespace (<code>red</code>, <code>green</code> and <code>blue</code>). We connect them with an (Open) Virtual Switch with three ports (<code>veth-r</code>, <code>veth-g</code> and <code>veth-b</code>). The whole toology looks like this:
 </p>
-<div id="outline-container-orgfbcd172" class="outline-2">
-<h2 id="orgfbcd172">Articles</h2>
-<div class="outline-text-2" id="text-orgfbcd172">
-<ul class="org-ul">
-<li>Februar 2024
 
-<dl class="org-dl">
-<dt><a href="NetworkNamespace.DE.html">Linux Netzwerk-Namespaces mit Open vSwitch (Teil I)</a></dt><dd>Ich entdecke Netwerk-Namespace unter Linux, indem ich drei erstelle:  "rot", "grün" und "blau", die ich über einen virtuellen Switch verbinde.</dd>
-<dt><a href="NetworkNamespaceDNS.DE.html">Linux Netzwerk-Namespaces (Teil II): einen DNS-Server hinzufügen</a></dt><dd>In Teil II  series füge ich dem blauen Namespace einen DNS-Server hinzu.</dd>
-<dt>Demnächst</dt><dd>Linux Netzwerk-Namespaces (Teil III): Einen Web-Server hinzufügen.</dd>
-</dl></li>
-</ul>
+
+<div id="org6b1a4a3" class="figure">
+<p><img src="img/ovs-net.png" alt="Network Diagram showing the relationship between the namespaces as described in the paragraph above." width="50%" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Network Diagram</p>
+</div>
+
+<p>
+In the <a href="NetworkNamespaceDNS.html">second part</a> we added DNS with <code>Bind</code>. That's a prerequisite for the next step: adding a SMTP-Server.
+</p>
+</div>
+<div id="outline-container-orgd5ff7d4" class="outline-3">
+<h3 id="orgd5ff7d4">Installing Exim4</h3>
+<div class="outline-text-3" id="text-orgd5ff7d4">
+<p>
+For this we have to choose a Mail Transfer Agent (<code>MTA</code>) to install. There are three main options:
+</p>
+
+<ol class="org-ol">
+<li><a href="https://www.proofpoint.com/us/products/email-protection/open-source-email-solution">Sendmail</a>.</li>
+<li><a href="http://www.postfix.org/">Postfix</a></li>
+<li><a href="https://www.exim.org/">Exim</a></li>
+</ol>
+
+<p>
+In this blog post I will use option number 3 - mainly because I have not previously set it up and want to know, how it works.
+</p>
+
+<p>
+If there already exists another <code>MTA</code> you might need to first uninstall it.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #b6a0ff;">if</span> [ -f /etc/os-release ]; <span style="color: #b6a0ff;">then</span>
+  <span style="color: #f78fe7;">.</span> /etc/os-release
+<span style="color: #b6a0ff;">else</span>
+  <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Cannot determine the Linux distribution."</span>
+  <span style="color: #b6a0ff;">exit</span> 1
+<span style="color: #b6a0ff;">fi</span>
+
+<span style="color: #b6a0ff;">case</span> ${<span style="color: #00d3d0;">ID_LIKE</span>%% *} <span style="color: #b6a0ff;">in</span>
+  debian|ubuntu)
+    apt install -y exim4
+    ;;
+  fedora|rhel|centos)
+    yum install -y exim
+    ;;
+  suse|opensuse)
+    zypper install -y exim 
+    ;;
+  arch)
+    pacman -Syu exim
+    ;;
+  *)
+      <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Unsupported distribution."</span>
+      <span style="color: #b6a0ff;">exit</span> 1
+    ;;
+<span style="color: #b6a0ff;">esac</span>
+<span style="color: #b6a0ff;">if</span>  [[ $<span style="color: #00d3d0;">ID</span> == arch ]]; <span style="color: #b6a0ff;">then</span>
+    pacman -Syu exim
+<span style="color: #b6a0ff;">else</span>
+          <span style="color: #f78fe7;">echo</span> <span style="color: #79a8ff;">"Unsupported distribution."</span>
+          <span style="color: #b6a0ff;">exit</span> 1
+<span style="color: #b6a0ff;">fi</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org093d93e" class="outline-3">
+<h3 id="org093d93e">Creating a configuration in the <code>red</code> namespace.</h3>
+<div class="outline-text-3" id="text-org093d93e">
+<p>
+We want to put the mail server in the <code>red</code> namespace. For this we need a configuration directory for <code>Exim</code> in the configuration directory:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">mkdir -p /etc/netns/green/exim/
+</pre>
+</div>
+</div>
+<div id="outline-container-orgeb6a461" class="outline-4">
+<h4 id="orgeb6a461">Creating the configuration file for exim</h4>
+<div class="outline-text-4" id="text-orgeb6a461">
+<p>
+We now copy the standard configuration file for <code>Exim</code> to this directory.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">cp /etc/exim/exim.conf /etc/netns/green/exim
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org0fda048" class="outline-4">
+<h4 id="org0fda048">Settings</h4>
+<div class="outline-text-4" id="text-org0fda048">
+<p>
+We now need to change a few settings:
+</p>
+
+<ol class="org-ol">
+<li>We need to set the domain name, for which we accept emails:</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-bash">sed -i <span style="color: #79a8ff;">'/local_domains/s|@|col.or|'</span> /etc/netns/red/exim/exim.conf
+</pre>
+</div>
+
+
+<ol class="org-ol">
+<li>We need to set from which clients we accept emails to relay.</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-bash">sed -i <span style="color: #79a8ff;">'/relay_from_hosts/s|localhost|&lt;; 127.0.0.0/8 ; ::1 ; 10.0.0.0/29|'</span> /etc/netns/red/exim/exim.conf
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org1222b92" class="outline-3">
+<h3 id="org1222b92">Adding MX record to zone file</h3>
+<div class="outline-text-3" id="text-org1222b92">
+<p>
+Next we want to add a <code>MX</code> record to the zone file for the <code>DNS</code> server in the <code>blue</code> namespace.
+Before that we need to add a <code>CNAME</code> record so that <code>smtp.col.or</code> points to <code>red.col.or</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sed -i <span style="color: #79a8ff;">'$a smtp   IN      CNAME   green.col.or.'</span>  /etc/netns/blue/bind/zones/db.col.or
+sed -i <span style="color: #79a8ff;">'$a \\n@      IN      MX      green.col.or.'</span>  /etc/netns/blue/bind/zones/db.col.or
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org6e0fc60" class="outline-3">
+<h3 id="org6e0fc60">(Re)generate virtual net</h3>
+<div class="outline-text-3" id="text-org6e0fc60">
+<p>
+Now it's time to (re)generate the virtual network from the first part. For that we need to source ovssetup.sh and ovs.sh.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #00d3d0;">script_dir</span>=<span style="color: #79a8ff;">"$(</span><span style="color: #f78fe7;">dirname $(find /home/ -type f -name db.col.or</span><span style="color: #79a8ff;">))/files"</span>
+<span style="color: #f78fe7;">.</span> ${<span style="color: #00d3d0;">script_dir</span>}/ovs_setup.sh
+<span style="color: #f78fe7;">.</span> ${<span style="color: #00d3d0;">script_dir</span>}/ovs.sh
+<span style="color: #f78fe7;">.</span> ${<span style="color: #00d3d0;">script_dir</span>}/ovs_named.sh
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org668d124" class="outline-2">
+<h2 id="org668d124">Acknowledgment</h2>
+<div class="outline-text-2" id="text-org668d124">
+<p>
+Most of what I have done in this part builds on <a href="https://ba1ajinaidu.hashnode.dev/how-to-configure-bind-as-a-private-network-dns-server-on-linux-network-namespaces">Balajinaidu's Blog</a> on this topic. 
+</p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2025-06-06 Fr 20:05</p>
+<p class="date">Created: 2025-06-06 Fr 20:06</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
