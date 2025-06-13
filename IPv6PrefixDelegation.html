@@ -3,13 +3,13 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-06-04 Mi 17:15 -->
+<!-- 2025-06-06 Fr 20:41 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>IPv6 prefix delegation using systemd-networkd</title>
 <meta name="author" content="Sebastian Meisel" />
 <meta name="generator" content="Org Mode" />
-<style>
+<style type="text/css">
   #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
@@ -200,7 +200,7 @@
 <h1 class="title">IPv6 prefix delegation using systemd-networkd</h1>
 
 
-<div id="org06ead22" class="figure">
+<div id="org93e7dc9" class="figure">
 <p><img src="img/Ostseepinguin.png" alt="The Ostseepinguin banner showing a baltic penguin on the beach." width="100%" />
 </p>
 </div>
@@ -210,7 +210,7 @@
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="orge0f92f6">
+<div class="menu" id="orgcb063af">
 <p>
 <a href="NetworkNamespace.DE.html">🇩🇪 DE</a>
 </p>
@@ -228,40 +228,53 @@
 </p>
 
 </div>
-
-<div id="outline-container-orgafa38d6" class="outline-2">
-<h2 id="orgafa38d6">Introduction</h2>
-<div class="outline-text-2" id="text-orgafa38d6">
+<div id="outline-container-org1645f79" class="outline-2">
+<h2 id="org1645f79">Introduction</h2>
+<div class="outline-text-2" id="text-org1645f79">
 <p>
 Recently my <code>ISP</code> (Internet Service Provider) finally provided me with modern <code>IPv6</code>. I at least got an <code>/60</code> prefix, which allows me to do subnetting, with up to 16 subnets, as the network identifier in <code>IPv6</code> has <code>64 bits</code>. So far so good. But I soon realized, that my prefix changes frequently, just as the <code>IPv4</code> prefix. That however is a problem. I do have two VLANs, beside my default network, that need their own <code>GUA</code> (Global Unicast Address) prefix. So whenever my prefix changes I would need to change my VLAN configurations and my routes. That's not feasible.
 </p>
 
 
 <p>
-Gladly there is an solution to that problem: IPv6 Prefix delegation (<code>PD</code>).
+Gladly there is an solution to that problem: <code>IPv6</code> Prefix delegation (<code>PD</code>).
 </p>
 </div>
+<div id="outline-container-orge56656e" class="outline-3">
+<h3 id="orge56656e">How it works</h3>
+<div class="outline-text-3" id="text-orge56656e">
+<p>
+With legacy <code>DHCP</code> you can automatically provide <code>IPv4</code> addresses and other configuration information to clients. With modern <code>ICMPv6</code> you can of cause do the same. But there is more: With <code>PD</code> you can provide whole network prefixes to a device.
+</p>
 
-<div id="outline-container-org8e94c56" class="outline-3">
-<h3 id="org8e94c56">Set up</h3>
-<div class="outline-text-3" id="text-org8e94c56">
+<p>
+That's actually how you get your <code>IPv6</code> prefix from your <code>ISP</code>. The client
+</p>
+
+
+<div id="org216ae8d" class="figure">
+<p><img src="img/IPv6PD.png" alt="Left: Diagram illustrating IPv6 prefix delegation. The ISP assigns a /60 prefix (3fff:abcd:0:abcd::/60) to a home router. The home router then delegates two /64 prefixes from this /60 block—3fff:abcd:dcbd:abdc::/64 and 3fff:abcd:dcbd:abdd::/64—to two separate downstream devices after receiving individual requests." width="80%" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org3089f79" class="outline-3">
+<h3 id="org3089f79">Set up</h3>
+<div class="outline-text-3" id="text-org3089f79">
 <p>
 This is how my network currently looks:
 </p>
 
 
-<div id="orgce462eb" class="figure">
+<div id="org2603566" class="figure">
 <p><img src="img/IPv6Network.png" alt="Left: The Internet (as a cloud) is connected to a home router via fiber. From there an Ethernet connection is drawn to a switch, which is connected to a Raspberry Pi, that acts as a router. Above the switch is connected to a Wireless AP, that provides Wifi to various mobile devices in the VLAN &quot;WLAN&quot;, which is colored light orange. Beneath a desktop PC is connected to the switch, which is in the VLAN &quot;Office&quot;, colored in light purple." width="80%" />
 </p>
 </div>
 </div>
 </div>
-
-
-
-<div id="outline-container-orge1316d9" class="outline-3">
-<h3 id="orge1316d9">Configuring the WAN-interface</h3>
-<div class="outline-text-3" id="text-orge1316d9">
+<div id="outline-container-org9f43962" class="outline-3">
+<h3 id="org9f43962">Configuring the WAN-interface</h3>
+<div class="outline-text-3" id="text-org9f43962">
 <p>
 <code>/etc/systemd/network/10--eth0.network</code>
 </p>
@@ -300,7 +313,7 @@ Gateway=192.168.178.1
 <div id="postamble" class="status">
 <p class="date">Date: 2025-06-04 Mi 00:00</p>
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2025-06-04 Mi 17:15</p>
+<p class="date">Created: 2025-06-06 Fr 20:41</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
