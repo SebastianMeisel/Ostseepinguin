@@ -74,38 +74,154 @@ ATTR_HTML: :width 80% :alt My Home router's Configuration with the option »Assi
 #+ATTR_ORG: :width 600
 [[file:img/IPv6PD_HomeRouter.png]]
 
-** Configuring the WAN-interface
+** Configuring the Raspberry Pi router
+Next we need to configure the internal router. As mentioned I use a Raspberry Pi, but the following steps should work on most modern Linux distributions and any PC hardware. You might prefer a device with more power and more importantly more bandwidth.
 
-~/etc/systemd/network/10--eth0.network~
+I first referred to the [[https://wiki.debian.org/IPv6PrefixDelegation][Debian wiki]] to get an idea on how to do this. I decided to settle on ~systemd-networkd~ to configure my interfaces. I run Raspberry Pi Os, which is based on Debian bookworm. It uses NetworkManager for network management.
+
+~systemd-networkd~ is however installed. So I decided to first configure everything, before disabling ~NetworkManager.service~ and enabling ~systemd-networkd.service~.
+
+*** Configuring the WAN interface
+
+I started with my physical interface, which naturally acts as my WAN-interface:
+
+The first line are the general setup. In the section ~[Match]~ you have to provide the interface name, as setup by the system. Here it is ~eth0~, on other systems it might be something like ~enp0s16f0u1~. Next you have to specify the interface type which is ~ether~ for a wired ethernet link. For a wifi interface it would be ~wlan~. There are other options to match your interface, e. g. the ~MACAddress~.
+
+~/etc/systemd/network/10-eth0.network~
 #+BEGIN_SRC text :tangle files/10-eth0.network
-[Match]
-Name=eth0
-Type=ether
+  [Match]
+  Name=eth0
+  Type=ether
+#+END_SRC
 
-[Network]
-Description=WAN Ethernet port
+Next comes the ~[Network]~ section, starting with a description. You can put anything here.
+#+BEGIN_SRC text :tangle files/10-eth0.network
+  [Network]
+  Description=WAN Ethernet port
+  #+END_SRC
 
-DHCP=ipv6
-IPv6AcceptRA=yes
+Now comes the first (slightliy) interesting part. We tell ~networkd~ to use ~DHCPv6~ to get an ~IPv6~ address and — more importantly — to accept ~IPv6~ Router Advertisements (~RA~).
 
-VLAN=Office
-VLAN=WLAN
+#+BEGIN_SRC text :tangle files/10-eth0.network
+  DHCP=ipv6
+  IPv6AcceptRA=yes
+#+END_SRC
 
-[Address]
-Address=192.168.178.254
-Gateway=192.168.178.1
+In this section we also have to configure which ~VLANs~ we want to associate with this physical interface. 
 
-[DHCPv6]
-PrefixDelegationHint=::/60
-UseDelegatedPrefix=yes
-UseAddress=no
+#+BEGIN_SRC text :tangle files/10-eth0.network
+  VLAN=Office
+  VLAN=WLAN
+#+END_SRC
 
+You most likely want to run dual stack. You should use static addressing for the legacy IP address that matches the network your in, e. g.:
 
+#+BEGIN_SRC text :tangle files/10-eth0.network
+  [Address]
+  Address=192.168.178.254
+  Gateway=192.168.178.1
+#+END_SRC
+
+Don't forget the ~IPv4~ default route. As we use Prefix Delegation for ~IPv6~ you do not need to set any routes there. It is done by ~DHCPv6~ for us.
+#+BEGIN_SRC text :tangle files/10-eth0.network
 [Route]
 Gateway=192.168.178.1
 #+END_SRC
 
+So finally there comes the part, where we configure ~IA_PD~ for the WAN interface:
 
+ - PrefixDelegationHint: :: You need to specify the size of the prefix, you want to get. It must be bigger the the prefix you got from your ISP, but at least ~/64~, which would however mean, you can only provide 1 subnet downstream. Normaly it is recommend to observe the nibble boundaries, which means you take steps of 4 bits, so on hex digit stands for one step in your network hierarchy. As I only got a ~/60~ I only have one nibble to work with. I decided that 4 subnets should be enough for now an settled on a ~/62~.[fn:1]
+ - UseDelegatedPrefix: :: This option activates the use Prefix Delegation and should be set, although it seems to work with it.
+
+#+BEGIN_SRC text :tangle files/10-eth0.network
+  [DHCPv6]
+  PrefixDelegationHint=::/62
+  UseDelegatedPrefix=yes
+#+END_SRC
+
+*** Configuring the Virtual LAN devices
+The next step is to set up the virtual devices for the ~VLANs~. For that we need to create a ~.netdev~ for *each* ~VLAN~ under ~/etc/systemd/network/~. These virtual devices must be created first before the physical device is configured, so the filename should start with ~00-~.
+
+The files need two section:
+ - [NetDev]: :: Define a virtual device with a ~Name~ of ~Kind~ ~vlan~.
+ - [VLAN]: :: In this section the ~VLAN~ ~Id~ is defined. This must be a number between 1 and 4096. It must match the VLAN Id configured on the managed switch.
+
+#+BEGIN_SRC text :tangle ./files/00-vlan10.netdev
+[NetDev]
+Name=Office
+Kind=vlan
+
+[VLAN]
+Id=10
+#+END_SRC
+
+Lastly a ~.network~ file must be created for *each* ~VLAN~ in the same directory. The number these files start we must be greater than the one the ~.network~ file for the physical starts with. I settled on ~20-~.
+
+It starts with a ~[Match]~ section, just as the ~.network~ file for physical interface. The ~Name~ to match is that configured for the virtual LAN device in the ~.netdev~ file. The ~Type~ must be set to ~vlan~.
+
+If you use physical Interfaces instead, use ~Type~ of ~ether~ or ~wlan~ and skip the ~[VLAN]~ section.
+#+BEGIN_SRC text :tangle ./files/20-vlan10.network
+  [Match]
+  Name=Office
+  Type=vlan
+
+  #+END_SRC
+
+The ~[VLAN]~ section with the ~Id~ must be identical to that in ~.netdev~ file.
+#+BEGIN_SRC text :tangle ./files/20-vlan10.network
+  [VLAN]
+  Id=10
+
+  #+END_SRC
+
+In the ~[Network]~ section is the place where some ~DHCPv6~ option must be configured:
+ - DHCP=ipv6: :: We want to use DHCPv6.
+ - IPv6SendRA: :: We want to send Router Advertisements, so the devices in the
+ - IPv6AcceptRA: :: We also need to accept Router Advertisments from upstream.
+ - DHCPPrefixDelegation: :: ~IA_PD~ must also be activated.
+
+#+BEGIN_SRC text :tangle ./files/20-vlan10.network
+  [Network]
+  Description=Office VLAN interface
+  DHCP=ipv6
+  IPv6SendRA=yes
+  IPv6AcceptRA=no
+  DHCPPrefixDelegation=yes
+
+#+END_SRC
+
+Again a legacy address should be provided for dual stack.
+
+#+BEGIN_SRC text :tangle ./files/20-vlan10.network
+  [Address]
+  Address=172.16.10.1/24
+
+#+END_SRC
+
+Finally an ~[IPv6PrefixDelegation]~ section is need. You can decide whether you Unique Local (Unicast) Addresses (~ULAs~). It doesn't hurt, although they will not actually be used, as legacy ~IPv4~ is preferred over ~IPv6~ for private addressing.
+
+The second option is more important. With ~SubnetId~ you can configure which of the available subnets you want to use. It's the number of the of the subnet in hexadecimal numbering. So ~0x1~ would be the first ~0xf~ would be the 15th subnets if you have so many to choose from.
+
+#+BEGIN_SRC text :tangle ./files/20-vlan10.network
+  [IPv6PrefixDelegation]
+  ULA=true
+  SubnetId=0x1
+
+#+END_SRC
+
+*** Disabling NetworkManager and enabling systemd-networkd
+
+
+
+** Configure Firewall
+
+* Conclusion
+
+
+
+* Footnotes
+
+[fn:1] Each extra bit halves the number of possible subnets. So ~/61~ would give me 8, ~/62~ 4, ~/63~ 2, and ~/64~ 1 possible subnet.
 # Local Variables:
 # jinx-languages: "en_US"
 # End:
