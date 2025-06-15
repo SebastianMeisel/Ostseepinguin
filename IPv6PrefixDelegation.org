@@ -45,7 +45,7 @@ With legacy ~DHCP~ you can automatically provide ~IPv4~ addresses and other conf
 
 That's actually how you get your ~IPv6~ prefix from your ~ISP~. Your Home router request a Prefix from the ~ISP's~ ~DHCPv6~ server. The ~ISP's DHCP~ server answers with a prefix of a certain length it delegates to your Home router. The good thing now is, that (given your Home router supports ~IA_PD~) you can use an internal router (e. g. a Linux machine) to request itself a portion of this prefix to again provide whole networks e. g.  for VLANs, as in my scenario.
 
-#+ATTR_HTML: :width 80% :alt Left: Diagram illustrating IPv6 prefix delegation. The ISP assigns a /60 prefix (3fff:abcd:0:abcd::/60) to a home router. The home router then delegates two /64 prefixes from this /60 block—3fff:abcd:dcbd:abdc::/64 and 3fff:abcd:dcbd:abdd::/64—to two separate downstream devices after receiving individual requests.
+#+ATTR_HTML: :width 80% :alt Diagram illustrating IPv6 prefix delegation. The ISP assigns a /60 prefix (3fff:abcd:0:abcd::/60) to a home router. The home router then delegates two /64 prefixes from this /60 block—3fff:abcd:dcbd:abdc::/64 and 3fff:abcd:dcbd:abdd::/64—to two separate downstream devices after receiving individual requests.
 #+ATTR_LATEX: :width .65\linewidth
 #+ATTR_ORG: :width 700
 [[file:img/IPv6PD.png]]
