@@ -51,6 +51,9 @@ Willkommen auf meinem Blog: "Ostseepinguin". Hier schreibe ich über das Leben, 
     In Teil II  series füge ich dem blauen Namespace einen DNS-Server hinzu.
   + Demnächst :: Linux Netzwerk-Namespaces (Teil III): Einen Web-Server hinzufügen.
 
++ Juni 2025
+  + [[file:IPv6PrefixDelegation_DE.org][IPv6 Prefix Delegation]] ::
+    Ich benutze DHCPv6 um mit meinem Linux Router ein ganzes Prefix vom meinem Homerouter zu bekommen, dass ich für VLANs nutze.
 
 # Local Variables:
 # jinx-languages: "de_DE"

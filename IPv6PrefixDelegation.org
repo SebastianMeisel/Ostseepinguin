@@ -20,7 +20,7 @@
 #+END_EXPORT
 
 #+begin_menu
-[[file:NetworkNamespace.DE.html][🇩🇪 DE]]
+[[file:IPv6PrefixDelegation_DE.html][🇩🇪 DE]]
 - > [[file:index.html][Home]]
 
 --------
@@ -37,11 +37,11 @@
 Recently my ~ISP~ (Internet Service Provider) finally provided me with modern ~IPv6~. I at least got an ~/60~ prefix, which allows me to do subnetting, with up to 16 subnets, as the network identifier in ~IPv6~ has ~64 bits~. So far so good. But I soon realized, that my prefix changes frequently, just as the ~IPv4~ prefix. That however is a problem. I do have two VLANs, beside my default network, that need their own ~GUA~ (Global Unicast Address) prefix. So whenever my prefix changes I would need to change my VLAN configurations and my routes. That's not feasible.
 
 
-Gladly there is an solution to that problem: ~IPv6~ Prefix delegation (~PD~).
+Gladly there is a solution to that problem: ~IPv6~ Prefix delegation (~PD~).
 
 ** How it works
 
-With legacy ~DHCP~ you can automatically provide ~IPv4~ addresses and other configuration information to clients. With modern ~ICMPv6~ you can of cause do the same. But there is more: With ~PD~ you can provide whole network prefixes to a device.
+With legacy ~DHCP~ you can automatically provide ~IPv4~ addresses and other configuration information to clients. With modern ~ICMPv6~ you can of course do the same. But there is more: With ~PD~ you can provide whole network prefixes to a device.
 
 That's actually how you get your ~IPv6~ prefix from your ~ISP~. Your Home router request a Prefix from the ~ISP's~ ~DHCPv6~ server. The ~ISP's DHCP~ server answers with a prefix of a certain length it delegates to your Home router. The good thing now is, that (given your Home router supports ~IA_PD~) you can use an internal router (e. g. a Linux machine) to request itself a portion of this prefix to again provide whole networks e. g.  for VLANs, as in my scenario.
 
@@ -50,7 +50,7 @@ That's actually how you get your ~IPv6~ prefix from your ~ISP~. Your Home router
 #+ATTR_ORG: :width 700
 [[file:img/IPv6PD.png]]
 
-The individual Interface of the downstream router can now themself request a ~/64/~ network and an IPv6 address in that network.
+The individual Interfaces of the downstream router can now themselves request a ~/64/~ network and an IPv6 address in that network.
 
 ** Set up
 
@@ -61,7 +61,7 @@ This is how my network currently looks:
 #+ATTR_ORG: :width 600
 [[file:img/IPv6Network.png]]
 
-My Home Router gets a ~/60~ IPv6 prefix which changes every few days. To that Home Router I connected a managed switch, so I can have VLANs. The firewall, DHCP(v6) server und router for these VLANs live on a Raspberry Pi, that functions as a router on a stick: It is connected to the switch on a trunk port and has 2 virtual devices for the two VLANs — Office (VLAN Id 10) and WLAN (VLAN Id 20).
+My Home router gets a ~/60~ IPv6 prefix which changes every few days. To that Home Router I connected a managed switch, so I can have VLANs. The firewall, DHCP(v6) server und router for these VLANs live on a Raspberry Pi, that functions as a router on a stick: It is connected to the switch on a trunk port and has 2 virtual devices for the two VLANs — Office (VLAN Id 10) and WLAN (VLAN Id 20).
 
 My Wifi access point is connect on an access port configured for VLAN 10 on my switch. The Office VLAN so far only contains my desktop Office PC.
 
@@ -69,7 +69,7 @@ My Wifi access point is connect on an access port configured for VLAN 10 on my s
 
 First you have to find out if and where you can enable the DHCPv6 option ~IA_PD~ on your Home router. On my Home router (called Fritz!Box) the menu looks like this an is found under =Home Network → Network → Network Settings → IPv6 Settings=.
 
-ATTR_HTML: :width 80% :alt My Home router's Configuration with the option »Assign DNS server, prefix (IA_PD) and IPv6 address (IA_NA)« under »Enable DHCPv6 server in the Fritz!Box for home network« enabled. Fritz!Box is a brand for Home routers owned by AVM very popular in Germany.
+#+ATTR_HTML: :width 80% :alt My Home router's Configuration with the option »Assign DNS server, prefix (IA_PD) and IPv6 address (IA_NA)« under »Enable DHCPv6 server in the Fritz!Box for home network« enabled. Fritz!Box is a brand for Home routers owned by AVM very popular in Germany.
 #+ATTR_LATEX: :width .65\linewidth :placement [!htpb]
 #+ATTR_ORG: :width 600
 [[file:img/IPv6PD_HomeRouter.png]]
@@ -83,7 +83,7 @@ I first referred to the [[https://wiki.debian.org/IPv6PrefixDelegation][Debian w
 
 *** Configuring the WAN interface
 
-I started with my physical interface, which naturally acts as my WAN-interface:
+I started with my physical interface, which naturally acts as my WAN interface:
 
 The first line are the general setup. In the section ~[Match]~ you have to provide the interface name, as setup by the system. Here it is ~eth0~, on other systems it might be something like ~enp0s16f0u1~. Next you have to specify the interface type which is ~ether~ for a wired ethernet link. For a wifi interface it would be ~wlan~. There are other options to match your interface, e. g. the ~MACAddress~.
 
@@ -100,11 +100,12 @@ Next comes the ~[Network]~ section, starting with a description. You can put any
   Description=WAN Ethernet port
   #+END_SRC
 
-Now comes the first (slightliy) interesting part. We tell ~networkd~ to use ~DHCPv6~ to get an ~IPv6~ address and — more importantly — to accept ~IPv6~ Router Advertisements (~RA~).
+Now comes the first (slightly) interesting part. We tell ~networkd~ to use ~DHCPv6~ to get an ~IPv6~ address and — more importantly — to accept ~IPv6~ Router Advertisements (~RA~). IP forwarding should also be activated on all interfaces on a router.
 
 #+BEGIN_SRC text :tangle files/10-eth0.network
   DHCP=ipv6
   IPv6AcceptRA=yes
+  IPForward=yes
 #+END_SRC
 
 In this section we also have to configure which ~VLANs~ we want to associate with this physical interface. 
@@ -114,7 +115,7 @@ In this section we also have to configure which ~VLANs~ we want to associate wit
   VLAN=WLAN
 #+END_SRC
 
-You most likely want to run dual stack. You should use static addressing for the legacy IP address that matches the network your in, e. g.:
+You most likely want to run dual stack. You should use static addressing for the legacy IP address that matches the network you'r in, e. g.:
 
 #+BEGIN_SRC text :tangle files/10-eth0.network
   [Address]
@@ -124,19 +125,21 @@ You most likely want to run dual stack. You should use static addressing for the
 
 Don't forget the ~IPv4~ default route. As we use Prefix Delegation for ~IPv6~ you do not need to set any routes there. It is done by ~DHCPv6~ for us.
 #+BEGIN_SRC text :tangle files/10-eth0.network
-[Route]
-Gateway=192.168.178.1
+  [Route]
+  Gateway=192.168.178.1
 #+END_SRC
 
 So finally there comes the part, where we configure ~IA_PD~ for the WAN interface:
 
- - PrefixDelegationHint: :: You need to specify the size of the prefix, you want to get. It must be bigger the the prefix you got from your ISP, but at least ~/64~, which would however mean, you can only provide 1 subnet downstream. Normaly it is recommend to observe the nibble boundaries, which means you take steps of 4 bits, so on hex digit stands for one step in your network hierarchy. As I only got a ~/60~ I only have one nibble to work with. I decided that 4 subnets should be enough for now an settled on a ~/62~.[fn:1]
- - UseDelegatedPrefix: :: This option activates the use Prefix Delegation and should be set, although it seems to work with it.
+ - PrefixDelegationHint: :: You need to specify the size of the prefix, you want to get. It must be bigger the the prefix you got from your ISP, but at least ~/64~, which would however mean, you can only provide 1 subnet downstream. Normally it is recommend to observe the nibble boundaries, which means you take steps of 4 bits, so on hex digit stands for one step in your network hierarchy. As I only got a ~/60~ I only have one nibble to work with. I decided that 4 subnets should be enough for now and settled on a ~/62~.[fn:1]
+ - UseDelegatedPrefix: :: This option activates the use Prefix Delegation and should be set, although it seems to work without it.
+ - UseAddress: :: This is kind of optional but it suppresses some warnings about addresses not being used.
 
 #+BEGIN_SRC text :tangle files/10-eth0.network
   [DHCPv6]
   PrefixDelegationHint=::/62
   UseDelegatedPrefix=yes
+  UseAddress=no
 #+END_SRC
 
 *** Configuring the Virtual LAN devices
@@ -147,19 +150,19 @@ The files need two section:
  - [VLAN]: :: In this section the ~VLAN~ ~Id~ is defined. This must be a number between 1 and 4096. It must match the VLAN Id configured on the managed switch.
 
 #+BEGIN_SRC text :tangle ./files/00-vlan10.netdev
-[NetDev]
-Name=Office
-Kind=vlan
+  [NetDev]
+  Name=Office
+  Kind=vlan
 
-[VLAN]
-Id=10
+  [VLAN]
+  Id=10
 #+END_SRC
 
 Lastly a ~.network~ file must be created for *each* ~VLAN~ in the same directory. The number these files start we must be greater than the one the ~.network~ file for the physical starts with. I settled on ~20-~.
 
 It starts with a ~[Match]~ section, just as the ~.network~ file for physical interface. The ~Name~ to match is that configured for the virtual LAN device in the ~.netdev~ file. The ~Type~ must be set to ~vlan~.
 
-If you use physical Interfaces instead, use ~Type~ of ~ether~ or ~wlan~ and skip the ~[VLAN]~ section.
+If you use physical Interfaces instead, use ~Type~ of ~ether~ or ~wlan~~.
 #+BEGIN_SRC text :tangle ./files/20-vlan10.network
   [Match]
   Name=Office
@@ -167,15 +170,9 @@ If you use physical Interfaces instead, use ~Type~ of ~ether~ or ~wlan~ and skip
 
   #+END_SRC
 
-The ~[VLAN]~ section with the ~Id~ must be identical to that in ~.netdev~ file.
-#+BEGIN_SRC text :tangle ./files/20-vlan10.network
-  [VLAN]
-  Id=10
-
-  #+END_SRC
-
 In the ~[Network]~ section is the place where some ~DHCPv6~ option must be configured:
  - DHCP=ipv6: :: We want to use DHCPv6.
+ - IPForward: :: IP forwarding should be activated for both IPv4 and IPv6.
  - IPv6SendRA: :: We want to send Router Advertisements, so the devices in the
  - IPv6AcceptRA: :: We also need to accept Router Advertisments from upstream.
  - DHCPPrefixDelegation: :: ~IA_PD~ must also be activated.
@@ -184,6 +181,7 @@ In the ~[Network]~ section is the place where some ~DHCPv6~ option must be confi
   [Network]
   Description=Office VLAN interface
   DHCP=ipv6
+  IPForward=yes
   IPv6SendRA=yes
   IPv6AcceptRA=no
   DHCPPrefixDelegation=yes
@@ -198,9 +196,9 @@ Again a legacy address should be provided for dual stack.
 
 #+END_SRC
 
-Finally an ~[IPv6PrefixDelegation]~ section is need. You can decide whether you Unique Local (Unicast) Addresses (~ULAs~). It doesn't hurt, although they will not actually be used, as legacy ~IPv4~ is preferred over ~IPv6~ for private addressing.
+Finally an ~[IPv6PrefixDelegation]~ section is need. You can decide whether your Unique Local (Unicast) Addresses (~ULAs~). It doesn't hurt, although they will not actually be used, as legacy ~IPv4~ is preferred over ~IPv6~ for private addressing.
 
-The second option is more important. With ~SubnetId~ you can configure which of the available subnets you want to use. It's the number of the of the subnet in hexadecimal numbering. So ~0x1~ would be the first ~0xf~ would be the 15th subnets if you have so many to choose from.
+The second option is more important. With ~SubnetId~ you can configure which of the available subnets you want to use. It's the number of the  subnet in hexadecimal numbering. So ~0x1~ would be the first ~0xf~ would be the 15th subnets if you have so many to choose from.
 
 #+BEGIN_SRC text :tangle ./files/20-vlan10.network
   [IPv6PrefixDelegation]
@@ -211,13 +209,76 @@ The second option is more important. With ~SubnetId~ you can configure which of 
 
 *** Disabling NetworkManager and enabling systemd-networkd
 
+Now it's time to move from ~NetworkManager~ to ~systemd-networkd~:
+
+#+BEGIN_SRC bash
+  sudo systemctl disable --now NetworkManager.service
+  sudo systemctl enable --now systemd-networkd.service
+#+END_SRC
+
+I recommend also checking that everything works by running:
+
+#+BEGIN_SRC bash 
+  systemctl status systemd-networkd
+#+END_SRC
+
+Which should look something like this:
+#+begin_example
+● systemd-networkd.service - Network Configuration
+     Loaded: loaded (/lib/systemd/system/systemd-networkd.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2025-06-14 21:02:05 CEST; 14h ago
+TriggeredBy: ● systemd-networkd.socket
+       Docs: man:systemd-networkd.service(8)
+             man:org.freedesktop.network1(5)
+   Main PID: 97581 (systemd-network)
+     Status: "Processing requests..."
+      Tasks: 1 (limit: 9564)
+        CPU: 583ms
+     CGroup: /system.slice/systemd-networkd.service
+             └─97581 /lib/systemd/systemd-networkd
+
+#+end_example
+
+You may also check if you got the expected prefixes with:
+
+#+BEGIN_SRC bash
+  ip --brief a
+#+END_SRC
 
 
 ** Configure Firewall
 
+It might however be, that you don't get an address on your inbound ports. This could be because ports ~547~ used by ~ICMPv6~ on the server side und ~546~ used on the client side are blocked. In this case you need to add the following rule to your input filter chain with nftables.
+
+#+BEGIN_SRC text
+ iifname "eth0" udp sport 547 udp dport 546 accept comment "Allow DHCPv6 from server to client"
+#+END_SRC
+
+If you don't feel comfortable with nftables, you might use ~ufw~ on a Debian based system:
+
+#+BEGIN_SRC bash
+sudo ufw allow in on eth0 proto udp from any port 547 to any port 546 comment 'Allow DHCPv6 from server to client'
+#+END_SRC
+
+Or you could use ~firewalld-cmd~ on a Red Hat based system:
+
+#+BEGIN_SRC bash
+sudo firewall-cmd --permanent \
+  --add-rich-rule='rule family="ipv6" \
+  source address="::/0" \
+  protocol value="udp" \
+  port port="547" protocol="udp" \
+  destination-port port="546" protocol="udp" \
+  interface name="eth0" \
+  accept'
+#+END_SRC
+
+
 * Conclusion
 
+With this setup all my downstream machine get their ~IPv6~ addresses in their ~VLAN~ with the correct prefix, no matter how often my ISP changes it. All routes are configured automatically and I don't have to care about any of this any more.
 
+This once again proves, that ~IPv6~ is more advanced and more simple then legacy ~IP(v4)~.
 
 * Footnotes
 

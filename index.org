@@ -52,7 +52,10 @@ Welcome to the blog of the "Ostseepinguin", which is German for "Baltic penguin"
     In part II of the series I add a nameserver to the blue namespace.
   + [[file:NetworkNamespaceWebServer.html][Linux network namesspaces (part III): Adding a webserver]] ::
     In part III of the series I add a webserver to the blue namespace.
- 
+
++ June 2025
+  + [[file:IPv6PrefixDelegation.org][IPv6 Prefix Delegation]] ::
+    Use DHCPv6 to delegate whole Prefixes to devices.
 
 
 
