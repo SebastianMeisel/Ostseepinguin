@@ -2,12 +2,10 @@
 Name=Office
 Type=vlan
 
-[VLAN]
-Id=10
-
 [Network]
-Description=Office VLAN interface
+Description=Office VLAN Interface
 DHCP=ipv6
+IPForward=yes
 IPv6SendRA=yes
 IPv6AcceptRA=no
 DHCPPrefixDelegation=yes
@@ -17,4 +15,4 @@ Address=172.16.10.1/24
 
 [IPv6PrefixDelegation]
 ULA=true
-SubnetId=0x2
+SubnetId=0x1

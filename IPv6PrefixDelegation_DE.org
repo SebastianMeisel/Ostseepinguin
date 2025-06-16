@@ -34,22 +34,22 @@
 
 * Einleitung
 
-Vor Kurzem hat mir mein ~~ISP~~ (Internetdienstanbieter) endlich modernes ~~IPv6~~ bereitgestellt. Ich habe zumindest ein ~~/60~~-Präfix erhalten, was mir erlaubt, Subnetze zu bilden – bis zu 16, da die Netzwerkkennung bei ~~IPv6~~ 64 Bit lang ist. So weit, so gut. Aber ich habe schnell gemerkt, dass sich dieses Präfix häufig ändert, genau wie das ~~IPv4~~-Präfix. Das ist jedoch ein Problem: Ich habe neben meinem Standardnetz zwei VLANs, die jeweils ein eigenes ~~GUA~~ (Global Unicast Address)-Präfix benötigen. Wann immer sich mein Präfix ändert, müsste ich die VLAN-Konfigurationen und die Routen anpassen. Das ist nicht praktikabel.
+Vor Kurzem hat mir mein ~ISP~ (Internetdienstanbieter) endlich modernes ~IPv6~ bereitgestellt. Ich habe zumindest ein ~/60~-Präfix erhalten, was mir erlaubt, Subnetze zu bilden – bis zu 16, da die Netzwerkkennung bei ~IPv6~ 64 Bit lang ist. So weit, so gut. Aber ich habe schnell gemerkt, dass sich dieses Präfix häufig ändert, genau wie das ~IPv4~-Präfix. Das ist jedoch ein Problem: Ich habe neben meinem Standardnetz zwei VLANs, die jeweils ein eigenes ~GUA~ (Global Unicast Address)-Präfix benötigen. Wann immer sich mein Präfix ändert, müsste ich die VLAN-Konfigurationen und die Routen anpassen. Das ist nicht praktikabel.
 
-Glücklicherweise gibt es eine Lösung für dieses Problem: ~~IPv6~~-Präfix-Delegation (~~PD~~).
+Glücklicherweise gibt es eine Lösung für dieses Problem: ~IPv6~-Präfix-Delegation (~PD~).
 
 ** Wie funktioniert das?
 
-Mit klassischem ~~DHCP~~ lassen sich automatisch ~~IPv4~~-Adressen und andere Konfigurationsdaten an Clients verteilen. Mit modernem ~~ICMPv6~~ geht das natürlich auch. Aber es geht noch besser: Mit ~~PD~~ kann man Geräten ganze Netzpräfixe zuweisen.
+Mit klassischem ~DHCP~ lassen sich automatisch ~IPv4~-Adressen und andere Konfigurationsdaten an Clients verteilen. Mit modernem ~ICMPv6~ geht das natürlich auch. Aber es geht noch besser: Mit ~PD~ kann man Geräten ganze Netzpräfixe zuweisen.
 
-Genau so bekommt auch dein Heimrouter das ~~IPv6~~-Präfix vom ~~ISP~~: Der Heimrouter fordert über den ~~DHCPv6~~-Server des ~~ISP~~ ein Präfix an. Der Server antwortet mit einem bestimmten Präfix, das er delegiert. Wenn dein Heimrouter ~~IA_PD~~ unterstützt, kannst du sogar mit einem internen Router (z. B. einem Linux-Rechner) selbst wieder einen Teil dieses Präfixes anfordern und eigene Netze (z. B. VLANs) bedienen – wie in meinem Fall.
+Genau so bekommt auch dein Heimrouter das ~IPv6~-Präfix vom ~ISP~: Der Heimrouter fordert über den ~DHCPv6~-Server des ~ISP~ ein Präfix an. Der Server antwortet mit einem bestimmten Präfix, das er delegiert. Wenn dein Heimrouter ~IA_PD~ unterstützt, kannst du sogar mit einem internen Router (z. B. einem Linux-Rechner) selbst wieder einen Teil dieses Präfixes anfordern und eigene Netze (z. B. VLANs) bedienen – wie in meinem Fall.
 
 #+ATTR_HTML: :width 80% :alt Links: Diagramm zur IPv6-Präfix-Delegation. Der ISP weist ein /60-Präfix (3fff:abcd:0:abcd::/60) dem Heimrouter zu. Der Heimrouter delegiert daraus zwei /64-Präfixe – 3fff:abcd:dcbd:abdc::/64 und 3fff:abcd:dcbd:abdd::/64 – an zwei nachgeschaltete Geräte, nachdem diese jeweils angefragt haben.
 #+ATTR_LATEX: :width .65linewidth
 #+ATTR_ORG: :width 700
 [[file:img/IPv6PD.png]]
 
-Die einzelnen Schnittstellen des nachgeschalteten Routers können nun selbst ein ~/64/-Netz anfordern und sich eine ~~IPv6~~-Adresse aus diesem Netz zuweisen lassen.
+Die einzelnen Schnittstellen des nachgeschalteten Routers können nun selbst ein ~/64/-Netz anfordern und sich eine ~IPv6~-Adresse aus diesem Netz zuweisen lassen.
 
 ** Netzwerkaufbau
 
