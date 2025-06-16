@@ -3,13 +3,13 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-06-15 So 21:14 -->
+<!-- 2025-06-16 Mo 09:44 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>IPv6 prefix delegation using systemd-networkd</title>
 <meta name="author" content="Sebastian Meisel" />
 <meta name="generator" content="Org Mode" />
-<style>
+<style type="text/css">
   #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
@@ -200,7 +200,7 @@
 <h1 class="title">IPv6 prefix delegation using systemd-networkd</h1>
 
 
-<div id="org0f21f49" class="figure">
+<div id="orgff27c0b" class="figure">
 <p><img src="img/Ostseepinguin.png" alt="The Ostseepinguin banner showing a baltic penguin on the beach." width="100%" />
 </p>
 </div>
@@ -210,7 +210,7 @@
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="org81eddc9">
+<div class="menu" id="orgfa865d5">
 <p>
 <a href="IPv6PrefixDelegation_DE.html">🇩🇪 DE</a>
 </p>
@@ -228,10 +228,9 @@
 </p>
 
 </div>
-
-<div id="outline-container-org2bcdc46" class="outline-2">
-<h2 id="org2bcdc46">Introduction</h2>
-<div class="outline-text-2" id="text-org2bcdc46">
+<div id="outline-container-orge289237" class="outline-2">
+<h2 id="orge289237">Introduction</h2>
+<div class="outline-text-2" id="text-orge289237">
 <p>
 Recently my <code>ISP</code> (Internet Service Provider) finally provided me with modern <code>IPv6</code>. I at least got an <code>/60</code> prefix, which allows me to do subnetting, with up to 16 subnets, as the network identifier in <code>IPv6</code> has <code>64 bits</code>. So far so good. But I soon realized, that my prefix changes frequently, just as the <code>IPv4</code> prefix. That however is a problem. I do have two VLANs, beside my default network, that need their own <code>GUA</code> (Global Unicast Address) prefix. So whenever my prefix changes I would need to change my VLAN configurations and my routes. That's not feasible.
 </p>
@@ -241,10 +240,9 @@ Recently my <code>ISP</code> (Internet Service Provider) finally provided me wit
 Gladly there is a solution to that problem: <code>IPv6</code> Prefix delegation (<code>PD</code>).
 </p>
 </div>
-
-<div id="outline-container-org7f39397" class="outline-3">
-<h3 id="org7f39397">How it works</h3>
-<div class="outline-text-3" id="text-org7f39397">
+<div id="outline-container-org600b89c" class="outline-3">
+<h3 id="org600b89c">How it works</h3>
+<div class="outline-text-3" id="text-org600b89c">
 <p>
 With legacy <code>DHCP</code> you can automatically provide <code>IPv4</code> addresses and other configuration information to clients. With modern <code>ICMPv6</code> you can of course do the same. But there is more: With <code>PD</code> you can provide whole network prefixes to a device.
 </p>
@@ -254,7 +252,7 @@ That's actually how you get your <code>IPv6</code> prefix from your <code>ISP</c
 </p>
 
 
-<div id="org0b18adc" class="figure">
+<div id="org6e02d7d" class="figure">
 <p><img src="img/IPv6PD.png" alt="Diagram illustrating IPv6 prefix delegation. The ISP assigns a /60 prefix (3fff:abcd:0:abcd::/60) to a home router. The home router then delegates two /64 prefixes from this /60 block—3fff:abcd:dcbd:abdc::/64 and 3fff:abcd:dcbd:abdd::/64—to two separate downstream devices after receiving individual requests." width="80%" />
 </p>
 </div>
@@ -264,16 +262,15 @@ The individual Interfaces of the downstream router can now themselves request a 
 </p>
 </div>
 </div>
-
-<div id="outline-container-orge7315b8" class="outline-3">
-<h3 id="orge7315b8">Set up</h3>
-<div class="outline-text-3" id="text-orge7315b8">
+<div id="outline-container-org6046116" class="outline-3">
+<h3 id="org6046116">Set up</h3>
+<div class="outline-text-3" id="text-org6046116">
 <p>
 This is how my network currently looks:
 </p>
 
 
-<div id="org39334ab" class="figure">
+<div id="org705df55" class="figure">
 <p><img src="img/IPv6Network.png" alt="Left: The Internet (as a cloud) is connected to a home router via fiber. From there an Ethernet connection is drawn to a switch, which is connected to a Raspberry Pi, that acts as a router. Above the switch is connected to a Wireless AP, that provides Wifi to various mobile devices in the VLAN &quot;WLAN&quot;, which is colored light orange. Beneath a desktop PC is connected to the switch, which is in the VLAN &quot;Office&quot;, colored in light purple." width="80%" />
 </p>
 </div>
@@ -287,25 +284,23 @@ My Wifi access point is connect on an access port configured for VLAN 10 on my s
 </p>
 </div>
 </div>
-
-<div id="outline-container-orgcff0ee7" class="outline-3">
-<h3 id="orgcff0ee7">Configuring the Home router</h3>
-<div class="outline-text-3" id="text-orgcff0ee7">
+<div id="outline-container-org080c885" class="outline-3">
+<h3 id="org080c885">Configuring the Home router</h3>
+<div class="outline-text-3" id="text-org080c885">
 <p>
 First you have to find out if and where you can enable the DHCPv6 option <code>IA_PD</code> on your Home router. On my Home router (called Fritz!Box) the menu looks like this an is found under <code>Home Network → Network → Network Settings → IPv6 Settings</code>.
 </p>
 
 
-<div id="org7d36d55" class="figure">
+<div id="org4c2554e" class="figure">
 <p><img src="img/IPv6PD_HomeRouter.png" alt="My Home router's Configuration with the option »Assign DNS server, prefix (IA_PD) and IPv6 address (IA_NA)« under »Enable DHCPv6 server in the Fritz!Box for home network« enabled. Fritz!Box is a brand for Home routers owned by AVM very popular in Germany." width="80%" />
 </p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgf7a8e45" class="outline-3">
-<h3 id="orgf7a8e45">Configuring the Raspberry Pi router</h3>
-<div class="outline-text-3" id="text-orgf7a8e45">
+<div id="outline-container-orgb3e811b" class="outline-3">
+<h3 id="orgb3e811b">Configuring the Raspberry Pi router</h3>
+<div class="outline-text-3" id="text-orgb3e811b">
 <p>
 Next we need to configure the internal router. As mentioned I use a Raspberry Pi, but the following steps should work on most modern Linux distributions and any PC hardware. You might prefer a device with more power and more importantly more bandwidth.
 </p>
@@ -318,10 +313,9 @@ I first referred to the <a href="https://wiki.debian.org/IPv6PrefixDelegation">D
 <code>systemd-networkd</code> is however installed. So I decided to first configure everything, before disabling <code>NetworkManager.service</code> and enabling <code>systemd-networkd.service</code>.
 </p>
 </div>
-
-<div id="outline-container-org5b8dcae" class="outline-4">
-<h4 id="org5b8dcae">Configuring the WAN interface</h4>
-<div class="outline-text-4" id="text-org5b8dcae">
+<div id="outline-container-orgd82c8c6" class="outline-4">
+<h4 id="orgd82c8c6">Configuring the WAN interface</h4>
+<div class="outline-text-4" id="text-orgd82c8c6">
 <p>
 I started with my physical interface, which naturally acts as my WAN interface:
 </p>
@@ -334,9 +328,9 @@ The first line are the general setup. In the section <code>[Match]</code> you ha
 <code>/etc/systemd/network/10-eth0.network</code>
 </p>
 <div class="org-src-container">
-<pre class="src src-text">  [Match]
-  Name=eth0
-  Type=ether
+<pre class="src src-text">[Match]
+Name=eth0
+Type=ether
 </pre>
 </div>
 
@@ -344,8 +338,8 @@ The first line are the general setup. In the section <code>[Match]</code> you ha
 Next comes the <code>[Network]</code> section, starting with a description. You can put anything here.
 </p>
 <div class="org-src-container">
-<pre class="src src-text">  [Network]
-  Description=WAN Ethernet port
+<pre class="src src-text">[Network]
+Description=WAN Ethernet port
 </pre>
 </div>
 
@@ -354,9 +348,9 @@ Now comes the first (slightly) interesting part. We tell <code>networkd</code> t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-text">  DHCP=ipv6
-  IPv6AcceptRA=yes
-  IPForward=yes
+<pre class="src src-text">DHCP=ipv6
+IPv6AcceptRA=yes
+IPForward=yes
 </pre>
 </div>
 
@@ -365,8 +359,8 @@ In this section we also have to configure which <code>VLANs</code> we want to as
 </p>
 
 <div class="org-src-container">
-<pre class="src src-text">  VLAN=Office
-  VLAN=WLAN
+<pre class="src src-text">VLAN=Office
+VLAN=WLAN
 </pre>
 </div>
 
@@ -375,9 +369,9 @@ You most likely want to run dual stack. You should use static addressing for the
 </p>
 
 <div class="org-src-container">
-<pre class="src src-text">  [Address]
-  Address=192.168.178.254
-  Gateway=192.168.178.1
+<pre class="src src-text">[Address]
+Address=192.168.178.254
+Gateway=192.168.178.1
 </pre>
 </div>
 
@@ -385,8 +379,8 @@ You most likely want to run dual stack. You should use static addressing for the
 Don't forget the <code>IPv4</code> default route. As we use Prefix Delegation for <code>IPv6</code> you do not need to set any routes there. It is done by <code>DHCPv6</code> for us.
 </p>
 <div class="org-src-container">
-<pre class="src src-text">  [Route]
-  Gateway=192.168.178.1
+<pre class="src src-text">[Route]
+Gateway=192.168.178.1
 </pre>
 </div>
 
@@ -401,18 +395,17 @@ So finally there comes the part, where we configure <code>IA_PD</code> for the W
 </dl>
 
 <div class="org-src-container">
-<pre class="src src-text">  [DHCPv6]
-  PrefixDelegationHint=::/62
-  UseDelegatedPrefix=yes
-  UseAddress=no
+<pre class="src src-text">[DHCPv6]
+PrefixDelegationHint=::/62
+UseDelegatedPrefix=yes
+UseAddress=no
 </pre>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgec817f4" class="outline-4">
-<h4 id="orgec817f4">Configuring the Virtual LAN devices</h4>
-<div class="outline-text-4" id="text-orgec817f4">
+<div id="outline-container-org7537a9c" class="outline-4">
+<h4 id="org7537a9c">Configuring the Virtual LAN devices</h4>
+<div class="outline-text-4" id="text-org7537a9c">
 <p>
 The next step is to set up the virtual devices for the <code>VLANs</code>. For that we need to create a <code>.netdev</code> for <b>each</b> <code>VLAN</code> under <code>/etc/systemd/network/</code>. These virtual devices must be created first before the physical device is configured, so the filename should start with <code>00-</code>.
 </p>
@@ -426,12 +419,12 @@ The files need two section:
 </dl>
 
 <div class="org-src-container">
-<pre class="src src-text">  [NetDev]
-  Name=Office
-  Kind=vlan
+<pre class="src src-text">[NetDev]
+Name=Office
+Kind=vlan
 
-  [VLAN]
-  Id=10
+[VLAN]
+Id=10
 </pre>
 </div>
 
@@ -447,9 +440,9 @@ It starts with a <code>[Match]</code> section, just as the <code>.network</code>
 If you use physical Interfaces instead, use <code>Type</code> of <code>ether</code> or <code>wlan~</code>.
 </p>
 <div class="org-src-container">
-<pre class="src src-text">  [Match]
-  Name=Office
-  Type=vlan
+<pre class="src src-text">[Match]
+Name=Office
+Type=vlan
 
 </pre>
 </div>
@@ -466,13 +459,13 @@ In the <code>[Network]</code> section is the place where some <code>DHCPv6</code
 </dl>
 
 <div class="org-src-container">
-<pre class="src src-text">  [Network]
-  Description=Office VLAN interface
-  DHCP=ipv6
-  IPForward=yes
-  IPv6SendRA=yes
-  IPv6AcceptRA=no
-  DHCPPrefixDelegation=yes
+<pre class="src src-text">[Network]
+Description=Office VLAN interface
+DHCP=ipv6
+IPForward=yes
+IPv6SendRA=yes
+IPv6AcceptRA=no
+DHCPPrefixDelegation=yes
 
 </pre>
 </div>
@@ -482,8 +475,8 @@ Again a legacy address should be provided for dual stack.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-text">  [Address]
-  Address=172.16.10.1/24
+<pre class="src src-text">[Address]
+Address=172.16.10.1/24
 
 </pre>
 </div>
@@ -497,25 +490,24 @@ The second option is more important. With <code>SubnetId</code> you can configur
 </p>
 
 <div class="org-src-container">
-<pre class="src src-text">  [IPv6PrefixDelegation]
-  ULA=true
-  SubnetId=0x1
+<pre class="src src-text">[IPv6PrefixDelegation]
+ULA=true
+SubnetId=0x1
 
 </pre>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org515f49a" class="outline-4">
-<h4 id="org515f49a">Disabling NetworkManager and enabling systemd-networkd</h4>
-<div class="outline-text-4" id="text-org515f49a">
+<div id="outline-container-orgb1bc4cb" class="outline-4">
+<h4 id="orgb1bc4cb">Disabling NetworkManager and enabling systemd-networkd</h4>
+<div class="outline-text-4" id="text-orgb1bc4cb">
 <p>
 Now it's time to move from <code>NetworkManager</code> to <code>systemd-networkd</code>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">  sudo systemctl disable --now NetworkManager.service
-  sudo systemctl enable --now systemd-networkd.service
+<pre class="src src-bash">sudo systemctl disable --now NetworkManager.service
+sudo systemctl enable --now systemd-networkd.service
 </pre>
 </div>
 
@@ -524,14 +516,14 @@ I recommend also checking that everything works by running:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">  systemctl status systemd-networkd
+<pre class="src src-bash">systemctl status systemd-networkd
 </pre>
 </div>
 
 <p>
 Which should look something like this:
 </p>
-<pre class="example" id="orgb01c573">
+<pre class="example" id="orgd56c360">
 ● systemd-networkd.service - Network Configuration
      Loaded: loaded (/lib/systemd/system/systemd-networkd.service; enabled; preset: enabled)
      Active: active (running) since Sat 2025-06-14 21:02:05 CEST; 14h ago
@@ -552,23 +544,21 @@ You may also check if you got the expected prefixes with:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash">  ip --brief a
+<pre class="src src-bash">ip --brief a
 </pre>
 </div>
 </div>
 </div>
 </div>
-
-
-<div id="outline-container-org915b3a0" class="outline-3">
-<h3 id="org915b3a0">Configure Firewall</h3>
-<div class="outline-text-3" id="text-org915b3a0">
+<div id="outline-container-orgf7f901d" class="outline-3">
+<h3 id="orgf7f901d">Configure Firewall</h3>
+<div class="outline-text-3" id="text-orgf7f901d">
 <p>
 It might however be, that you don't get an address on your inbound ports. This could be because ports <code>547</code> used by <code>ICMPv6</code> on the server side und <code>546</code> used on the client side are blocked. In this case you need to add the following rule to your input filter chain with nftables.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-text"> iifname "eth0" udp sport 547 udp dport 546 accept comment "Allow DHCPv6 from server to client"
+<pre class="src src-text">iifname "eth0" udp sport 547 udp dport 546 accept comment "Allow DHCPv6 from server to client"
 </pre>
 </div>
 
@@ -599,11 +589,9 @@ Or you could use <code>firewalld-cmd</code> on a Red Hat based system:
 </div>
 </div>
 </div>
-
-
-<div id="outline-container-org8638734" class="outline-2">
-<h2 id="org8638734">Conclusion</h2>
-<div class="outline-text-2" id="text-org8638734">
+<div id="outline-container-org861b0a7" class="outline-2">
+<h2 id="org861b0a7">Conclusion</h2>
+<div class="outline-text-2" id="text-org861b0a7">
 <p>
 With this setup all my downstream machine get their <code>IPv6</code> addresses in their <code>VLAN</code> with the correct prefix, no matter how often my ISP changes it. All routes are configured automatically and I don't have to care about any of this any more.
 </p>
@@ -627,7 +615,7 @@ Each extra bit halves the number of possible subnets. So <code>/61</code> would 
 <div id="postamble" class="status">
 <p class="date">Date: 2025-06-04 Mi 00:00</p>
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2025-06-15 So 21:14</p>
+<p class="date">Created: 2025-06-16 Mo 09:44</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
