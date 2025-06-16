@@ -3,13 +3,13 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-06-15 So 20:55 -->
+<!-- 2025-06-16 Mo 09:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
 <meta name="author" content="Sebastian Meisel" />
 <meta name="generator" content="Org Mode" />
-<style>
+<style type="text/css">
   #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
@@ -199,7 +199,7 @@
 <div id="content" class="content">
 
 
-<div id="orgd2c48e1" class="figure">
+<div id="org327ecc4" class="figure">
 <p><img src="img/Ostseepinguin.png" alt="Das Ostseepinguin-Banner zeigt einen Pinguin am Ostseestrand." width="100%" />
 </p>
 </div>
@@ -208,7 +208,7 @@
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="org54b35ac">
+<div class="menu" id="org1ee835d">
 <p>
 <a href="IPv6PrefixDelegation.html">🇺🇸 EN</a>
 </p>
@@ -229,51 +229,48 @@
 </p>
 
 </div>
-
-<div id="outline-container-orge0f7e18" class="outline-2">
-<h2 id="orge0f7e18">Einleitung</h2>
-<div class="outline-text-2" id="text-orge0f7e18">
+<div id="outline-container-org5ba277f" class="outline-2">
+<h2 id="org5ba277f">Einleitung</h2>
+<div class="outline-text-2" id="text-org5ba277f">
 <p>
-Vor Kurzem hat mir mein <code>~ISP~</code> (Internetdienstanbieter) endlich modernes <code>~IPv6~</code> bereitgestellt. Ich habe zumindest ein <code>~/60~</code>-Präfix erhalten, was mir erlaubt, Subnetze zu bilden – bis zu 16, da die Netzwerkkennung bei <code>~IPv6~</code> 64 Bit lang ist. So weit, so gut. Aber ich habe schnell gemerkt, dass sich dieses Präfix häufig ändert, genau wie das <code>~IPv4~</code>-Präfix. Das ist jedoch ein Problem: Ich habe neben meinem Standardnetz zwei VLANs, die jeweils ein eigenes <code>~GUA~</code> (Global Unicast Address)-Präfix benötigen. Wann immer sich mein Präfix ändert, müsste ich die VLAN-Konfigurationen und die Routen anpassen. Das ist nicht praktikabel.
+Vor Kurzem hat mir mein <code>ISP</code> (Internetdienstanbieter) endlich modernes <code>IPv6</code> bereitgestellt. Ich habe zumindest ein <code>/60</code>-Präfix erhalten, was mir erlaubt, Subnetze zu bilden – bis zu 16, da die Netzwerkkennung bei <code>IPv6</code> 64 Bit lang ist. So weit, so gut. Aber ich habe schnell gemerkt, dass sich dieses Präfix häufig ändert, genau wie das <code>IPv4</code>-Präfix. Das ist jedoch ein Problem: Ich habe neben meinem Standardnetz zwei VLANs, die jeweils ein eigenes <code>GUA</code> (Global Unicast Address)-Präfix benötigen. Wann immer sich mein Präfix ändert, müsste ich die VLAN-Konfigurationen und die Routen anpassen. Das ist nicht praktikabel.
 </p>
 
 <p>
-Glücklicherweise gibt es eine Lösung für dieses Problem: <code>~IPv6~</code>-Präfix-Delegation (<code>~PD~</code>).
+Glücklicherweise gibt es eine Lösung für dieses Problem: <code>IPv6</code>-Präfix-Delegation (<code>PD</code>).
 </p>
 </div>
-
-<div id="outline-container-org891c01b" class="outline-3">
-<h3 id="org891c01b">Wie funktioniert das?</h3>
-<div class="outline-text-3" id="text-org891c01b">
+<div id="outline-container-orgb56ff75" class="outline-3">
+<h3 id="orgb56ff75">Wie funktioniert das?</h3>
+<div class="outline-text-3" id="text-orgb56ff75">
 <p>
-Mit klassischem <code>~DHCP~</code> lassen sich automatisch <code>~IPv4~</code>-Adressen und andere Konfigurationsdaten an Clients verteilen. Mit modernem <code>~ICMPv6~</code> geht das natürlich auch. Aber es geht noch besser: Mit <code>~PD~</code> kann man Geräten ganze Netzpräfixe zuweisen.
+Mit klassischem <code>DHCP</code> lassen sich automatisch <code>IPv4</code>-Adressen und andere Konfigurationsdaten an Clients verteilen. Mit modernem <code>ICMPv6</code> geht das natürlich auch. Aber es geht noch besser: Mit <code>PD</code> kann man Geräten ganze Netzpräfixe zuweisen.
 </p>
 
 <p>
-Genau so bekommt auch dein Heimrouter das <code>~IPv6~</code>-Präfix vom <code>~ISP~</code>: Der Heimrouter fordert über den <code>~DHCPv6~</code>-Server des <code>~ISP~</code> ein Präfix an. Der Server antwortet mit einem bestimmten Präfix, das er delegiert. Wenn dein Heimrouter <code>~IA_PD~</code> unterstützt, kannst du sogar mit einem internen Router (z. B. einem Linux-Rechner) selbst wieder einen Teil dieses Präfixes anfordern und eigene Netze (z. B. VLANs) bedienen – wie in meinem Fall.
+Genau so bekommt auch dein Heimrouter das <code>IPv6</code>-Präfix vom <code>ISP</code>: Der Heimrouter fordert über den <code>DHCPv6</code>-Server des <code>ISP</code> ein Präfix an. Der Server antwortet mit einem bestimmten Präfix, das er delegiert. Wenn dein Heimrouter <code>IA_PD</code> unterstützt, kannst du sogar mit einem internen Router (z. B. einem Linux-Rechner) selbst wieder einen Teil dieses Präfixes anfordern und eigene Netze (z. B. VLANs) bedienen – wie in meinem Fall.
 </p>
 
 
-<div id="org7586c5e" class="figure">
+<div id="orge673ba0" class="figure">
 <p><img src="img/IPv6PD.png" alt="Links: Diagramm zur IPv6-Präfix-Delegation. Der ISP weist ein /60-Präfix (3fff:abcd:0:abcd::/60) dem Heimrouter zu. Der Heimrouter delegiert daraus zwei /64-Präfixe – 3fff:abcd:dcbd:abdc::/64 und 3fff:abcd:dcbd:abdd::/64 – an zwei nachgeschaltete Geräte, nachdem diese jeweils angefragt haben." width="80%" />
 </p>
 </div>
 
 <p>
-Die einzelnen Schnittstellen des nachgeschalteten Routers können nun selbst ein <code>/64/-Netz anfordern und sich eine ~~IPv6~</code>-Adresse aus diesem Netz zuweisen lassen.
+Die einzelnen Schnittstellen des nachgeschalteten Routers können nun selbst ein <code>/64/-Netz anfordern und sich eine ~IPv6</code>-Adresse aus diesem Netz zuweisen lassen.
 </p>
 </div>
 </div>
-
-<div id="outline-container-orgfe90d79" class="outline-3">
-<h3 id="orgfe90d79">Netzwerkaufbau</h3>
-<div class="outline-text-3" id="text-orgfe90d79">
+<div id="outline-container-org2f9398b" class="outline-3">
+<h3 id="org2f9398b">Netzwerkaufbau</h3>
+<div class="outline-text-3" id="text-org2f9398b">
 <p>
 So sieht mein aktuelles Netzwerk aus:
 </p>
 
 
-<div id="org2838953" class="figure">
+<div id="org15f68d9" class="figure">
 <p><img src="img/IPv6Network.png" alt="Links: Das Internet (als Wolke) ist über Glasfaser mit einem Heimrouter verbunden. Von dort führt ein Ethernet-Kabel zu einem Switch, der wiederum mit einem Raspberry Pi verbunden ist, der als Router dient. Oberhalb des Switches ist ein WLAN-Access-Point angeschlossen, der mobile Geräte im VLAN &quot;WLAN&quot; versorgt (orange eingefärbt). Unterhalb ist ein Desktop-PC im VLAN &quot;Office&quot; (violett eingefärbt) angeschlossen." width="80%" />
 </p>
 </div>
@@ -287,26 +284,24 @@ Der WLAN-Access-Point ist über einen Access-Port angeschlossen, der für VLAN 1
 </p>
 </div>
 </div>
-
-<div id="outline-container-orga92d032" class="outline-3">
-<h3 id="orga92d032">Konfiguration des Heimrouters</h3>
-<div class="outline-text-3" id="text-orga92d032">
+<div id="outline-container-orgf652291" class="outline-3">
+<h3 id="orgf652291">Konfiguration des Heimrouters</h3>
+<div class="outline-text-3" id="text-orgf652291">
 <p>
 Zuerst musst du herausfinden, ob und wo du auf deinem Heimrouter die Option IA<sub>PD</sub> (Prefix Delegation) für DHCPv6 aktivieren kannst. Auf meinem Heimrouter (eine Fritz!Box) sieht das Menü folgendermaßen aus und ist unter <code>Heimnetz → Netzwerk → Netzwerkeinstellungen → IPv6-Einstellungen</code> zu finden.
 </p>
 
 
-<div id="org3f7dc7b" class="figure">
+<div id="org63b6b38" class="figure">
 <p><img src="img/IPv6PD_HomeRouter.png" alt="Screenshot der Fritz!Box mit aktivierter Option „DNS-Server, Präfix (IA_PD) und IPv6-Adresse (IA_NA) zuweisen“ unter „DHCPv6-Server im Heimnetz der Fritz!Box aktivieren“. Die Fritz!Box ist ein in Deutschland weit verbreiteter Heimrouter von AVM." width="80%" />
 </p>
 </div>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org6736f1b" class="outline-2">
-<h2 id="org6736f1b">Konfiguration des Raspberry Pi Routers</h2>
-<div class="outline-text-2" id="text-org6736f1b">
+<div id="outline-container-orga554cdc" class="outline-2">
+<h2 id="orga554cdc">Konfiguration des Raspberry Pi Routers</h2>
+<div class="outline-text-2" id="text-orga554cdc">
 <p>
 Als nächstes müssen wir den internen Router konfigurieren. Wie erwähnt, nutze ich einen Raspberry Pi, aber die folgenden Schritte sollten auf den meisten modernen Linux-Distributionen und mit beliebiger PC-Hardware funktionieren. Du könntest eventuell ein leistungsfähigeres Gerät bevorzugen – insbesondere mit mehr Bandbreite.
 </p>
@@ -319,10 +314,9 @@ Ich habe mich zunächst im <a href="https://wiki.ubuntuusers.de/Router/Pr%C3%A4f
 <code>systemd-networkd</code> ist jedoch bereits installiert. Ich habe mich deshalb entschieden, erst alles zu konfigurieren und danach den <code>NetworkManager.service</code> zu deaktivieren und stattdessen <code>systemd-networkd.service</code> zu aktivieren.
 </p>
 </div>
-
-<div id="outline-container-org9feed81" class="outline-4">
-<h4 id="org9feed81">WAN-Schnittstelle konfigurieren</h4>
-<div class="outline-text-4" id="text-org9feed81">
+<div id="outline-container-orgc690ce2" class="outline-4">
+<h4 id="orgc690ce2">WAN-Schnittstelle konfigurieren</h4>
+<div class="outline-text-4" id="text-orgc690ce2">
 <p>
 Ich beginne mit der physischen Schnittstelle, die als WAN-Schnittstelle dient:
 </p>
@@ -338,7 +332,7 @@ Die ersten Zeilen enthalten allgemeine Einstellungen. Im Abschnitt <code>[Match]
 <pre class="src src-text">[Match]
 Name=eth0
 Type=ether
-        
+
 </pre>
 </div>
 
@@ -348,7 +342,7 @@ Als nächstes folgt der Abschnitt <code>[Network]</code>, beginnend mit einer Be
 <div class="org-src-container">
 <pre class="src src-text">[Network]
 Description=WAN-Ethernet-Port
-        
+
 </pre>
 </div>
 
@@ -369,7 +363,7 @@ Hier geben wir auch an, welche <code>VLANs</code> mit dieser Schnittstelle verkn
 <div class="org-src-container">
 <pre class="src src-text">VLAN=Office
 VLAN=WLAN
-        
+
 </pre>
 </div>
 
@@ -380,7 +374,7 @@ Da in der Regel ein Dual-Stack-Betrieb sinnvoll ist, setzen wir eine statische <
 <pre class="src src-text">[Address]
 Address=192.168.178.254
 Gateway=192.168.178.1
-        
+
 </pre>
 </div>
 
@@ -390,7 +384,7 @@ Die <code>IPv4</code>-Default-Route darf nicht fehlen. Für <code>IPv6</code> is
 <div class="org-src-container">
 <pre class="src src-text">[Route]
 Gateway=192.168.178.1
-        
+
 </pre>
 </div>
 
@@ -413,10 +407,9 @@ UseAddress=no
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgc535572" class="outline-4">
-<h4 id="orgc535572">VLAN-Geräte konfigurieren</h4>
-<div class="outline-text-4" id="text-orgc535572">
+<div id="outline-container-org3879c53" class="outline-4">
+<h4 id="org3879c53">VLAN-Geräte konfigurieren</h4>
+<div class="outline-text-4" id="text-org3879c53">
 <p>
 Im nächsten Schritt richten wir die virtuellen Geräte für die <code>VLANs</code> ein. Dafür muss <b>jeweils</b> eine Datei vom Typ <code>.netdev</code> unter <code>/etc/systemd/network/</code> angelegt werden. Diese Dateien sollten mit <code>00-</code> beginnen, damit sie vor der Konfiguration der physischen Schnittstelle verarbeitet werden.
 </p>
@@ -498,15 +491,14 @@ Der Abschnitt <code>[IPv6PrefixDelegation]</code> steuert die Zuweisung des Subn
 <pre class="src src-text">[IPv6PrefixDelegation]
 ULA=true
 SubnetId=0x1
-        
+
 </pre>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgbc9de02" class="outline-4">
-<h4 id="orgbc9de02">Wechsel zu systemd-networkd</h4>
-<div class="outline-text-4" id="text-orgbc9de02">
+<div id="outline-container-orgd66129c" class="outline-4">
+<h4 id="orgd66129c">Wechsel zu systemd-networkd</h4>
+<div class="outline-text-4" id="text-orgd66129c">
 <p>
 Wenn alles konfiguriert ist, deaktivieren wir <code>NetworkManager</code> und aktivieren stattdessen <code>systemd-networkd</code>:
 </p>
@@ -528,7 +520,7 @@ Mit folgendem Befehl prüfst du, ob alles läuft:
 <p>
 Beispielausgabe:
 </p>
-<pre class="example" id="orgbffe76c">
+<pre class="example" id="org1c8045d">
 ● systemd-networkd.service - Network Configuration
 Loaded: loaded (/lib/systemd/system/systemd-networkd.service; enabled)
 Active: active (running) since ...
@@ -543,10 +535,9 @@ Du kannst dir auch die zugewiesenen Adressen anzeigen lassen mit:
 </div>
 </div>
 </div>
-
-<div id="outline-container-org651a387" class="outline-3">
-<h3 id="org651a387">Konfiguration der Firewall</h3>
-<div class="outline-text-3" id="text-org651a387">
+<div id="outline-container-org31644b5" class="outline-3">
+<h3 id="org31644b5">Konfiguration der Firewall</h3>
+<div class="outline-text-3" id="text-org31644b5">
 <p>
 Es kann vorkommen, dass dein interner Router keine Adresse auf den <code>VLAN</code>-Interfaces erhält. Das liegt häufig daran, dass die für <code>DHCPv6</code> benötigten Ports blockiert werden. Der Server verwendet UDP-Port <code>547</code>, der Client UDP-Port <code>546</code>. Diese müssen erlaubt werden.
 </p>
@@ -579,10 +570,9 @@ Oder unter Fedora, CentOS oder RHEL mit <code>firewalld</code>:
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgfbb0ea5" class="outline-3">
-<h3 id="orgfbb0ea5">Fazit</h3>
-<div class="outline-text-3" id="text-orgfbb0ea5">
+<div id="outline-container-orgfbec77a" class="outline-3">
+<h3 id="orgfbec77a">Fazit</h3>
+<div class="outline-text-3" id="text-orgfbec77a">
 <p>
 Mit diesem Setup erhalten alle Geräte in meinen <code>VLANs</code> automatisch eine gültige <code>IPv6</code>-Adresse mit dem korrekten Präfix – auch wenn sich das Präfix regelmäßig durch meinen Provider ändert. Die Routen werden ebenfalls automatisch gesetzt. Ich muss mich um nichts mehr kümmern.
 </p>
@@ -592,10 +582,9 @@ Das zeigt einmal mehr: <code>IPv6</code> ist moderner und einfacher als das vera
 </p>
 </div>
 </div>
-
-<div id="outline-container-org760695d" class="outline-3">
-<h3 id="org760695d">Fußnoten</h3>
-<div class="outline-text-3" id="text-org760695d">
+<div id="outline-container-org9700b8a" class="outline-3">
+<h3 id="org9700b8a">Fußnoten</h3>
+<div class="outline-text-3" id="text-org9700b8a">
 </div>
 </div>
 </div>
@@ -613,7 +602,7 @@ Jeder zusätzliche Bit halbiert die Zahl möglicher Subnetze. Ein /61 ergibt 8, 
 <div id="postamble" class="status">
 <p class="date">Date: 2025-06-04 Mi 00:00</p>
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2025-06-15 So 20:55</p>
+<p class="date">Created: 2025-06-16 Mo 09:49</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
