@@ -1,18 +1,19 @@
-[Match]
-Name=Office
-Type=vlan
+  [Match]
+  Name=Office
+  Type=vlan
 
-[Network]
-Description=Office VLAN Interface
-DHCP=ipv6
-IPForward=yes
-IPv6SendRA=yes
-IPv6AcceptRA=no
-DHCPPrefixDelegation=yes
+  [Network]
+  Description=Office VLAN interface
+  DHCP=ipv6
+  IPForward=yes
+  IPv6SendRA=yes
+  IPv6AcceptRA=no
+  DHCPPrefixDelegation=yes
 
-[Address]
-Address=172.16.10.1/24
+  [Address]
+  Address=172.16.10.1/24
 
-[IPv6PrefixDelegation]
-ULA=true
-SubnetId=0x1
+  [DHCPPrefixDelegation]
+  ULA=true
+  SubnetId=0x1
+  Token=::1

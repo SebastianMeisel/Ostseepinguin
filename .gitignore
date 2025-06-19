@@ -5,3 +5,4 @@ webserver/Cargo.lock
 webserver/target/**
 /Test-DdAWPno/**
 *.bkp
+/files/WLAN.pcapng

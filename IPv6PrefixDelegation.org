@@ -113,6 +113,7 @@ In this section we also have to configure which ~VLANs~ we want to associate wit
 #+BEGIN_SRC text :tangle files/10-eth0.network
   VLAN=Office
   VLAN=WLAN
+  
 #+END_SRC
 
 You most likely want to run dual stack. You should use static addressing for the legacy IP address that matches the network you'r in, e. g.:
@@ -121,25 +122,33 @@ You most likely want to run dual stack. You should use static addressing for the
   [Address]
   Address=192.168.178.254
   Gateway=192.168.178.1
+  
 #+END_SRC
 
 Don't forget the ~IPv4~ default route. As we use Prefix Delegation for ~IPv6~ you do not need to set any routes there. It is done by ~DHCPv6~ for us.
 #+BEGIN_SRC text :tangle files/10-eth0.network
   [Route]
   Gateway=192.168.178.1
+  
 #+END_SRC
+
+We can make our live easier by assigning a Host-ID to our interface instead of using a random one. I just use ~::1~ as my Home router doesn't:
+
+#+BEGIN_SRC text  :tangle files/10-eth0.network
+  [IPv6AcceptRA]
+  Token=::1
+#+END_SRC
+
 
 So finally there comes the part, where we configure ~IA_PD~ for the WAN interface:
 
  - PrefixDelegationHint: :: You need to specify the size of the prefix, you want to get. It must be bigger the the prefix you got from your ISP, but at least ~/64~, which would however mean, you can only provide 1 subnet downstream. Normally it is recommend to observe the nibble boundaries, which means you take steps of 4 bits, so on hex digit stands for one step in your network hierarchy. As I only got a ~/60~ I only have one nibble to work with. I decided that 4 subnets should be enough for now and settled on a ~/62~.[fn:1]
  - UseDelegatedPrefix: :: This option activates the use Prefix Delegation and should be set, although it seems to work without it.
- - UseAddress: :: This is kind of optional but it suppresses some warnings about addresses not being used.
 
 #+BEGIN_SRC text :tangle files/10-eth0.network
   [DHCPv6]
   PrefixDelegationHint=::/62
   UseDelegatedPrefix=yes
-  UseAddress=no
 #+END_SRC
 
 *** Configuring the Virtual LAN devices
@@ -196,14 +205,17 @@ Again a legacy address should be provided for dual stack.
 
 #+END_SRC
 
-Finally an ~[IPv6PrefixDelegation]~ section is need. You can decide whether your Unique Local (Unicast) Addresses (~ULAs~). It doesn't hurt, although they will not actually be used, as legacy ~IPv4~ is preferred over ~IPv6~ for private addressing.
+Finally an ~[DHCPPrefixDelegation]~ section is need. You can decide whether your Unique Local (Unicast) Addresses (~ULAs~). It doesn't hurt, although they will not actually be used, as legacy ~IPv4~ is preferred over ~IPv6~ for private addressing.
 
 The second option is more important. With ~SubnetId~ you can configure which of the available subnets you want to use. It's the number of the  subnet in hexadecimal numbering. So ~0x1~ would be the first ~0xf~ would be the 15th subnets if you have so many to choose from.
 
+I also like to use ~::1~ as the Host-ID, configure with ~Token~, so I can easily ping the router.
+
 #+BEGIN_SRC text :tangle ./files/20-vlan10.network
-  [IPv6PrefixDelegation]
+  [DHCPPrefixDelegation]
   ULA=true
   SubnetId=0x1
+  Token=::1
 
 #+END_SRC
 

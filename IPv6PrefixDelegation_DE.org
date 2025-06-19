@@ -129,20 +129,27 @@ Die ~IPv4~-Default-Route darf nicht fehlen. Für ~IPv6~ ist das nicht nötig –
 #+BEGIN_SRC text :tangle files/10-eth0.network
 [Route]
 Gateway=192.168.178.1
-	
+
+#+END_SRC
+
+Ich mache es mir gerne einfach und benutze hier ~::1~ als Host-ID, da mein Heimrouter es nicht tut:
+
+#+BEGIN_SRC text  :tangle files/10-eth0.network
+  [IPv6AcceptRA]
+  Token=::1
+  
 #+END_SRC
 
 Nun zum wichtigsten Teil: ~IA_PD~ aktivieren:
 
  - PrefixDelegationHint: :: Die gewünschte Präfixgröße – sie muss größer als das Präfix, dass dein ISP dir liefert (bei mir ~/60/~), aber höchstens ~/64~ sein. Ich habe mich für ~/62~ entschieden, was vier Subnetze erlaubt.[fn:1]
  - UseDelegatedPrefix: :: Aktiviert die Nutzung der Prefix Delegation.
- - UseAddress: :: Optional – unterdrückt Warnungen, dass Adressen nicht verwendet werden.
 
 #+BEGIN_SRC text :tangle files/10-eth0.network
-[DHCPv6]
-PrefixDelegationHint=::/62
-UseDelegatedPrefix=yes
-UseAddress=no
+  [DHCPv6]
+  PrefixDelegationHint=::/62
+  UseDelegatedPrefix=yes
+  
 #+END_SRC
 
 *** VLAN-Geräte konfigurieren
@@ -155,21 +162,23 @@ Jede Datei enthält zwei Abschnitte:
  - [VLAN]: :: Hier wird die ~VLAN-Id~ festgelegt (zwischen 1 und 4096), passend zur Konfiguration auf dem Switch.
 
 #+BEGIN_SRC text :tangle ./files/00-vlan10.netdev
-[NetDev]
-Name=Office
-Kind=vlan
+  [NetDev]
+  Name=Office
+  Kind=vlan
 
-[VLAN]
-Id=10
+  [VLAN]
+  Id=10
+  
 #+END_SRC
 
 Für *jedes* ~VLAN~ brauchen wir zusätzlich eine passende ~.network~-Datei. Diese sollte mit einer höheren Nummer (z. B. ~20-~) beginnen als die der physischen Schnittstelle.
 
 Im Abschnitt ~[Match]~ geben wir den Namen des ~VLAN~-Geräts an. Der ~Typ~ ist ~vlan~.
 #+BEGIN_SRC text :tangle ./files/20-vlan10.network
-[Match]
-Name=Office
-Type=vlan
+  [Match]
+  Name=Office
+  Type=vlan
+  
 #+END_SRC
 
 Im Abschnitt ~[Network]~ erfolgt die eigentliche Netzwerkkonfiguration:
@@ -181,30 +190,34 @@ Im Abschnitt ~[Network]~ erfolgt die eigentliche Netzwerkkonfiguration:
  - DHCPPrefixDelegation: :: Aktiviert ~IA_PD~.
 
 #+BEGIN_SRC text :tangle ./files/20-vlan10.network
-[Network]
-Description=Office VLAN Interface
-DHCP=ipv6
-IPForward=yes
-IPv6SendRA=yes
-IPv6AcceptRA=no
-DHCPPrefixDelegation=yes
+  [Network]
+  Description=Office VLAN Interface
+  DHCP=ipv6
+  IPForward=yes
+  IPv6SendRA=yes
+  IPv6AcceptRA=no
+  DHCPPrefixDelegation=yes
+  
 #+END_SRC
 
 Auch eine ~IPv4~-Adresse sollte für Dual-Stack vergeben werden:
 #+BEGIN_SRC text :tangle ./files/20-vlan10.network
-[Address]
-Address=172.16.10.1/24
+  [Address]
+  Address=172.16.10.1/24
+  
 #+END_SRC
 
-Der Abschnitt ~[IPv6PrefixDelegation]~ steuert die Zuweisung des Subnetzes:
- - ULA=true: :: Aktiviert Unique Local Addresses (optional)
- - SubnetId=0x1: :: Wählt das gewünschte Subnetz (z. B. ~0x1~ für das zweite Subnetz). Die Nummerierung der Subnetze wird hexadezimal geschrieben. ~0xf~ wäre also das 15te Netzwerk.
+Der Abschnitt ~[DHCPPrefixDelegation]~ steuert die Zuweisung des Subnetzes:
+ - ULA=true : :: Aktiviert Unique Local Addresses (optional)
+ - SubnetId=0x1 : :: Wählt das gewünschte Subnetz (z. B. ~0x1~ für das zweite Subnetz). Die Nummerierung der Subnetze wird hexadezimal geschrieben. ~0xf~ wäre also das 15te Netzwerk.
+ - Token=::1 : :: Setzt die Host-ID auf ~::1~, sodass der Router leichter angepingt werden kann.
 
 #+BEGIN_SRC text :tangle ./files/20-vlan10.network
-[IPv6PrefixDelegation]
-ULA=true
-SubnetId=0x1
-	
+  [DHCPPrefixDelegation]
+  ULA=true
+  SubnetId=0x1
+  Token=::1
+
 #+END_SRC
 
 *** Wechsel zu systemd-networkd
