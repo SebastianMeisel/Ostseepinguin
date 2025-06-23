@@ -1,0 +1,36 @@
+#+TITLE: IPv6PrefixDelegation for Virtual Machine Manager with Open vSwitch
+#+AUTHOR: Sebastian Meisel
+#+DATE: <2025-06-18 Mi>
+:HTML_PROPERTIES:
+#+OPTIONS: num:nil toc:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="mystyle.css" />
+:END:
+
+#+ATTR_HTML: :width 100% :alt The Ostseepinguin banner showing a baltic penguin on the beach.
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 700
+[[file:img/Ostseepinguin.png]]
+
+
+#+NAME: toggle-mode-script
+#+BEGIN_EXPORT HTML
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+#+END_EXPORT
+
+#+begin_menu
+[[file:IPv6Prefix_virtmanager_DE.html][🇩🇪 DE]]
+- > [[file:index.html][Home]]
+
+--------
+#+ATTR_HTML: :width 16px :alt Mastodon
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 20
+[[file:img/Mastodon.png]] https://emacs.ch/@SebasTEAan
+
+📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
+#+end_menu
+
+* Introduction
+
