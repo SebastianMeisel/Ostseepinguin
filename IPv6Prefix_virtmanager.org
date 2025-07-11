@@ -34,3 +34,129 @@
 
 * Introduction
 
+After I setup [[file:IPv6PrefixDelegation.html][IPv6 Prefix Delegation (~PD~) on my Linux router]] I realized, that I still need an IPv6 subnet for the virtual machines (~VMs~), I run on my Desktop PC.
+
+For this I again chose to move from ~NetworkManager~ to ~systemd-netword~. This time I'm on a openSUSE Tumbleweed machine. As for the last time, I choose to first configure ~netword~ and then transition, with hopefully everything working.
+
+* Configure networkd
+
+As before I first have to configure the physical Ethernet interface. For this I create the file ~/etc/systemd/network/10-enp0s16f0u1~. In the section ~[Match]~ I match the type ~ether~, but instead of the device name, this time I opted to match the ~MACAddress~:
+
+#+BEGIN_SRC text :tangle files/10-eth0.network_suse
+  [Match]
+  MACAddress=d8:bb:c1:8b:b9:d1
+  Type=ether
+  
+#+END_SRC
+
+The section ~[Network]~ starts with deliberate description:
+#+BEGIN_SRC text :tangle files/10-eth0.network_suse
+  [Network]
+  Description=Physical Ethernet Port
+#+END_SRC
+
+ - DHCP=yes : :: I want to use ~DHCP~ for both ~IPv6~ and legacy ~IPv4~.
+ - IPv6AcceptRA=yes : :: For ~IPv6~ we need to accept Router Advertisments (~RA~).
+ - IPForward=yes : :: We also need to be sure IP forwarding is activated.
+
+
+#+BEGIN_SRC text :tangle files/10-eth0.network
+  DHCP=yes
+  IPv6AcceptRA=yes
+  IPForward=yes
+#+END_SRC
+
+Here is also the place to include the ~VLANs~ which are connected to that device — in this case:
+
+ 1) ~Office~ for the host and
+ 2) ~VM~ for the virtual machines.
+
+#+BEGIN_SRC text :tangle files/10-eth0.network
+  VLAN=Office
+  VLAN=VM
+#+END_SRC
+
+
+* VLAN 10: Host network
+
+
+#+NAME: 30-vlan10.netdev
+#+BEGIN_SRC conf :tangle /etc/systemd/network/30-vlan10.netdev
+[NetDev]
+Name=Office
+Kind=vlan
+
+[VLAN]
+Id=10
+#+END_SRC
+
+#+NAME: 40-vlan10.network
+#+BEGIN_SRC conf :tangle /etc/systemd/network/40-vlan10.network
+[Match]
+Name=vlan10
+
+[Network]
+DHCP=yes
+#+END_SRC
+
+
+* VLAN 20: Bridge for VMs
+#+NAME: 50-vlan20.netdev
+#+BEGIN_SRC conf :tangle /etc/systemd/network/50-vlan20.netdev
+[NetDev]
+Name=VM
+Kind=vlan
+
+[VLAN]
+Id=30
+#+END_SRC
+
+* Bridge device (br20)
+#+NAME: 60-br20.netdev
+#+BEGIN_SRC conf :tangle /etc/systemd/network/60-br20.netdev
+[NetDev]
+Name=br20
+Kind=bridge
+#+END_SRC
+
+* Attach VLAN 20 to the bridge
+#+NAME: 70-vlan20.network
+#+BEGIN_SRC conf :tangle /etc/systemd/network/70-vlan20.network
+[Match]
+Name=vlan20
+
+[Network]
+Bridge=br20
+#+END_SRC
+
+* Bridge interface configuration
+#+NAME: 80-br20.network
+#+BEGIN_SRC conf :tangle /etc/systemd/network/80-br20.network
+[Match]
+Name=br20
+
+[Network]
+# no IP configuration unless needed
+#+END_SRC
+
+* Virtual Machine Configuration
+Connect your VM interfaces to ~br20~ using `virt-manager` or XML. Example in libvirt XML:
+
+#+BEGIN_SRC xml
+<interface type='bridge'>
+  <source bridge='br20'/>
+  <model type='virtio'/>
+</interface>
+#+END_SRC
+
+* Notes
+#+BEGIN_NOTES
+- If `libvirt` tries to manage the bridge itself (e.g. ~virbr0~), disable its autostart bridge and use your own.
+- You can test VLAN tagging with ~tcpdump -i eth0 vlan~.
+- Avoid overlapping IP subnets between VLAN 10 and VLAN 20.
+
+#+END_NOTES
+
+# Local Variables:
+# jinx-languages: "en_US"
+# End:
