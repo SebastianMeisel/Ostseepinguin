@@ -36,7 +36,7 @@
 
 After I setup [[file:IPv6PrefixDelegation.html][IPv6 Prefix Delegation (~PD~) on my Linux router]] I realized, that I still need an IPv6 subnet for the virtual machines (~VMs~), I run on my Desktop PC.
 
-For this I again chose to move from ~NetworkManager~ to ~systemd-netword~. This time I'm on a openSUSE Tumbleweed machine. As for the last time, I choose to first configure ~netword~ and then transition, with hopefully everything working.
+For a ~VM~ you use a 
 
 * Configure networkd
 
