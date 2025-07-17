@@ -19,33 +19,36 @@
 \date{\textit{<Mi,  4. Jun. 2025>>}}
 \title{IPv6 prefix delegation using systemd-networkd}
 \hypersetup{
- pdfauthor={Sebastian Meisel},
- pdftitle={IPv6 prefix delegation using systemd-networkd},
- pdfkeywords={},
- pdfsubject={},
- pdfcreator={Emacs 29.4 (Org mode 9.6.15)}, 
- pdflang={English}}
+	pdfauthor={Sebastian Meisel},
+	pdftitle={IPv6 prefix delegation using systemd-networkd},
+	pdfkeywords={},
+	pdfsubject={},
+	pdfcreator={Emacs 29.4 (Org mode 9.6.15)},
+	pdflang={English}}
+
+\newenvironment{menu}{}{}
+
 \begin{document}
 
 \maketitle
 
 \begin{center}
-\includegraphics[width=.65\linewidth]{img/Ostseepinguin.png}
+	\includegraphics[width=.65\linewidth]{img/Ostseepinguin.png}
 \end{center}
 
 
 \begin{menu}
-\href{NetworkNamespace.DE.html}{🇩🇪 DE}
-\begin{itemize}
-\item > \href{index.html}{Home}
-\end{itemize}
+	\href{NetworkNamespace.DE.html}{🇩🇪 DE}
+	\begin{itemize}
+		\item > \href{index.html}{Home}
+	\end{itemize}
 
-\noindent\rule{\textwidth}{0.5pt}
-\begin{center}
-\includegraphics[width=.65\linewidth]{img/Mastodon.png}
-\end{center} \url{https://emacs.ch/@SebasTEAan}
+	\noindent\rule{\textwidth}{0.5pt}
+	\begin{center}
+		\includegraphics[width=.65\linewidth]{img/Mastodon.png}
+	\end{center} \url{https://emacs.ch/@SebasTEAan}
 
-📧 \href{mailto:sebastian.meisel+ostseepinguin@gmail.com}{sebastian.meisel at gmail.com}
+	📧 \href{mailto:sebastian.meisel+ostseepinguin@gmail.com}{sebastian.meisel at gmail.com}
 \end{menu}
 
 \section*{Introduction}
@@ -63,7 +66,7 @@ This is how my network currently looks:
 
 ATTR\textsubscript{HTML}: :width 100\% :alt Left: The Internet (as a cloud) is connected to a home router via fiber. From there an Ethernet connection is drawn to a switch, which is connected to a Raspberry Pi, that acts as a router. Above the switch is connected to a Wireless AP, that provides Wifi to various mobile devices in the VLAN "WLAN", which is colored light orange. Beneath a desktop PC is connected to the switch, which is in the VLAN "Office", colored in light purple.
 \begin{center}
-\includegraphics[width=.65\linewidth]{img/IPv6Network.png}
+	\includegraphics[width=.65\linewidth]{img/IPv6Network.png}
 \end{center}
 
 

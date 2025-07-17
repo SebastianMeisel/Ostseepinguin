@@ -1,6 +1,6 @@
-  [NetDev]
-  Name=Office
-  Kind=vlan
+[NetDev]
+Name=Office
+Kind=vlan
 
-  [VLAN]
-  Id=10
+[VLAN]
+Id=10

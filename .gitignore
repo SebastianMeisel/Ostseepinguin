@@ -6,3 +6,5 @@ webserver/target/**
 /Test-DdAWPno/**
 *.bkp
 /files/WLAN.pcapng
+*.fdb_latexmk
+auto/**
