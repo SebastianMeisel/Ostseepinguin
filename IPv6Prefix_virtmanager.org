@@ -34,11 +34,91 @@
 
 * Introduction
 
-After I setup [[file:IPv6PrefixDelegation.html][IPv6 Prefix Delegation (~PD~) on my Linux router]] I realized, that I still need an IPv6 subnet for the virtual machines (~VMs~), I run on my Desktop PC.
+After I setup [[file:IPv6PrefixDelegation.html][IPv6 Prefix Delegation (~PD~) on my Linux router]] I realized, that I still need an ~IPv6~ subnet for the virtual machines (~VMs~), I run on my Desktop PC.
 
-For a ~VM~ you use a 
+For ~IPv6~ I want to use bridged network, but on the other hand, I do not actually want my ~VMs~ in my Office ~VLAN~. So I decided to create a third ~VLAN~ just for my ~VMs~. The whole setup in the end shall work like this:
 
-* Configure networkd
+#+ATTR_HTML: :width 50%
+#+ATTR_LATEX: :width .65\linewidth :placement [!htpb]
+#+ATTR_ORG: :width 700
+[[file:img/IPv6Network_virtmanager.png]]
+
+* Add new VLAN on the Switch
+
+#+ATTR_HTML: :width 50%
+#+ATTR_LATEX: :width .65\linewidth :placement [!htpb]
+#+ATTR_ORG: :width 700
+[[file:img/Switch_VLAN30.png]]
+
+ATTR_HTML: :width 50%
+#+ATTR_LATEX: :width .65\linewidth :placement [!htpb]
+#+ATTR_ORG: :width 700
+[[file:img/Switch_VLANPorts.png]]
+
+
+* Add new VLAN on the Router
+
+#+BEGIN_SRC text
+[Match]
+Name=eth0
+Type=ether
+
+[Network]
+Description=Outbound Ethernet port
+
+DHCP=ipv6
+IPv6AcceptRA=yes
+
+VLAN=Office
+VLAN=WLAN
+VLAN=VMs
+
+[Address]
+Address=192.168.178.254/24
+
+[IPv6AcceptRA]
+Token=::1
+
+[DHCPv6]
+PrefixDelegationHint=::/62
+UseDelegatedPrefix=yes
+
+[Route]
+Gateway=192.168.178.1
+#+END_SRC
+
+#+BEGIN_SRC text
+[NetDev]
+Name=VMs
+Kind=vlan
+
+[VLAN]
+Id=30
+#+END_SRC
+
+#+BEGIN_SRC text
+[Match]
+Name=VMs
+Type=vlan
+
+[Network]
+Description=VMs VLAN interface
+DHCP=ipv6
+IPv6SendRA=yes
+IPv6AcceptRA=no
+DHCPPrefixDelegation=yes
+
+[Address]
+Address=172.16.30.1/24
+
+[DHCPPrefixDelegation]
+Token=::1
+SubnetId=0x2
+#+END_SRC
+
+
+* Configure Host
+** Configure networkd
 
 As before I first have to configure the physical Ethernet interface. For this I create the file ~/etc/systemd/network/10-enp0s16f0u1~. In the section ~[Match]~ I match the type ~ether~, but instead of the device name, this time I opted to match the ~MACAddress~:
 
@@ -77,7 +157,7 @@ Here is also the place to include the ~VLANs~ which are connected to that device
 #+END_SRC
 
 
-* VLAN 10: Host network
+** VLAN 10: Host network
 
 
 #+NAME: 30-vlan10.netdev
@@ -100,7 +180,7 @@ DHCP=yes
 #+END_SRC
 
 
-* VLAN 20: Bridge for VMs
+** VLAN 30: Bridge for VMs
 #+NAME: 50-vlan20.netdev
 #+BEGIN_SRC conf :tangle /etc/systemd/network/50-vlan20.netdev
 [NetDev]
@@ -111,7 +191,7 @@ Kind=vlan
 Id=30
 #+END_SRC
 
-* Bridge device (br20)
+** Bridge device (br20)
 #+NAME: 60-br20.netdev
 #+BEGIN_SRC conf :tangle /etc/systemd/network/60-br20.netdev
 [NetDev]
@@ -119,7 +199,7 @@ Name=br20
 Kind=bridge
 #+END_SRC
 
-* Attach VLAN 20 to the bridge
+** Attach VLAN 20 to the bridge
 #+NAME: 70-vlan20.network
 #+BEGIN_SRC conf :tangle /etc/systemd/network/70-vlan20.network
 [Match]
@@ -129,7 +209,7 @@ Name=vlan20
 Bridge=br20
 #+END_SRC
 
-* Bridge interface configuration
+** Bridge interface configuration
 #+NAME: 80-br20.network
 #+BEGIN_SRC conf :tangle /etc/systemd/network/80-br20.network
 [Match]

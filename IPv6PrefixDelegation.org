@@ -1,3 +1,12 @@
+:LaTeX_PROPERTIES:
+#+LANGUAGE: de
+#+OPTIONS: d:nil todo:nil pri:nil tags:nil
+#+OPTIONS: H:4
+#+LaTeX_CLASS: orgstandard
+#+LaTeX_CMD: xelatex
+#+LATEX_HEADER: \usepackage{listings}
+:END:
+
 #+TITLE: IPv6 prefix delegation using systemd-networkd
 #+AUTHOR: Sebastian Meisel
 #+DATE: <2025-06-04 Mi>

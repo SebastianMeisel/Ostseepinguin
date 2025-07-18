@@ -8,3 +8,4 @@ webserver/target/**
 /files/WLAN.pcapng
 *.fdb_latexmk
 auto/**
+*.tex
