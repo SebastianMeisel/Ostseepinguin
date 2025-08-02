@@ -440,7 +440,7 @@ Only the ~Office~ interface should get an Global Unicast IPv6 Address (~GUA~).
 #+begin_example
 lo               UNKNOWN        127.0.0.1/8 ::1/128 
 enp0s16f0u1      UP             172.16.10.154/24 metric 1024 fe80::dabb:c1ff:fe8b:b9d1/64 
-br20             UP             fe80::84d9:45ff:fe20:bb32/64 
+br30             UP             fe80::84d9:45ff:fe20:bb32/64 
 Office@enp0s16f0u1 UP             172.16.10.155/24 metric 1024 3fff:abc:def:bf0c:dabb:c1ff:fe8b:b9d1/64 fe80::dabb:c1ff:fe8b:b9d1/64 
 VM@enp0s16f0u1   UP             fe80::dabb:c1ff:fe8b:b9d1/64 
 #+end_example
