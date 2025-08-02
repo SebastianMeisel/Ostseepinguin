@@ -20,6 +20,7 @@
 
 #+begin_menu
 [[file:IPv6PrefixDelegation.html][🇺🇸 EN]]
+- > [[file:IPv6Prefix_virtmanager_DE.org][IPv6-Präfix-Delegation für Virtual Machine Manager]] (Teil II)
 
 -> [[file:index.DE.html][Startseite]]
 

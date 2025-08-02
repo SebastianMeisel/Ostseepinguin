@@ -34,7 +34,7 @@
 
 Willkommen auf meinem Blog: "Ostseepinguin". Hier schreibe ich über das Leben, Linux und den ganzen Rest.
 
-* Articles
+* Artikel
 :PROPERTIES:
 :header-args:bash: :shebang #!/bin/bash  :eval never :session OVS :exports code
 :header-args:mermaid: :tangle nil :results file :exports results :eval t
@@ -52,8 +52,12 @@ Willkommen auf meinem Blog: "Ostseepinguin". Hier schreibe ich über das Leben, 
   + Demnächst :: Linux Netzwerk-Namespaces (Teil III): Einen Web-Server hinzufügen.
 
 + Juni 2025
-  + [[file:IPv6PrefixDelegation_DE.org][IPv6 Prefix Delegation]] ::
+  + [[file:IPv6PrefixDelegation_DE.html][IPv6-Präfix-Delegation]] ::
     Ich benutze DHCPv6 um mit meinem Linux Router ein ganzes Prefix vom meinem Homerouter zu bekommen, dass ich für VLANs nutze.
+
++ Juli 2025
+  + [[file:IPv6Prefix_virtmanager_DE.html][IPv6-Präfix-Delegation für Virtual Machine Manager]] ::
+    Separates ~VLAN~ mit eigenem ~IPv6-Präfix~ für meine virtuellen Machinen. 
 
 # Local Variables:
 # jinx-languages: "de_DE"

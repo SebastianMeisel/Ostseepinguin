@@ -1,26 +1,6 @@
-[Match]
-Name=eth0
-Type=ether
-
-[Network]
-Description=WAN Ethernet port
-
-DHCP=ipv6
+DHCP=yes
 IPv6AcceptRA=yes
 IPForward=yes
 
 VLAN=Office
-VLAN=WLAN
-
-[Address]
-Address=192.168.178.254
-
-[Route]
-Gateway=192.168.178.1
-
-[IPv6AcceptRA]
-Token=::1
-
-[DHCPv6]
-PrefixDelegationHint=::/62
-UseDelegatedPrefix=yes
+VLAN=VM

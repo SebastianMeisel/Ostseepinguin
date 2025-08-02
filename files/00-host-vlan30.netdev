@@ -1,0 +1,6 @@
+[NetDev]
+Name=VM
+Kind=vlan
+
+[VLAN]
+Id=30

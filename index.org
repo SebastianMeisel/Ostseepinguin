@@ -56,7 +56,10 @@ Welcome to the blog of the "Ostseepinguin", which is German for "Baltic penguin"
 + June 2025
   + [[file:IPv6PrefixDelegation.org][IPv6 Prefix Delegation]] ::
     Use DHCPv6 to delegate whole Prefixes to devices.
-
+ 
++ July 2025
+  + [[file:IPv6Prefix_virtmanager.html][IPv6 Prefix Delegation for Virtual Machine Manager]] ::
+    Put your virtual machines on a separate ~VLAN~ with it's own ~IPv6~ prefix. 
 
 
 # Local Variables:

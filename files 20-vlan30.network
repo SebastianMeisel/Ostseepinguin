@@ -1,0 +1,16 @@
+[Match]
+Name=VMs
+Type=vlan
+
+[Network]
+Description=VMs VLAN interface
+DHCP=ipv6
+IPv6SendRA=yes
+IPv6AcceptRA=yes
+DHCPPrefixDelegation=yes
+
+[DHCPPrefixDelegation]
+Token=::1
+SubnetId=0x2
+Assign=yes
+Announce=yes

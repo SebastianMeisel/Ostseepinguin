@@ -1,0 +1,7 @@
+Host Win Windows Window11 Windoof win
+     HostName	       fe80::d8b8:3a7:126b:162b%%VMs
+     User             Username
+     IdentityFile	~/.ssh/win
+     ProxyJump         pi
+Host *
+    IdentitiesOnly      yes

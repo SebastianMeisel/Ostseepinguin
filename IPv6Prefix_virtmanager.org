@@ -1,4 +1,4 @@
-#+TITLE: IPv6PrefixDelegation for Virtual Machine Manager with Open vSwitch
+#+TITLE: IPv6PrefixDelegation for Virtual Machine Manager
 #+AUTHOR: Sebastian Meisel
 #+DATE: <2025-06-18 Mi>
 :HTML_PROPERTIES:
@@ -22,25 +22,29 @@
 #+begin_menu
 [[file:IPv6Prefix_virtmanager_DE.html][🇩🇪 DE]]
 - > [[file:index.html][Home]]
-
+- > [[file:IPv6PrefixDelegation.html][IPv6 prefix delegation (Part I)]]
 --------
 #+ATTR_HTML: :width 16px :alt Mastodon
 #+ATTR_LATEX: :width .65\linewidth
 #+ATTR_ORG: :width 20
-[[file:img/Mastodon.png]] https://emacs.ch/@SebasTEAan
+[[file:img/Mastodon.png]] [[https://linuxrocks.online/@SebasTEAan]]
 
 📧 [[mailto:sebastian.meisel+ostseepinguin@gmail.com][sebastian.meisel at gmail.com]]
 #+end_menu
 
 * Introduction
 
-After I setup [[file:IPv6PrefixDelegation.html][IPv6 Prefix Delegation (~PD~) on my Linux router]] I realized, that I still need an ~IPv6~ subnet for the virtual machines (~VMs~), I run on my Desktop PC.
+After I set up [[file:IPv6PrefixDelegation.html][IPv6 Prefix Delegation (~PD~) on my Linux router]], I realized that I still need an ~IPv6~ subnet for the virtual machines (~VMs~) I run on my desktop PC.
 
-For ~IPv6~ I want to use bridged network, but on the other hand, I do not actually want my ~VMs~ in my Office ~VLAN~. So I decided to create a third ~VLAN~ just for my ~VMs~. The whole setup in the end shall work like this:
+For a ~VM~ to get an address from a delegated prefix, I need a bridged interface with a connected ~VLAN~, and a way to propagate the prefix to that segment. In this guide, I use ~systemd-networkd~. Alternatives like NetworkManager or netplan can be used similarly, but the focus here is on declarative ~.network~ and ~.netdev~ units.
 
-#+ATTR_HTML: :width 50%
-#+ATTR_LATEX: :width .65\linewidth :placement [!htpb]
-#+ATTR_ORG: :width 700
+I also want the ~VLAN~ to be configured on my physical switch, with addresses assigned on my router. My host computer works as a bridge in this scenario, not as a ~NAT~ gatway or router. This way the ~VMs~ do not have acces to my ~Office VLAN~ which gives me extra security. This is especially important to me, as one of the ~VMs~ is a Windows 11 machine, which I consider insecure.
+
+In the end my network is supposed to look like this:
+
+#+ATTR_HTML: :width 80% :alt: Left: The Internet (as a cloud) is connected to a home router via fiber. From there, an Ethernet connection is drawn to a switch, which is connected to a Raspberry Pi, that acts as a router. Above, the switch is connected to a Wireless AP, that provides WiFi to various mobile devices in the VLAN "WLAN", which is colored light orange. Beneath, a desktop PC is connected to the switch, which is in the VLAN "Office", colored in light purple. Inside this Office PC, a virtual machine (VM) is running, which is itself connected to the VLAN "VLAN VM", depicted by a smaller blue network interface box within the Office PC.
+#+ATTR_LATEX: :width .65\linewidth
+#+ATTR_ORG: :width 600
 [[file:img/IPv6Network_virtmanager.png]]
 
 * Add new VLAN on the Switch
@@ -120,71 +124,166 @@ SubnetId=0x2
 * Configure Host
 ** Configure networkd
 
-As before I first have to configure the physical Ethernet interface. For this I create the file ~/etc/systemd/network/10-enp0s16f0u1~. In the section ~[Match]~ I match the type ~ether~, but instead of the device name, this time I opted to match the ~MACAddress~:
+First, configure the physical Ethernet interface in ~/etc/systemd/network/10-eth0.network~. I match the device by ~MACAddress~ rather than name, which avoids renaming issues after reboots or BIOS updates.
 
-#+BEGIN_SRC text :tangle files/10-eth0.network_suse
-  [Match]
-  MACAddress=d8:bb:c1:8b:b9:d1
-  Type=ether
-  
+Explanation of key options:
+- ~DHCP=yes~: enables both IPv4 and IPv6 DHCP if advertised
+- ~IPv6AcceptRA=yes~: allows the interface to receive router advertisements
+- ~IPv6SendRA=yes~: enables the system to forward router advertisements to child interfaces
+- ~IPv4Forwarding=~ and ~IPv6Forwarding=~: enable packet forwarding
+- ~VLAN=~: binds named VLAN interfaces to this physical device
+
+#+BEGIN_SRC text :tangle files/10-eth0-host.network
+[Match]
+MACAddress=d8:bb:c1:8b:b9:d1
+Type=ether
+
+[Network]
+Description=Physical Ethernet Port
+DHCP=yes
+IPv6AcceptRA=yes
+IPv6SendRA=yes
 #+END_SRC
 
-The section ~[Network]~ starts with deliberate description:
-#+BEGIN_SRC text :tangle files/10-eth0.network_suse
-  [Network]
-  Description=Physical Ethernet Port
+Just to be sure, I also activate forwarding:
+
+#+BEGIN_SRC text :tangle files/10-eth0-host.network
+IPv4Forwarding=yes
+IPv6Forwarding=yes
 #+END_SRC
 
- - DHCP=yes : :: I want to use ~DHCP~ for both ~IPv6~ and legacy ~IPv4~.
- - IPv6AcceptRA=yes : :: For ~IPv6~ we need to accept Router Advertisments (~RA~).
- - IPForward=yes : :: We also need to be sure IP forwarding is activated.
-
-
-#+BEGIN_SRC text :tangle files/10-eth0.network
-  DHCP=yes
-  IPv6AcceptRA=yes
-  IPForward=yes
-#+END_SRC
 
 Here is also the place to include the ~VLANs~ which are connected to that device — in this case:
 
  1) ~Office~ for the host and
  2) ~VM~ for the virtual machines.
 
-#+BEGIN_SRC text :tangle files/10-eth0.network
+#+BEGIN_SRC text :tangle files/10-eth0-host.network
   VLAN=Office
   VLAN=VM
 #+END_SRC
 
-
 ** VLAN 10: Host network
 
+I want to use the Office ~VLAN~ for my host, as it is my Office PC in ~/etc/systemd/network/00-vlan10.netdev~. To use it I need to first define a virtual network of ~Kind~ ~vlan~. In the ~[VLAN]~ I need to give the ~VLAN Id~.
 
-#+NAME: 30-vlan10.netdev
-#+BEGIN_SRC conf :tangle /etc/systemd/network/30-vlan10.netdev
-[NetDev]
-Name=Office
-Kind=vlan
+#+NAME: 00-vlan10.netdev
+#+BEGIN_SRC conf :tangle files/00-host-vlan10.netdev
+  [NetDev]
+  Name=Office
+  Kind=vlan
 
-[VLAN]
-Id=10
+  [VLAN]
+  Id=10
 #+END_SRC
 
-#+NAME: 40-vlan10.network
-#+BEGIN_SRC conf :tangle /etc/systemd/network/40-vlan10.network
-[Match]
-Name=vlan10
+Next I have to configure it in ~/etc/systemd/network/20-vlan10.network~ For addressing I use ~DHCP~ and ~RA~ for ~IPv6~ again.
 
-[Network]
-DHCP=yes
+
+#+NAME: 20-vlan10.network
+#+BEGIN_SRC conf :tangle files/20-host-vlan10.network
+  [Match]
+  Name=Office
+  Type=vlan
+
+  [Network]
+  Description=Office VLAN interface
+  DHCP=yes
+  IPv6AcceptRA=yes
 #+END_SRC
 
+This will be the device I actually connect to on my host.
+
+* VLAN 30: Bridge for VMs
+
+Next I need a ~VLAN~ interface for the virtual machines:
 
 ** VLAN 30: Bridge for VMs
-#+NAME: 50-vlan20.netdev
-#+BEGIN_SRC conf :tangle /etc/systemd/network/50-vlan20.netdev
+NAME: 50-vlan20.netdev
+#+BEGIN_SRC conf :tangle files/00-host-vlan30.netdev
+  [NetDev]
+  Name=VM
+  Kind=vlan
+
+  [VLAN]
+  Id=30
+  
+#+END_SRC
+
+* Bridge device (br30)
+
+And I need a brigde device to which the ~VMs~ can connect.
+#+BEGIN_SRC conf :tangle files/00-host-br30.netdev
 [NetDev]
-Name=VM
+Name=br30
+Kind=bridge
+#+END_SRC
+
+* Attach VLAN 30 to the bridge
+
+Now I need to connect the bridge device to the virtual ~VLAN~ interface, I called ~VM~. For that I use the following options in ~/etc/systemd/network/20-vlan3.network~.:
+
+- ~Bridge=br30~ connects this VLAN interface to the bridge
+- ~IPv6AcceptRA=yes~ allows RA to be accepted and relayed to VMs
+- ~LinkLocalAddressing=ipv6~ ensures IPv6 link-local addresses are generated
+
+#+BEGIN_SRC conf :tangle files/20-host-vlan30.network
+  [Match]
+  Name=VM
+  Type=vlan
+
+  [Network]
+  Description=VM VLAN interface
+  Bridge=br30
+  IPv6AcceptRA=yes
+  LinkLocalAddressing=ipv6
+#+END_SRC
+
+** Bridge interface configuration
+
+The bridge itself should be transparent, not routing or managing ~RA~:
+
+Explanation:
+- ~IPv6AcceptRA=no~ avoids the bridge configuring itself.
+- ~IPv6SendRA=no~ prevents the bridge from issuing router advertisements.
+- ~LinkLocalAddressing=kernel~ lets the kernel assign a link-local address.
+
+#+NAME: 80-br30.network
+#+BEGIN_SRC conf :tangle files/20-host-br30.network
+  [Match]
+  Name=br30
+
+  [Network]
+  BridgeForwardDelaySec=0
+  IPv6AcceptRA=no
+  IPv6SendRA=no
+  LinkLocalAddressing=kernel
+
+#+END_SRC
+
+* Virtual Machine Configuration
+
+Connect your VM interfaces to ~br30~ using `virt-manager` or XML: 
+
+#+BEGIN_SRC xml :tangle files/network.xml
+<interface type='bridge'>
+  <source bridge='br30'/>
+  <model type='virtio'/>
+</interface>
+#+END_SRC
+
+#+ATTR_HTML: :width 50% :alt Screenshot of the network interface settings of a virtual machine, from the Virt-Manager GUI. On the left, a vertical navigation menu lists various configuration sections including “Overview,” “OS information,” “CPUs,” “Memory,” “NIC :e7:4c:6a” (currently selected),  and others. On the right, the details tab is open for the virtual network interface: Tab: “Details” (active, next to “XML”); Network source: “Bridge device...”; Device name: br20; Device model: virtio (dropdown shown); MAC address: 52:54:00:e7:4c:6a; IP address: “Unknown”; Link state: active (checkbox checked).
+#+ATTR_LATEX: :width .65\linewidth :placement [!htpb]
+#+ATTR_ORG: :width 700
+[[file:img/VirtManagerBridge.png]]
+
+* Configure VLAN 30 on the router
+
+On my raspberry pi router I now need to configure the new ~VLAN 30~ for the ~VMs~. First I need to configure ~/etc/systemd/network/00-vlan30.netdev~ there:
+
+#+BEGIN_SRC text :tangle files 00-vlan30.netdev
+[NetDev]
+Name=VMs
 Kind=vlan
 
 [VLAN]
@@ -192,50 +291,166 @@ Id=30
 #+END_SRC
 
 ** Bridge device (br20)
-#+NAME: 60-br20.netdev
-#+BEGIN_SRC conf :tangle /etc/systemd/network/60-br20.netdev
-[NetDev]
-Name=br20
-Kind=bridge
+Next comes ~/etc/systemd/network/20-vlan30.network~:
+#+BEGIN_SRC text :tangle files 20-vlan30.network
+  [Match]
+  Name=VMs
+  Type=vlan
+
 #+END_SRC
 
 ** Attach VLAN 20 to the bridge
-#+NAME: 70-vlan20.network
-#+BEGIN_SRC conf :tangle /etc/systemd/network/70-vlan20.network
-[Match]
-Name=vlan20
+In the ~[Network]~ section we need the following options:
+- DHCP=ipv6 ::
+  Enables the DHCPv6 client on this interface.
+- IPv6SendRA=yes ::
+  The system sends Router Advertisements (~RA~) on this interface.
+- IPv6AcceptRA=yes ::
+  The system accepts incoming Router Advertisements.
+- DHCPPrefixDelegation=yes ::
+  Enables the interface to request a delegated prefix via ~DHCPv6~.
 
-[Network]
-Bridge=br20
+
+  #+BEGIN_SRC text :tangle files 20-vlan30.network
+  [Network]
+  Description=VMs VLAN interface
+  DHCP=ipv6
+  IPv6SendRA=yes
+  IPv6AcceptRA=yes
+  DHCPPrefixDelegation=yes
+
 #+END_SRC
+
 
 ** Bridge interface configuration
-#+NAME: 80-br20.network
-#+BEGIN_SRC conf :tangle /etc/systemd/network/80-br20.network
-[Match]
-Name=br20
 
-[Network]
-# no IP configuration unless needed
+- Token=::1 ::
+  Specifies the interface identifier (~IID~) suffix to be used when constructing the delegated address or prefix. This value is appended to the delegated prefix to form the full IPv6 address. For example, with a delegated prefix ~2001:db8:1234:567c:/62~ and ~Token=::1~, the resulting address might be ~2001:db8:1234:567c:1~.
+- SubnetId=0x2 ::
+  Specifies a hexadecimal subnet ID used to select a specific ~/64~ subnet from the delegated prefix. For example, with a delegated ~/62~, setting ~SubnetId=0x2~ would assign the third network ~2001:db8:1234:567e::/64~ to the interface.
+- Assign=yes ::
+  Indicates that the selected subnet (via ~SubnetId~) should be assigned to the interface automatically.
+- Announce=yes ::
+  Enables the system to announce the assigned prefix via ~RA~, making it available to other devices on the link.
+
+
+  #+BEGIN_SRC text :tangle files 20-vlan30.network
+  [DHCPPrefixDelegation]
+  Token=::1
+  SubnetId=0x2
+  Assign=yes
+  Announce=yes
+
 #+END_SRC
 
-* Virtual Machine Configuration
-Connect your VM interfaces to ~br20~ using `virt-manager` or XML. Example in libvirt XML:
+Lastly I need to setup my legacy ~DHCP~ pool for the ~VMs VLAN~ in ~/etc/dnsmasq.d/00-vlans.conf~:
 
-#+BEGIN_SRC xml
-<interface type='bridge'>
-  <source bridge='br20'/>
-  <model type='virtio'/>
-</interface>
+- interface=VMs ::
+  Binds `dnsmasq` to the network interface named `VMs`. It will listen and provide DHCP on this interface.
+
+- dhcp-range=set:vlan30,172.16.30.10,172.16.30.200,255.255.255.0,24h ::
+  Defines a DHCP address pool for clients tagged with `vlan30`. The range is from `172.16.30.10` to `172.16.30.200`, with a subnet mask of `255.255.255.0`, and lease duration of 24 hours.
+
+- dhcp-option=tag:vlan30,option:router,192.168.178.254 ::
+  Specifies the default gateway (router) for DHCP clients tagged with `vlan30`. Clients will receive `192.168.178.254` as their default route, which is my pi-routers ~WAN interface IP~.
+
+- dhcp-option=tag:vlan30,option:dns-server,192.168.178.254 ::
+  Sets the DNS server for clients tagged with `vlan30` to `192.168.178.254`. This is sent as part of the DHCP offer.
+
+
+#+BEGIN_SRC text
+# DHCP for vlan-interfaces
+interface=WLAN
+dhcp-range=set:vlan10,172.16.10.10,172.16.10.200,255.255.255.0,24h
+dhcp-option=tag:vlan10,option:router,192.168.178.254
+dhcp-option=tag:vlan10,option:dns-server,192.168.178.254
+
+interface=Office
+dhcp-range=set:vlan20,172.16.20.10,172.16.20.200,255.255.255.0,24h
+dhcp-option=tag:vlan20,option:router,192.168.178.254
+dhcp-option=tag:vlan20,option:dns-server,192.168.178.254
+
+interface=VMs
+dhcp-range=set:vlan30,172.16.30.10,172.16.30.200,255.255.255.0,24h
+dhcp-option=tag:vlan30,option:router,192.168.178.254
+dhcp-option=tag:vlan30,option:dns-server,192.168.178.254
+
 #+END_SRC
 
-* Notes
-#+BEGIN_NOTES
-- If `libvirt` tries to manage the bridge itself (e.g. ~virbr0~), disable its autostart bridge and use your own.
-- You can test VLAN tagging with ~tcpdump -i eth0 vlan~.
-- Avoid overlapping IP subnets between VLAN 10 and VLAN 20.
 
-#+END_NOTES
+* Configure VLAN 30 on the Switch
+
+For the whole setup to work I also need to create the ~VLAN~ with ~Id 30~ on the managed switch. How to do this depends on your type of switch of course.
+
+#+ATTR_HTML: :width 50% :alt Screenshot of the VLAN configuration page on a Netgear S350 Smart Managed Pro Switch (example). The interface lists VLANs with their IDs, names, and types. VLAN 30 named "VMs" is selected and set as Statisch (Static). Other VLANs include ID 1 (default), 2 (Auto-VoIP), 10 (Office), 20 (WLAN), and 4089 (Auto-Video). The user is in the “Switching” > “VLAN” > “VLAN-Konfiguration” section.
+#+ATTR_LATEX: :width .65\linewidth :placement [!htpb]
+#+ATTR_ORG: :width 700
+[[file:img/VLAN30_Switch.png]]
+
+You need to make sure, that the interface connect to the host PC is marked as ’tagged’ and that the ~VLAN 10~ and ~30~ are associated with the port. You also need to associate ~VLAN 30~ with the port to the router.
+
+#+ATTR_HTML: :width 50% :alt Screenshot of the “Port-PVID-Konfiguration” page on a Netgear S350 switch. The table shows port-based VLAN configuration. Ports where VLAN 30 is configured: g1: PVID: 10, VLAN Member: 1,10,30, VLAN Tag: 10,30; g6: PVID: 1, VLAN Member: 1,10,30, VLAN Tag: 10,30. Other ports (g2 to g5) are not members of VLAN 30. The active section in the sidebar is Port-PVID-Konfiguration under “Erweitert” (German for Advanced).
+#+ATTR_LATEX: :width .65\linewidth :placement [!htpb]
+#+ATTR_ORG: :width 700
+[[file:img/PortKonfigurationSwitch.png]]
+
+
+
+* Disable filtering for the bridge device
+
+Up to this point everything work very straight forward. But when I tried to connect to the network, I didn't get an address. It took me quite some time to find the problem and solve it.
+
+The problem is the default behavior on Linux is, that some packages are filtered on Layer 3 as well as Layer 2. As we are using the host as a mere bridge to the Virtual Machines, that' not desired. So we need to deactivate this behavior for bridge devices:
+
+~/etc/sysctl.d/99-brigde.conf~
+#+BEGIN_SRC text :tangle files/99-bridge.conf
+net.bridge.bridge-nf-call-ip6tables=0
+net.bridge.bridge-nf-call-iptables=0
+net.bridge.bridge-nf-call-arptables=0
+#+END_SRC
+
+This would however only take affect after a system restart, unless you read the file with ~sysctl~:
+
+#+BEGIN_SRC bash
+sudo sysctl -f /etc/sysctl.d/99-bridge.conf
+#+END_SRC
+
+* Conclusion
+
+When you know the options to set, it is very easy to set up a dedicated VLAN from you router straight to you ~VMs~. There are of course two more things to consider:
+
+- You can not easily bridge ~Wifi~ interfaces.
+- Your ~VMs~ are on a separate subnet, so you can not just ~ssh~ into them. There are serveral possible solutions to this:
+  - Dedicated forwarding roules using nftables.
+  - Use [[https://tailscale.com/][tailscale]] or [[https://github.com/slackhq/nebula][nebula]].
+  - My preferred method is however a proxy jump over my pi-router. In ~${HOME}/.ssh/config~ it looks like that:
+
+#+BEGIN_SRC text :tangle files/ssh_config
+  Host Win Windows Window11 Windoof win
+       HostName	       fe80::d8b8:3a7:126b:162b%%VMs
+       User             Username
+       IdentityFile	~/.ssh/win
+       ProxyJump         pi
+  Host *
+      IdentitiesOnly      yes
+
+#+END_SRC
+
+- Host Win Windows Window11 Windoof win ::
+  Defines a group of host aliases. You can use any of these names (`Win`, `Windows`, etc.) with `ssh`, and the settings below will apply.
+  - HostName fe80::d8b8:3a7:126b:162b%%VMs ::
+    Specifies the actual destination host. In this case, it's a link-local IPv6 address with the zone index `%%VMs` (the interface name needed for link-local communication).
+  - User Username ::
+    Sets the SSH username to `Username` for this host.
+  - IdentityFile ~/.ssh/win ::
+    Specifies the private SSH key file to use when connecting to this host.
+  - ProxyJump pi ::
+    Uses the host alias `pi` as a jump host (SSH proxy). SSH will first connect to `pi`, then use it to reach the Windows machine.
+- Host * ::
+  A wildcard match for all hosts not explicitly listed above.
+  - IdentitiesOnly yes ::
+    Ensures that only the identity files explicitly specified in the config (e.g. `~/.ssh/win`) are used for authentication, preventing SSH from trying other keys loaded in the agent.
+
 
 # Local Variables:
 # jinx-languages: "en_US"

@@ -1,0 +1,15 @@
+[Match]
+MACAddress=d8:bb:c1:8b:b9:d1
+Type=ether
+
+[Network]
+Description=Physical Ethernet Port
+DHCP=yes
+IPv6AcceptRA=yes
+IPv6SendRA=yes
+
+IPv4Forwarding=yes
+IPv6Forwarding=yes
+
+VLAN=Office
+VLAN=VM

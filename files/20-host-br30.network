@@ -1,0 +1,8 @@
+[Match]
+Name=br30
+
+[Network]
+BridgeForwardDelaySec=0
+IPv6AcceptRA=no
+IPv6SendRA=no
+LinkLocalAddressing=kernel

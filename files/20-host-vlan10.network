@@ -1,0 +1,8 @@
+[Match]
+Name=Office
+Type=vlan
+
+[Network]
+Description=Office VLAN interface
+DHCP=yes
+IPv6AcceptRA=yes

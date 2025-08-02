@@ -1,0 +1,682 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2025-08-02 Sa 12:12 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IPv6-Präfix-Delegation für Virtual Machine Manager</title>
+<meta name="author" content="Sebastian Meisel" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="mystyle.css" />
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">IPv6-Präfix-Delegation für Virtual Machine Manager</h1>
+
+
+<div id="org0d0cc34" class="figure">
+<p><img src="img/Ostseepinguin.png" alt="Das Ostseepinguin-Banner zeigt einen Ostsee-Pinguin am Strand." width="100%" />
+</p>
+</div>
+
+<input type="checkbox" id="darkmode-toggle">
+<label for="darkmode-toggle"></label></input>
+<script src="script.js"></script>
+
+<div class="menu" id="orgc040c0c">
+<p>
+<a href="IPv6Prefix_virtmanager.html">🇬🇧 EN</a>
+</p>
+<ul class="org-ul">
+<li>&gt; <a href="index.html">Startseite</a></li>
+<li>&gt; <a href="IPv6PrefixDelegation_DE.html">IPv6-Präfix-Delegation (Teil I)</a></li>
+</ul>
+<hr />
+
+<p width="16px" alt="Mastodon">
+<img src="img/Mastodon.png" alt="Mastodon" width="16px" /> <a href="https://linuxrocks.online/@SebasTEAan">https://linuxrocks.online/@SebasTEAan</a>
+</p>
+
+<p>
+📧 <a href="mailto:sebastian.meisel+ostseepinguin@gmail.com">sebastian.meisel at gmail.com</a>
+</p>
+
+</div>
+<div id="outline-container-orgac3ecc5" class="outline-2">
+<h2 id="orgac3ecc5">Einführung</h2>
+<div class="outline-text-2" id="text-orgac3ecc5">
+<p>
+Nachdem ich <a href="IPv6PrefixDelegation.html">IPv6 Präfix-Delegation (<code>PD</code>) auf meinem Linux-Router</a> eingerichtet habe, wurde mir klar, dass ich immer noch ein <code>IPv6</code>-Subnetz für die virtuellen Maschinen (<code>VMs</code>) benötige, die ich auf meinem Desktop-PC betreibe.
+</p>
+
+<p>
+Damit eine <code>VM</code> eine Adresse aus einem delegierten Präfix erhält, benötige ich eine Bridge-Schnittstelle mit einem verbundenen <code>VLAN</code> und eine Möglichkeit, den Präfix an dieses Segment zu übertragen. In dieser Anleitung verwende ich <code>systemd-networkd</code>. Alternativen wie <code>NetworkManager</code> oder <code>netplan</code> können ähnlich verwendet werden, aber der Fokus liegt hier auf deklarativen <code>.network</code>- und <code>.netdev</code>-Units.
+</p>
+
+<p>
+Ich möchte auch, dass das <code>VLAN</code> auf meinem physischen Switch konfiguriert wird, wobei die Adressen auf meinem Router zugewiesen werden. Mein Host-Computer funktioniert in diesem Szenario als Bridge, nicht als <code>NAT</code>-Gateway oder Router. Auf diese Weise haben die <code>VMs</code> keinen Zugriff auf mein <code>Office VLAN</code>, was mir zusätzliche Sicherheit bietet. Das ist besonders wichtig für mich, da eine der <code>VMs</code> eine Windows 11-Maschine ist, die ich als unsicher betrachte.
+</p>
+
+<p>
+Am Ende soll mein Netzwerk so aussehen:
+</p>
+
+
+<div id="org9701b7b" class="figure">
+<p><img src="img/IPv6Network_virtmanager.png" alt="IPv6Network_virtmanager.png" width="80% :alt: Links: Das Internet (als Wolke) ist über Glasfaser mit einem Heimrouter verbunden. Von dort führt eine Ethernet-Verbindung zu einem Switch, der mit einem Raspberry Pi verbunden ist, der als Router fungiert. Oben ist der Switch mit einem Wireless AP verbunden, der WiFi für verschiedene mobile Geräte im VLAN &quot;WLAN&quot; bereitstellt, das hellorange eingefärbt ist. Unten ist ein Desktop-PC mit dem Switch verbunden, der sich im VLAN &quot;Office&quot; befindet und hellviolett eingefärbt ist. Innerhalb dieses Office-PCs läuft eine virtuelle Maschine (VM), die selbst mit dem VLAN &quot;VLAN VM&quot; verbunden ist, dargestellt durch eine kleinere blaue Netzwerkschnittstellen-Box innerhalb des Office-PCs." />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org45ace53" class="outline-2">
+<h2 id="org45ace53">Hostnetzwerk konfigurieren</h2>
+<div class="outline-text-2" id="text-org45ace53">
+<p>
+Zuerst konfiguriere ich die physische Ethernet-Schnittstelle in <code>/etc/systemd/network/10-eth0.network</code>. Ich ordne das Gerät über die <code>MACAddress</code> zu, anstatt über den Namen, was Probleme mit der Namensgebung nach Neustarts oder BIOS-Updates vermeidet.
+</p>
+
+<p>
+Erklärung der wichtigsten Optionen:
+</p>
+<ul class="org-ul">
+<li><code>DHCP=yes</code>: aktiviert sowohl IPv4- als auch IPv6-DHCP.</li>
+<li><code>IPv6AcceptRA=yes</code>: erlaubt der Schnittstelle, Router-Advertisements (<code>RAs</code>) zu empfangen.</li>
+<li><code>IPv6SendRA=yes</code>: ermöglicht es dem System, <code>RAs</code> an untergeordnete Schnittstellen weiterzuleiten.</li>
+<li><code>IPv4Forwarding=</code> und <code>IPv6Forwarding=</code>: aktivieren die Paketweiterleitung.</li>
+<li><code>VLAN=</code>: bindet benannte VLAN-Schnittstellen an dieses physische Gerät.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-text">[Match]
+MACAddress=d8:bb:c1:8b:b9:d1
+Type=ether
+
+[Network]
+Description=Physical Ethernet Port
+DHCP=yes
+IPv6AcceptRA=yes
+IPv6SendRA=yes
+</pre>
+</div>
+
+<p>
+Zur Sicherheit aktiviere ich auch die Weiterleitung:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">IPv4Forwarding=yes
+IPv6Forwarding=yes
+</pre>
+</div>
+
+
+<p>
+Das ist auch der richtige Ort, um die <code>VLANs</code> einzubinden, die mit diesem Gerät verbunden sind — in diesem Fall:
+</p>
+
+<ol class="org-ol">
+<li><code>Office</code> für den Host und</li>
+<li><code>VM</code> für die virtuellen Maschinen.</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-text">VLAN=Office
+VLAN=VM
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf7c6e8e" class="outline-2">
+<h2 id="orgf7c6e8e">VLAN 10: Host-Netzwerk</h2>
+<div class="outline-text-2" id="text-orgf7c6e8e">
+<p>
+Ich möchte das  <code>Office VLAN</code> für meinen Host verwenden, da es mein Office-PC ist, in <code>/etc/systemd/network/00-vlan10.netdev</code>. Um es zu verwenden, muss ich zuerst ein virtuelles Netzwerk vom Typ (<code>Kind</code>) <code>vlan</code> definieren. Im <code>[VLAN]</code>-Abschnitt muss ich die <code>VLAN Id</code> angeben.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-conf" id="org2e90456">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">NetDev</span>]
+<span style="font-style: italic;">Name</span>=Office
+<span style="font-style: italic;">Kind</span>=vlan
+
+[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">VLAN</span>]
+<span style="font-style: italic;">Id</span>=10
+</pre>
+</div>
+
+<p>
+Als nächstes muss ich es in <code>/etc/systemd/network/20-vlan10.network</code> konfigurieren. Für die Adressierung verwende ich wieder <code>DHCP</code> und <code>RA</code> für <code>IPv6</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-conf" id="orgf2e4e89">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Match</span>]
+<span style="font-style: italic;">Name</span>=Office
+<span style="font-style: italic;">Type</span>=vlan
+
+[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Network</span>]
+<span style="font-style: italic;">Description</span>=Office VLAN interface
+<span style="font-style: italic;">DHCP</span>=yes
+<span style="font-style: italic;">IPv6AcceptRA</span>=yes
+</pre>
+</div>
+
+<p>
+Das wird das Gerät sein, mit dem ich mich tatsächlich auf meinem Host verbinde.
+</p>
+</div>
+</div>
+<div id="outline-container-orgfec13f6" class="outline-2">
+<h2 id="orgfec13f6">VLAN 30: Bridge für VMs</h2>
+<div class="outline-text-2" id="text-orgfec13f6">
+<p>
+Als nächstes benötige ich eine <code>VLAN</code>-Schnittstelle für die virtuellen Maschinen:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-conf" id="orga511fad">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">NetDev</span>]
+<span style="font-style: italic;">Name</span>=VM
+<span style="font-style: italic;">Kind</span>=vlan
+
+[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">VLAN</span>]
+<span style="font-style: italic;">Id</span>=30
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org3a5deda" class="outline-2">
+<h2 id="org3a5deda">Bridge-Gerät (br30)</h2>
+<div class="outline-text-2" id="text-org3a5deda">
+<p>
+Und ich benötige ein Bridge-Gerät, mit dem sich die <code>VMs</code> verbinden können.
+</p>
+<div class="org-src-container">
+<pre class="src src-conf">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">NetDev</span>]
+<span style="font-style: italic;">Name</span>=br30
+<span style="font-style: italic;">Kind</span>=bridge
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orge115358" class="outline-2">
+<h2 id="orge115358">VLAN 30 an die Bridge anhängen</h2>
+<div class="outline-text-2" id="text-orge115358">
+<p>
+Jetzt muss ich das Bridge-Gerät mit der virtuellen <code>VLAN</code>-Schnittstelle verbinden, die ich <code>VM</code> genannt habe. Dafür verwende ich die folgenden Optionen in <code>/etc/systemd/network/20-vlan3.network</code>.:
+</p>
+
+<ul class="org-ul">
+<li><code>Bridge=br30</code> verbindet diese VLAN-Schnittstelle mit der Bridge.</li>
+<li><code>IPv6AcceptRA=yes</code> ermöglicht es, dass RA akzeptiert und an VMs weitergeleitet wird.</li>
+<li><code>LinkLocalAddressing=ipv6</code> stellt sicher, dass IPv6-Link-Local-Adressen erzeugt werden.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-conf">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Match</span>]
+<span style="font-style: italic;">Name</span>=VM
+<span style="font-style: italic;">Type</span>=vlan
+
+[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Network</span>]
+<span style="font-style: italic;">Description</span>=VM VLAN interface
+<span style="font-style: italic;">Bridge</span>=br30
+<span style="font-style: italic;">IPv6AcceptRA</span>=yes
+<span style="font-style: italic;">LinkLocalAddressing</span>=ipv6
+</pre>
+</div>
+</div>
+<div id="outline-container-org2e89042" class="outline-3">
+<h3 id="org2e89042">Bridge-Schnittstellen-Konfiguration</h3>
+<div class="outline-text-3" id="text-org2e89042">
+<p>
+Die Bridge selbst sollte transparent sein und nicht routen oder <code>RA</code> verwalten:
+</p>
+
+<ul class="org-ul">
+<li><code>IPv6AcceptRA=no</code> verhindert, dass sich die Bridge selbst konfiguriert.</li>
+<li><code>IPv6SendRA=no</code> verhindert, dass die Bridge Router-Ankündigungen ausgibt.</li>
+<li><code>LinkLocalAddressing=kernel</code> lässt den Kernel eine Link-Local-Adresse zuweisen.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-conf" id="org6ed86a5">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Match</span>]
+<span style="font-style: italic;">Name</span>=br30
+
+[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Network</span>]
+<span style="font-style: italic;">BridgeForwardDelaySec</span>=0
+<span style="font-style: italic;">IPv6AcceptRA</span>=no
+<span style="font-style: italic;">IPv6SendRA</span>=no
+<span style="font-style: italic;">LinkLocalAddressing</span>=kernel
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org830a968" class="outline-2">
+<h2 id="org830a968">Konfiguration der virtuellen Maschine</h2>
+<div class="outline-text-2" id="text-org830a968">
+<p>
+Verbinden Sie Ihre VM-Schnittstellen mit <code>br30</code> über `virt-manager` oder XML: 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-xml"><span style="color: #ffffff; background-color: #000000;">&lt;</span><span style="color: #cfcff8;">interface</span> <span style="font-style: italic;">type</span>=<span style="color: #a2a0b2;">'bridge'</span><span style="color: #ffffff; background-color: #000000;">&gt;</span>
+  <span style="color: #ffffff; background-color: #000000;">&lt;</span><span style="color: #cfcff8;">source</span> <span style="font-style: italic;">bridge</span>=<span style="color: #a2a0b2;">'br30'</span><span style="color: #ffffff; background-color: #000000;">/</span><span style="color: #ffffff; background-color: #000000;">&gt;</span>
+  <span style="color: #ffffff; background-color: #000000;">&lt;</span><span style="color: #cfcff8;">model</span> <span style="font-style: italic;">type</span>=<span style="color: #a2a0b2;">'virtio'</span><span style="color: #ffffff; background-color: #000000;">/</span><span style="color: #ffffff; background-color: #000000;">&gt;</span>
+<span style="color: #ffffff; background-color: #000000;">&lt;</span><span style="color: #ffffff; background-color: #000000;">/</span><span style="color: #cfcff8;">interface</span><span style="color: #ffffff; background-color: #000000;">&gt;</span>
+</pre>
+</div>
+
+
+<div id="org1c160f9" class="figure">
+<p><img src="img/VirtManagerBridge.png" alt="Screenshot der Netzwerkschnittstellen-Einstellungen einer virtuellen Maschine aus der Virt-Manager-GUI. Links zeigt ein vertikales Navigationsmenü verschiedene Konfigurationsabschnitte einschließlich &quot;Übersicht&quot;, &quot;OS-Informationen&quot;, &quot;CPUs&quot;, &quot;Speicher&quot;, &quot;NIC :e7:4c:6a&quot; (aktuell ausgewählt) und andere. Rechts ist der Details-Tab für die virtuelle Netzwerkschnittstelle geöffnet: Tab: &quot;Details&quot; (aktiv, neben &quot;XML&quot;); Netzwerkquelle: &quot;Bridge-Gerät...&quot;; Gerätename: br20; Gerätemodell: virtio (Dropdown angezeigt); MAC-Adresse: 52:54:00:e7:4c:6a; IP-Adresse: &quot;Unbekannt&quot;; Link-Status: aktiv (Checkbox markiert)." width="50%" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd36d2e7" class="outline-2">
+<h2 id="orgd36d2e7">VLAN 30 auf dem Router konfigurieren</h2>
+<div class="outline-text-2" id="text-orgd36d2e7">
+<p>
+Auf meinem Raspberry Pi-Router muss ich jetzt das neue <code>VLAN 30</code> für die <code>VMs</code> konfigurieren. Zuerst muss ich dort <code>/etc/systemd/network/00-vlan30.netdev</code> konfigurieren:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">[NetDev]
+Name=VMs
+Kind=vlan
+
+[VLAN]
+Id=30
+</pre>
+</div>
+
+<p>
+Als nächstes kommt <code>/etc/systemd/network/20-vlan30.network</code>:
+</p>
+<div class="org-src-container">
+<pre class="src src-text">[Match]
+Name=VMs
+Type=vlan
+</pre>
+</div>
+
+<p>
+Im <code>[Network]</code>-Abschnitt benötigen wir die folgenden Optionen:
+</p>
+<dl class="org-dl">
+<dt>DHCP=ipv6</dt><dd>Aktiviert den DHCPv6-Client auf dieser Schnittstelle.</dd>
+<dt>IPv6SendRA=yes</dt><dd>Das System sendet Router-Ankündigungen (RA) auf dieser Schnittstelle.</dd>
+<dt>IPv6AcceptRA=yes</dt><dd>Das System akzeptiert eingehende Router-Ankündigungen.</dd>
+<dt>DHCPPrefixDelegation=yes</dt><dd>Ermöglicht es der Schnittstelle, einen delegierten Präfix über DHCPv6 anzufordern.</dd>
+</dl>
+
+
+<div class="org-src-container">
+<pre class="src src-text">[Network]
+Description=VMs VLAN interface
+DHCP=ipv6
+IPv6SendRA=yes
+IPv6AcceptRA=yes
+DHCPPrefixDelegation=yes
+
+</pre>
+</div>
+
+<p>
+Für das Legacy-<code>IPv4</code> verwenden wir einfach eine statische Adresse.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">[Address]
+Address=172.16.30.1/24
+
+</pre>
+</div>
+
+<dl class="org-dl">
+<dt>Token=::1</dt><dd>Gibt das Interface-Identifier (IID)-Suffix an, das bei der Konstruktion der delegierten Adresse oder des Präfixes verwendet werden soll. Dieser Wert wird an den delegierten Präfix angehängt, um die vollständige IPv6-Adresse zu bilden. Zum Beispiel würde mit einem delegierten Präfix `2001:db8:1234:567c:/62` und `Token=::1` die resultierende Adresse `2001:db8:1234:567c:1` lauten.</dd>
+<dt>SubnetId=0x2</dt><dd>Gibt eine hexadezimale Subnetz-ID an, die verwendet wird, um ein spezifisches /64-Subnetz aus dem delegierten Präfix auszuwählen. Zum Beispiel würde bei einem delegierten /62 die Einstellung `SubnetId=0x2` das dritte Netzwerk `2001:db8:1234:567e::/64` der Schnittstelle zuweisen.</dd>
+<dt>Assign=yes</dt><dd>Gibt an, dass das ausgewählte Subnetz (über `SubnetId`) automatisch der Schnittstelle zugewiesen werden soll.</dd>
+<dt>Announce=yes</dt><dd>Ermöglicht es dem System, den zugewiesenen Präfix über Router-Ankündigungen (RA) zu verkünden und ihn für andere Geräte im Link verfügbar zu machen.</dd>
+</dl>
+
+
+<div class="org-src-container">
+<pre class="src src-text">[DHCPPrefixDelegation]
+Token=::1
+SubnetId=0x2
+Assign=yes
+Announce=yes
+
+</pre>
+</div>
+
+<p>
+Schließlich muss ich meinen Legacy-<code>DHCP</code>-Pool für das <code>VMs VLAN</code> in <code>/etc/dnsmasq.d/00-vlans.conf</code> einrichten:
+</p>
+
+<dl class="org-dl">
+<dt>interface=VMs</dt><dd>Bindet `dnsmasq` an die Netzwerkschnittstelle namens `VMs`. Es wird auf dieser Schnittstelle lauschen und DHCP bereitstellen.
+<dl class="org-dl">
+<dt>dhcp-range=set:vlan30,172.16.30.10,172.16.30.200,255.255.255.0,24h</dt><dd>Definiert einen DHCP-Adresspool für Clients, die mit `vlan30` getaggt sind. Der Bereich reicht von `172.16.30.10` bis `172.16.30.200`, mit einer Subnetzmaske von `255.255.255.0` und einer Lease-Dauer von 24 Stunden.</dd>
+<dt>dhcp-option=tag:vlan30,option:router,192.168.178.254</dt><dd>Gibt das Standard-Gateway (Router) für DHCP-Clients an, die mit `vlan30` getaggt sind. Clients erhalten `192.168.178.254` als ihre Standardroute, was die <code>WAN-Schnittstellen-IP</code> meines Pi-Routers ist.</dd>
+<dt>dhcp-option=tag:vlan30,option:dns-server,192.168.178.254</dt><dd>Setzt den DNS-Server für Clients, die mit `vlan30` getaggt sind, auf `192.168.178.254`. Dies wird als Teil des DHCP-Angebots gesendet.</dd>
+</dl></dd>
+</dl>
+
+
+<div class="org-src-container">
+<pre class="src src-text"># DHCP f&#252;r vlan-Schnittstellen
+interface=WLAN
+dhcp-range=set:vlan10,172.16.10.10,172.16.10.200,255.255.255.0,24h
+dhcp-option=tag:vlan10,option:router,192.168.178.254
+dhcp-option=tag:vlan10,option:dns-server,192.168.178.254
+
+interface=Office
+dhcp-range=set:vlan20,172.16.20.10,172.16.20.200,255.255.255.0,24h
+dhcp-option=tag:vlan20,option:router,192.168.178.254
+dhcp-option=tag:vlan20,option:dns-server,192.168.178.254
+
+interface=VMs
+dhcp-range=set:vlan30,172.16.30.10,172.16.30.200,255.255.255.0,24h
+dhcp-option=tag:vlan30,option:router,192.168.178.254
+dhcp-option=tag:vlan30,option:dns-server,192.168.178.254
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org0ab1ca7" class="outline-2">
+<h2 id="org0ab1ca7">VLAN 30 auf dem Switch konfigurieren</h2>
+<div class="outline-text-2" id="text-org0ab1ca7">
+<p>
+Damit die gesamte Einrichtung funktioniert, muss ich auch das <code>VLAN</code> mit der <code>Id 30</code> auf dem verwalteten Switch erstellen. Wie das gemacht wird, hängt natürlich von Ihrem Switch-Typ ab.
+</p>
+
+
+<div id="org2b9e38d" class="figure">
+<p><img src="img/VLAN30_Switch.png" alt="Screenshot der VLAN-Konfigurationsseite auf einem Netgear S350 Smart Managed Pro Switch (Beispiel). Die Oberfläche listet VLANs mit ihren IDs, Namen und Typen auf. VLAN 30 namens &quot;VMs&quot; ist ausgewählt und als Statisch (Static) eingestellt. Andere VLANs umfassen ID 1 (Standard), 2 (Auto-VoIP), 10 (Office), 20 (WLAN) und 4089 (Auto-Video). Der Benutzer befindet sich im Abschnitt &quot;Switching&quot; &gt; &quot;VLAN&quot; &gt; &quot;VLAN-Konfiguration&quot;." width="50%" />
+</p>
+</div>
+
+<p>
+Sie müssen sicherstellen, dass die Schnittstelle, die mit dem Host-PC verbunden ist, als 'tagged' markiert ist und dass die <code>VLAN 10</code> und <code>30</code> mit dem Port verknüpft sind. Sie müssen auch <code>VLAN 30</code> mit dem Port zum Router verknüpfen.
+</p>
+
+
+<div id="org0e676a6" class="figure">
+<p><img src="img/PortKonfigurationSwitch.png" alt="Screenshot der &quot;Port-PVID-Konfiguration&quot;-Seite auf einem Netgear S350-Switch. Die Tabelle zeigt die port-basierte VLAN-Konfiguration. Ports, wo VLAN 30 konfiguriert ist: g1: PVID: 10, VLAN-Mitglied: 1,10,30, VLAN-Tag: 10,30; g6: PVID: 1, VLAN-Mitglied: 1,10,30, VLAN-Tag: 10,30. Andere Ports (g2 bis g5) sind keine Mitglieder von VLAN 30. Der aktive Abschnitt in der Seitenleiste ist Port-PVID-Konfiguration unter &quot;Erweitert&quot;." width="50%" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org5c1819a" class="outline-2">
+<h2 id="org5c1819a">Filterung für das Bridge-Gerät deaktivieren</h2>
+<div class="outline-text-2" id="text-org5c1819a">
+<p>
+Bis zu diesem Punkt funktioniert alles sehr unkompliziert. Aber als ich versuchte, mich mit dem Netzwerk zu verbinden, bekam ich keine Adresse. Es hat mich ziemlich viel Zeit gekostet, das Problem zu finden und zu lösen.
+</p>
+
+<p>
+Das Problem ist, dass das Standardverhalten unter Linux darin besteht, dass einige Pakete sowohl auf Layer 3 als auch auf Layer 2 gefiltert werden. Da wir den Host als reine Bridge zu den virtuellen Maschinen verwenden, ist das nicht erwünscht. Also müssen wir dieses Verhalten für Bridge-Geräte deaktivieren:
+</p>
+
+<p>
+<code>/etc/sysctl.d/bridge.conf</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-text">net.bridge.bridge-nf-call-ip6tables=0
+net.bridge.bridge-nf-call-iptables=0
+net.bridge.bridge-nf-call-arptables=0
+</pre>
+</div>
+
+<p>
+Das würde jedoch nur nach einem Systemneustart wirksam werden, außer Sie lesen die Datei mit <code>sysctl</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">sudo sysctl -f /etc/sysctl.d/99-bridge.conf
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf40d7c5" class="outline-2">
+<h2 id="orgf40d7c5">Fazit</h2>
+<div class="outline-text-2" id="text-orgf40d7c5">
+<p>
+Wenn Sie die zu setzenden Optionen kennen, ist es sehr einfach, ein dediziertes VLAN von Ihrem Router direkt zu Ihren <code>VMs</code> einzurichten. Es gibt natürlich noch zwei weitere Dinge zu beachten:
+</p>
+
+<ul class="org-ul">
+<li>Sie können <code>Wifi</code>-Schnittstellen nicht einfach mit einer Bridge überbrücken.</li>
+<li>Ihre <code>VMs</code> befinden sich in einem separaten Subnetz, sodass Sie nicht einfach per <code>ssh</code> auf sie zugreifen können. Es gibt mehrere mögliche Lösungen dafür:
+<ul class="org-ul">
+<li>Dedizierte Weiterleitungsregeln mit <code>nftables</code>.</li>
+<li>Verwenden Sie <a href="https://tailscale.com/">tailscale</a> oder <a href="https://github.com/slackhq/nebula">nebula</a>.</li>
+<li>Meine bevorzugte Methode ist jedoch ein Proxy-Jump über meinen Pi-Router. In <code>${HOME}/.ssh/config</code> sieht das so aus:</li>
+</ul></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-text">Host Win Windows Window11 Windoof win
+     HostName          fe80::d8b8:3a7:126b:162b%%VMs
+     User             Username
+     IdentityFile       ~/.ssh/win
+     ProxyJump         pi
+Host *
+    IdentitiesOnly      yes
+
+</pre>
+</div>
+
+<dl class="org-dl">
+<dt>Host Win Windows Window11 Windoof win</dt><dd>Definiert eine Gruppe von Host-Aliasen. Sie können jeden dieser Namen (`Win`, `Windows`, etc.) mit `ssh` verwenden, und die unten stehenden Einstellungen werden angewendet.
+<dl class="org-dl">
+<dt>HostName fe80::d8b8:3a7:126b:162b%%VMs</dt><dd>Gibt den tatsächlichen Ziel-Host an. In diesem Fall ist es eine Link-Local-IPv6-Adresse mit dem Zonen-Index `%%VMs` (der Schnittstellenname, der für Link-Local-Kommunikation benötigt wird).</dd>
+<dt>User Username</dt><dd>Setzt den SSH-Benutzernamen für diesen Host auf `Username`.</dd>
+<dt>IdentityFile ~/.ssh/win</dt><dd>Gibt die private SSH-Schlüsseldatei an, die beim Verbinden zu diesem Host verwendet werden soll.</dd>
+<dt>ProxyJump pi</dt><dd>Verwendet den Host-Alias `pi` als Jump-Host (SSH-Proxy). SSH wird sich zuerst mit `pi` verbinden und ihn dann verwenden, um die Windows-Maschine zu erreichen.</dd>
+</dl></dd>
+<dt>Host *</dt><dd>Ein Platzhalter-Match für alle Hosts, die nicht explizit oben aufgelistet sind.
+<dl class="org-dl">
+<dt>IdentitiesOnly yes</dt><dd>Stellt sicher, dass nur die explizit in der Konfiguration angegebenen Identitätsdateien (z.B. `~/.ssh/win`) für die Authentifizierung verwendet werden, und verhindert, dass SSH andere im Agent geladene Schlüssel ausprobiert.</dd>
+</dl></dd>
+</dl>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2025-06-18 Mi 00:00</p>
+<p class="author">Author: Sebastian Meisel</p>
+<p class="date">Created: 2025-08-02 Sa 12:12</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

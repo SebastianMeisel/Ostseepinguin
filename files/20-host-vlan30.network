@@ -1,0 +1,9 @@
+[Match]
+Name=VM
+Type=vlan
+
+[Network]
+Description=VM VLAN interface
+Bridge=br30
+IPv6AcceptRA=yes
+LinkLocalAddressing=ipv6
