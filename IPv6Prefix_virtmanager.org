@@ -410,15 +410,24 @@ Just checking that there occurred no problems:
 
 The output should look something like this:
 #+RESULTS: networkd-status
-: ○ systemd-networkd.service - Network Configuration
-:      Loaded: loaded (/usr/lib/systemd/system/systemd-networkd.service; disabled; preset: disabled)
-:     Drop-In: /usr/lib/systemd/system/service.d
-:              └─10-timeout-abort.conf, 50-keep-warm.conf
-:      Active: inactive (dead)
-: TriggeredBy: ○ systemd-networkd.socket
-:        Docs: man:systemd-networkd.service(8)
-:              man:org.freedesktop.network1(5)
-:    FD Store: 0 (limit: 512)
+#+begin_example
+● systemd-networkd.service - Network Configuration
+     Loaded: loaded (/usr/lib/systemd/system/systemd-networkd.service; enabled; preset: disabled)
+     Active: active (running) since Thu 2025-07-31 07:45:37 CEST; 2 days ago
+ Invocation: 8fc13f7bd3854763a86c1eb8900269a7
+TriggeredBy: ● systemd-networkd.socket
+       Docs: man:systemd-networkd.service(8)
+             man:org.freedesktop.network1(5)
+   Main PID: 1521 (systemd-network)
+     Status: "Processing requests..."
+      Tasks: 1 (limit: 19023)
+   FD Store: 0 (limit: 512)
+        CPU: 3.775s
+     CGroup: /system.slice/systemd-networkd.service
+             └─1521 /usr/lib/systemd/systemd-networkd
+
+Warning: some journal files were not opened due to insufficient permissions.
+#+end_example
 
 And I also check that all device are up and configured:
 
@@ -427,10 +436,16 @@ And I also check that all device are up and configured:
   ip --brief a 
 #+END_SRC
 
+Only the ~Office~ interface should get an Global Unicast IPv6 Address (~GUA~).
+
 #+RESULTS: ipbrief
-: lo               UNKNOWN        127.0.0.1/8 ::1/128 
-: wlp170s0         UP             172.16.20.66/24 3fff:abc:245:bf0d:1ad:1ab6:f1d9:4974/64 fe80::80f3:a041:2de9:3fe7/64 
-: tailscale0       UNKNOWN        100.123.223.106/32 fd7a:115c:a1e0::8a01:df76/128 fe80::a47a:c117:fe62:8f8f/64 
+#+begin_example
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp0s16f0u1      UP             172.16.10.154/24 metric 1024 fe80::dabb:c1ff:fe8b:b9d1/64 
+br20             UP             fe80::84d9:45ff:fe20:bb32/64 
+Office@enp0s16f0u1 UP             172.16.10.155/24 metric 1024 3fff:abc:def:bf0c:dabb:c1ff:fe8b:b9d1/64 fe80::dabb:c1ff:fe8b:b9d1/64 
+VM@enp0s16f0u1   UP             fe80::dabb:c1ff:fe8b:b9d1/64 
+#+end_example
 
 
 * Disable filtering for the bridge device

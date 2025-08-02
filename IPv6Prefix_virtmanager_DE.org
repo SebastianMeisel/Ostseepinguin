@@ -316,7 +316,50 @@ Sie müssen sicherstellen, dass die Schnittstelle, die mit dem Host-PC verbunden
 #+ATTR_ORG: :width 700
 [[file:img/PortKonfigurationSwitch.png]]
 
-
+* Wechsel zu systemd-networkd
+Auf meinem System lief bisher ~NetworkManager~, den ich jetzt durch ~systemd-networkd~ ersetzen möchte, was ohnehin die bessere Wahl auf einem Desktop ohne ~WLAN~ ist. Das ist einfach zu bewerkstelligen, indem man folgendes ausführt:
+#+BEGIN_SRC bash
+  sudo systemctl disable --now NetworkManager
+  sydo systemctl enable --now systemd-networkd
+#+END_SRC
+Nur zur Überprüfung, dass keine Probleme aufgetreten sind:
+#+Name: networkd-status
+#+BEGIN_SRC bash :export both :results verbatim
+  systemctl status systemd-networkd
+#+END_SRC
+Die Ausgabe sollte etwa so aussehen:
+#+RESULTS: networkd-status
+#+begin_example
+● systemd-networkd.service - Network Configuration
+     Loaded: loaded (/usr/lib/systemd/system/systemd-networkd.service; enabled; preset: disabled)
+     Active: active (running) since Thu 2025-07-31 07:45:37 CEST; 2 days ago
+ Invocation: 8fc13f7bd3854763a86c1eb8900269a7
+TriggeredBy: ● systemd-networkd.socket
+       Docs: man:systemd-networkd.service(8)
+             man:org.freedesktop.network1(5)
+   Main PID: 1521 (systemd-network)
+     Status: "Processing requests..."
+      Tasks: 1 (limit: 19023)
+   FD Store: 0 (limit: 512)
+        CPU: 3.775s
+     CGroup: /system.slice/systemd-networkd.service
+             └─1521 /usr/lib/systemd/systemd-networkd
+Warning: some journal files were not opened due to insufficient permissions.
+#+end_example
+Und ich überprüfe auch, dass alle Geräte aktiv und konfiguriert sind:
+#+Name: ipbrief
+#+BEGIN_SRC bash :export both :results verbatim :eval no-export
+  ip --brief a 
+#+END_SRC
+Nur die ~Office~ Schnittstelle sollte eine Globale Unicast IPv6-Adresse (~GUA~) erhalten.
+#+RESULTS: ipbrief
+#+begin_example
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp0s16f0u1      UP             172.16.10.154/24 metric 1024 fe80::dabb:c1ff:fe8b:b9d1/64 
+br20             UP             fe80::84d9:45ff:fe20:bb32/64 
+Office@enp0s16f0u1 UP             172.16.10.155/24 metric 1024 3fff:abc:def:bf0c:dabb:c1ff:fe8b:b9d1/64 fe80::dabb:c1ff:fe8b:b9d1/64 
+VM@enp0s16f0u1   UP             fe80::dabb:c1ff:fe8b:b9d1/64 
+#+end_example
 
 * Filterung für das Bridge-Gerät deaktivieren
 
