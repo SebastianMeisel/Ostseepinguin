@@ -409,7 +409,6 @@ Just checking that there occurred no problems:
 
 
 The output should look something like this:
-#+RESULTS: networkd-status
 #+begin_example
 ● systemd-networkd.service - Network Configuration
      Loaded: loaded (/usr/lib/systemd/system/systemd-networkd.service; enabled; preset: disabled)
@@ -438,7 +437,6 @@ And I also check that all device are up and configured:
 
 Only the ~Office~ interface should get an Global Unicast IPv6 Address (~GUA~).
 
-#+RESULTS: ipbrief
 #+begin_example
 lo               UNKNOWN        127.0.0.1/8 ::1/128 
 enp0s16f0u1      UP             172.16.10.154/24 metric 1024 fe80::dabb:c1ff:fe8b:b9d1/64 

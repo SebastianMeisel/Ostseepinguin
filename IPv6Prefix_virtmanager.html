@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-08-02 Sa 19:03 -->
+<!-- 2025-08-02 Sa 19:16 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>IPv6PrefixDelegation for Virtual Machine Manager</title>
@@ -200,7 +200,7 @@
 <h1 class="title">IPv6PrefixDelegation for Virtual Machine Manager</h1>
 
 
-<div id="orgd2effec" class="figure">
+<div id="org71e44b9" class="figure">
 <p><img src="img/Ostseepinguin.png" alt="The Ostseepinguin banner showing a baltic penguin on the beach." width="100%" />
 </p>
 </div>
@@ -210,7 +210,7 @@
 <label for="darkmode-toggle"></label></input>
 <script src="script.js"></script>
 
-<div class="menu" id="orga0af6cd">
+<div class="menu" id="org3c8df8b">
 <p>
 <a href="IPv6Prefix_virtmanager_DE.html">🇩🇪 DE</a>
 </p>
@@ -228,9 +228,9 @@
 </p>
 
 </div>
-<div id="outline-container-orgcd2add5" class="outline-2">
-<h2 id="orgcd2add5">Introduction</h2>
-<div class="outline-text-2" id="text-orgcd2add5">
+<div id="outline-container-org08ca5b8" class="outline-2">
+<h2 id="org08ca5b8">Introduction</h2>
+<div class="outline-text-2" id="text-org08ca5b8">
 <p>
 After I set up <a href="IPv6PrefixDelegation.html">IPv6 Prefix Delegation (<code>PD</code>) on my Linux router</a>, I realized that I still need an <code>IPv6</code> subnet for the virtual machines (<code>VMs</code>) I run on my desktop PC.
 </p>
@@ -248,17 +248,17 @@ In the end my network is supposed to look like this:
 </p>
 
 
-<div id="org156551e" class="figure">
+<div id="org9bd6944" class="figure">
 <p><img src="img/IPv6Network_virtmanager.png" alt="IPv6Network_virtmanager.png" width="80% :alt: Left: The Internet (as a cloud) is connected to a home router via fiber. From there, an Ethernet connection is drawn to a switch, which is connected to a Raspberry Pi, that acts as a router. Above, the switch is connected to a Wireless AP, that provides WiFi to various mobile devices in the VLAN &quot;WLAN&quot;, which is colored light orange. Beneath, a desktop PC is connected to the switch, which is in the VLAN &quot;Office&quot;, colored in light purple. Inside this Office PC, a virtual machine (VM) is running, which is itself connected to the VLAN &quot;VLAN VM&quot;, depicted by a smaller blue network interface box within the Office PC." />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org4cdf125" class="outline-2">
-<h2 id="org4cdf125">Add new VLAN on the Switch</h2>
-<div class="outline-text-2" id="text-org4cdf125">
+<div id="outline-container-org434ddea" class="outline-2">
+<h2 id="org434ddea">Add new VLAN on the Switch</h2>
+<div class="outline-text-2" id="text-org434ddea">
 
-<div id="org7fc8830" class="figure">
+<div id="orgbea912f" class="figure">
 <p><img src="img/Switch_VLAN30.png" alt="Switch_VLAN30.png" width="50%" />
 </p>
 </div>
@@ -267,15 +267,15 @@ In the end my network is supposed to look like this:
 ATTR<sub>HTML</sub>: :width 50%
 </p>
 
-<div id="orgbe0b626" class="figure">
+<div id="orgf9aba75" class="figure">
 <p><img src="img/Switch_VLANPorts.png" alt="Switch_VLANPorts.png" />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org48e774b" class="outline-2">
-<h2 id="org48e774b">Add new VLAN on the Router</h2>
-<div class="outline-text-2" id="text-org48e774b">
+<div id="outline-container-org854939a" class="outline-2">
+<h2 id="org854939a">Add new VLAN on the Router</h2>
+<div class="outline-text-2" id="text-org854939a">
 <div class="org-src-container">
 <pre class="src src-text">[Match]
 Name=eth0
@@ -338,13 +338,13 @@ SubnetId=0x2
 </div>
 </div>
 </div>
-<div id="outline-container-org4eab6f9" class="outline-2">
-<h2 id="org4eab6f9">Configure Host</h2>
-<div class="outline-text-2" id="text-org4eab6f9">
+<div id="outline-container-org55ee74a" class="outline-2">
+<h2 id="org55ee74a">Configure Host</h2>
+<div class="outline-text-2" id="text-org55ee74a">
 </div>
-<div id="outline-container-org0177588" class="outline-3">
-<h3 id="org0177588">Configure networkd</h3>
-<div class="outline-text-3" id="text-org0177588">
+<div id="outline-container-org73a486a" class="outline-3">
+<h3 id="org73a486a">Configure networkd</h3>
+<div class="outline-text-3" id="text-org73a486a">
 <p>
 First, configure the physical Ethernet interface in <code>/etc/systemd/network/10-eth0.network</code>. I match the device by <code>MACAddress</code> rather than name, which avoids renaming issues after reboots or BIOS updates.
 </p>
@@ -400,15 +400,15 @@ VLAN=VM
 </div>
 </div>
 </div>
-<div id="outline-container-org959add1" class="outline-3">
-<h3 id="org959add1">VLAN 10: Host network</h3>
-<div class="outline-text-3" id="text-org959add1">
+<div id="outline-container-org6183b12" class="outline-3">
+<h3 id="org6183b12">VLAN 10: Host network</h3>
+<div class="outline-text-3" id="text-org6183b12">
 <p>
 I want to use the Office <code>VLAN</code> for my host, as it is my Office PC in <code>/etc/systemd/network/00-vlan10.netdev</code>. To use it I need to first define a virtual network of <code>Kind</code> <code>vlan</code>. In the <code>[VLAN]</code> I need to give the <code>VLAN Id</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-conf" id="org92b12d9">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">NetDev</span>]
+<pre class="src src-conf" id="orgcee0aa5">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">NetDev</span>]
 <span style="font-style: italic;">Name</span>=Office
 <span style="font-style: italic;">Kind</span>=vlan
 
@@ -423,7 +423,7 @@ Next I have to configure it in <code>/etc/systemd/network/20-vlan10.network</cod
 
 
 <div class="org-src-container">
-<pre class="src src-conf" id="org7f35276">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Match</span>]
+<pre class="src src-conf" id="org322e540">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Match</span>]
 <span style="font-style: italic;">Name</span>=Office
 <span style="font-style: italic;">Type</span>=vlan
 
@@ -440,16 +440,16 @@ This will be the device I actually connect to on my host.
 </div>
 </div>
 </div>
-<div id="outline-container-orge2350ad" class="outline-2">
-<h2 id="orge2350ad">VLAN 30: Bridge for VMs</h2>
-<div class="outline-text-2" id="text-orge2350ad">
+<div id="outline-container-org37f0a7c" class="outline-2">
+<h2 id="org37f0a7c">VLAN 30: Bridge for VMs</h2>
+<div class="outline-text-2" id="text-org37f0a7c">
 <p>
 Next I need a <code>VLAN</code> interface for the virtual machines:
 </p>
 </div>
-<div id="outline-container-org94efdc1" class="outline-3">
-<h3 id="org94efdc1">VLAN 30: Bridge for VMs</h3>
-<div class="outline-text-3" id="text-org94efdc1">
+<div id="outline-container-orgd8c6a2d" class="outline-3">
+<h3 id="orgd8c6a2d">VLAN 30: Bridge for VMs</h3>
+<div class="outline-text-3" id="text-orgd8c6a2d">
 <p>
 NAME: 50-vlan20.netdev
 </p>
@@ -466,9 +466,9 @@ NAME: 50-vlan20.netdev
 </div>
 </div>
 </div>
-<div id="outline-container-org8133a92" class="outline-2">
-<h2 id="org8133a92">Bridge device (br30)</h2>
-<div class="outline-text-2" id="text-org8133a92">
+<div id="outline-container-org7792bab" class="outline-2">
+<h2 id="org7792bab">Bridge device (br30)</h2>
+<div class="outline-text-2" id="text-org7792bab">
 <p>
 And I need a brigde device to which the <code>VMs</code> can connect.
 </p>
@@ -480,9 +480,9 @@ And I need a brigde device to which the <code>VMs</code> can connect.
 </div>
 </div>
 </div>
-<div id="outline-container-org4f87ce6" class="outline-2">
-<h2 id="org4f87ce6">Attach VLAN 30 to the bridge</h2>
-<div class="outline-text-2" id="text-org4f87ce6">
+<div id="outline-container-orgea90bbd" class="outline-2">
+<h2 id="orgea90bbd">Attach VLAN 30 to the bridge</h2>
+<div class="outline-text-2" id="text-orgea90bbd">
 <p>
 Now I need to connect the bridge device to the virtual <code>VLAN</code> interface, I called <code>VM</code>. For that I use the following options in <code>/etc/systemd/network/20-vlan3.network</code>.:
 </p>
@@ -506,9 +506,9 @@ Now I need to connect the bridge device to the virtual <code>VLAN</code> interfa
 </pre>
 </div>
 </div>
-<div id="outline-container-org6234ae7" class="outline-3">
-<h3 id="org6234ae7">Bridge interface configuration</h3>
-<div class="outline-text-3" id="text-org6234ae7">
+<div id="outline-container-org53857bc" class="outline-3">
+<h3 id="org53857bc">Bridge interface configuration</h3>
+<div class="outline-text-3" id="text-org53857bc">
 <p>
 The bridge itself should be transparent, not routing or managing <code>RA</code>:
 </p>
@@ -523,7 +523,7 @@ Explanation:
 </ul>
 
 <div class="org-src-container">
-<pre class="src src-conf" id="org9820899">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Match</span>]
+<pre class="src src-conf" id="org310b1be">[<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Match</span>]
 <span style="font-style: italic;">Name</span>=br30
 
 [<span style="color: #a2a0b2; font-weight: bold; font-style: italic;">Network</span>]
@@ -537,9 +537,9 @@ Explanation:
 </div>
 </div>
 </div>
-<div id="outline-container-org28e0549" class="outline-2">
-<h2 id="org28e0549">Virtual Machine Configuration</h2>
-<div class="outline-text-2" id="text-org28e0549">
+<div id="outline-container-org5ec2719" class="outline-2">
+<h2 id="org5ec2719">Virtual Machine Configuration</h2>
+<div class="outline-text-2" id="text-org5ec2719">
 <p>
 Connect your VM interfaces to <code>br30</code> using `virt-manager` or XML: 
 </p>
@@ -553,15 +553,15 @@ Connect your VM interfaces to <code>br30</code> using `virt-manager` or XML:
 </div>
 
 
-<div id="orgc3edb28" class="figure">
+<div id="org49f83dd" class="figure">
 <p><img src="img/VirtManagerBridge.png" alt="Screenshot of the network interface settings of a virtual machine, from the Virt-Manager GUI. On the left, a vertical navigation menu lists various configuration sections including “Overview,” “OS information,” “CPUs,” “Memory,” “NIC :e7:4c:6a” (currently selected),  and others. On the right, the details tab is open for the virtual network interface: Tab: “Details” (active, next to “XML”); Network source: “Bridge device...”; Device name: br20; Device model: virtio (dropdown shown); MAC address: 52:54:00:e7:4c:6a; IP address: “Unknown”; Link state: active (checkbox checked)." width="50%" />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org56babde" class="outline-2">
-<h2 id="org56babde">Configure VLAN 30 on the router</h2>
-<div class="outline-text-2" id="text-org56babde">
+<div id="outline-container-org2d65dd1" class="outline-2">
+<h2 id="org2d65dd1">Configure VLAN 30 on the router</h2>
+<div class="outline-text-2" id="text-org2d65dd1">
 <p>
 On my raspberry pi router I now need to configure the new <code>VLAN 30</code> for the <code>VMs</code>. First I need to configure <code>/etc/systemd/network/00-vlan30.netdev</code> there:
 </p>
@@ -576,9 +576,9 @@ Id=30
 </pre>
 </div>
 </div>
-<div id="outline-container-org85cbb84" class="outline-3">
-<h3 id="org85cbb84">Bridge device (br20)</h3>
-<div class="outline-text-3" id="text-org85cbb84">
+<div id="outline-container-org306dc27" class="outline-3">
+<h3 id="org306dc27">Bridge device (br20)</h3>
+<div class="outline-text-3" id="text-org306dc27">
 <p>
 Next comes <code>/etc/systemd/network/20-vlan30.network</code>:
 </p>
@@ -591,9 +591,9 @@ Type=vlan
 </div>
 </div>
 </div>
-<div id="outline-container-orgfece8aa" class="outline-3">
-<h3 id="orgfece8aa">Attach VLAN 20 to the bridge</h3>
-<div class="outline-text-3" id="text-orgfece8aa">
+<div id="outline-container-orge04e7de" class="outline-3">
+<h3 id="orge04e7de">Attach VLAN 20 to the bridge</h3>
+<div class="outline-text-3" id="text-orge04e7de">
 <p>
 In the <code>[Network]</code> section we need the following options:
 </p>
@@ -617,9 +617,9 @@ DHCPPrefixDelegation=yes
 </div>
 </div>
 </div>
-<div id="outline-container-orgfccadbf" class="outline-3">
-<h3 id="orgfccadbf">Bridge interface configuration</h3>
-<div class="outline-text-3" id="text-orgfccadbf">
+<div id="outline-container-orgb727341" class="outline-3">
+<h3 id="orgb727341">Bridge interface configuration</h3>
+<div class="outline-text-3" id="text-orgb727341">
 <dl class="org-dl">
 <dt>Token=::1</dt><dd>Specifies the interface identifier (<code>IID</code>) suffix to be used when constructing the delegated address or prefix. This value is appended to the delegated prefix to form the full IPv6 address. For example, with a delegated prefix <code>2001:db8:1234:567c:/62</code> and <code>Token=::1</code>, the resulting address might be <code>2001:db8:1234:567c:1</code>.</dd>
 <dt>SubnetId=0x2</dt><dd>Specifies a hexadecimal subnet ID used to select a specific <code>/64</code> subnet from the delegated prefix. For example, with a delegated <code>/62</code>, setting <code>SubnetId=0x2</code> would assign the third network <code>2001:db8:1234:567e::/64</code> to the interface.</dd>
@@ -675,15 +675,15 @@ dhcp-option=tag:vlan30,option:dns-server,192.168.178.254
 </div>
 </div>
 </div>
-<div id="outline-container-org582e55f" class="outline-2">
-<h2 id="org582e55f">Configure VLAN 30 on the Switch</h2>
-<div class="outline-text-2" id="text-org582e55f">
+<div id="outline-container-org0b74b19" class="outline-2">
+<h2 id="org0b74b19">Configure VLAN 30 on the Switch</h2>
+<div class="outline-text-2" id="text-org0b74b19">
 <p>
 For the whole setup to work I also need to create the <code>VLAN</code> with <code>Id 30</code> on the managed switch. How to do this depends on your type of switch of course.
 </p>
 
 
-<div id="org5784fff" class="figure">
+<div id="org0773b0f" class="figure">
 <p><img src="img/VLAN30_Switch.png" alt="Screenshot of the VLAN configuration page on a Netgear S350 Smart Managed Pro Switch (example). The interface lists VLANs with their IDs, names, and types. VLAN 30 named &quot;VMs&quot; is selected and set as Statisch (Static). Other VLANs include ID 1 (default), 2 (Auto-VoIP), 10 (Office), 20 (WLAN), and 4089 (Auto-Video). The user is in the “Switching” &gt; “VLAN” &gt; “VLAN-Konfiguration” section." width="50%" />
 </p>
 </div>
@@ -693,15 +693,15 @@ You need to make sure, that the interface connect to the host PC is marked as �
 </p>
 
 
-<div id="orgd611a9e" class="figure">
+<div id="orge64f6a6" class="figure">
 <p><img src="img/PortKonfigurationSwitch.png" alt="Screenshot of the “Port-PVID-Konfiguration” page on a Netgear S350 switch. The table shows port-based VLAN configuration. Ports where VLAN 30 is configured: g1: PVID: 10, VLAN Member: 1,10,30, VLAN Tag: 10,30; g6: PVID: 1, VLAN Member: 1,10,30, VLAN Tag: 10,30. Other ports (g2 to g5) are not members of VLAN 30. The active section in the sidebar is Port-PVID-Konfiguration under “Erweitert” (German for Advanced)." width="50%" />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org4cd8ebf" class="outline-2">
-<h2 id="org4cd8ebf">Switch to systemd-networkd</h2>
-<div class="outline-text-2" id="text-org4cd8ebf">
+<div id="outline-container-org23d5bd6" class="outline-2">
+<h2 id="org23d5bd6">Switch to systemd-networkd</h2>
+<div class="outline-text-2" id="text-org23d5bd6">
 <p>
 My system ran on <code>NetworkManager</code>, which I want to replace by <code>systemd-networkd</code> now, which is the better choice on a desktop without <code>Wifi</code> anyway. This is easly done by running:
 </p>
@@ -717,7 +717,7 @@ Just checking that there occurred no problems:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash" id="org0c78128">systemctl status systemd-networkd
+<pre class="src src-bash" id="org48e31a1">systemctl status systemd-networkd
 </pre>
 </div>
 
@@ -725,24 +725,50 @@ Just checking that there occurred no problems:
 <p>
 The output should look something like this:
 </p>
+<pre class="example" id="org0789228">
+● systemd-networkd.service - Network Configuration
+     Loaded: loaded (/usr/lib/systemd/system/systemd-networkd.service; enabled; preset: disabled)
+     Active: active (running) since Thu 2025-07-31 07:45:37 CEST; 2 days ago
+ Invocation: 8fc13f7bd3854763a86c1eb8900269a7
+TriggeredBy: ● systemd-networkd.socket
+       Docs: man:systemd-networkd.service(8)
+             man:org.freedesktop.network1(5)
+   Main PID: 1521 (systemd-network)
+     Status: "Processing requests..."
+      Tasks: 1 (limit: 19023)
+   FD Store: 0 (limit: 512)
+        CPU: 3.775s
+     CGroup: /system.slice/systemd-networkd.service
+             └─1521 /usr/lib/systemd/systemd-networkd
+
+Warning: some journal files were not opened due to insufficient permissions.
+</pre>
 
 <p>
 And I also check that all device are up and configured:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash" id="org5335b21">ip --brief a 
+<pre class="src src-bash" id="org7e6508b">ip --brief a 
 </pre>
 </div>
 
 <p>
 Only the <code>Office</code> interface should get an Global Unicast IPv6 Address (<code>GUA</code>).
 </p>
+
+<pre class="example" id="org75f8205">
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp0s16f0u1      UP             172.16.10.154/24 metric 1024 fe80::dabb:c1ff:fe8b:b9d1/64 
+br20             UP             fe80::84d9:45ff:fe20:bb32/64 
+Office@enp0s16f0u1 UP             172.16.10.155/24 metric 1024 3fff:abc:def:bf0c:dabb:c1ff:fe8b:b9d1/64 fe80::dabb:c1ff:fe8b:b9d1/64 
+VM@enp0s16f0u1   UP             fe80::dabb:c1ff:fe8b:b9d1/64 
+</pre>
 </div>
 </div>
-<div id="outline-container-orge6abdff" class="outline-2">
-<h2 id="orge6abdff">Disable filtering for the bridge device</h2>
-<div class="outline-text-2" id="text-orge6abdff">
+<div id="outline-container-orge366abf" class="outline-2">
+<h2 id="orge366abf">Disable filtering for the bridge device</h2>
+<div class="outline-text-2" id="text-orge366abf">
 <p>
 Up to this point everything work very straight forward. But when I tried to connect to the network, I didn't get an address. It took me quite some time to find the problem and solve it.
 </p>
@@ -771,9 +797,9 @@ This would however only take affect after a system restart, unless you read the 
 </div>
 </div>
 </div>
-<div id="outline-container-org0dbe6b9" class="outline-2">
-<h2 id="org0dbe6b9">Conclusion</h2>
-<div class="outline-text-2" id="text-org0dbe6b9">
+<div id="outline-container-org0f6a1ae" class="outline-2">
+<h2 id="org0f6a1ae">Conclusion</h2>
+<div class="outline-text-2" id="text-org0f6a1ae">
 <p>
 When you know the options to set, it is very easy to set up a dedicated VLAN from you router straight to you <code>VMs</code>. There are of course two more things to consider:
 </p>
@@ -819,7 +845,7 @@ Host *
 <div id="postamble" class="status">
 <p class="date">Date: 2025-06-18 Mi 00:00</p>
 <p class="author">Author: Sebastian Meisel</p>
-<p class="date">Created: 2025-08-02 Sa 19:03</p>
+<p class="date">Created: 2025-08-02 Sa 19:16</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

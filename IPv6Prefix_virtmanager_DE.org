@@ -328,7 +328,7 @@ Nur zur Überprüfung, dass keine Probleme aufgetreten sind:
   systemctl status systemd-networkd
 #+END_SRC
 Die Ausgabe sollte etwa so aussehen:
-#+RESULTS: networkd-status
+
 #+begin_example
 ● systemd-networkd.service - Network Configuration
      Loaded: loaded (/usr/lib/systemd/system/systemd-networkd.service; enabled; preset: disabled)
@@ -352,7 +352,7 @@ Und ich überprüfe auch, dass alle Geräte aktiv und konfiguriert sind:
   ip --brief a 
 #+END_SRC
 Nur die ~Office~ Schnittstelle sollte eine Globale Unicast IPv6-Adresse (~GUA~) erhalten.
-#+RESULTS: ipbrief
+
 #+begin_example
 lo               UNKNOWN        127.0.0.1/8 ::1/128 
 enp0s16f0u1      UP             172.16.10.154/24 metric 1024 fe80::dabb:c1ff:fe8b:b9d1/64 
