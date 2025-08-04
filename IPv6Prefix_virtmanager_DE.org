@@ -250,7 +250,7 @@ Für das Legacy-~IPv4~ verwenden wir einfach eine statische Adresse.
 #+END_SRC
 
 - Token=::1 ::
-  Gibt das Interface-Identifier (IID)-Suffix an, das bei der Konstruktion der delegierten Adresse oder des Präfixes verwendet werden soll. Dieser Wert wird an den delegierten Präfix angehängt, um die vollständige IPv6-Adresse zu bilden. Zum Beispiel würde mit einem delegierten Präfix `2001:db8:1234:567c:/62` und `Token=::1` die resultierende Adresse `2001:db8:1234:567c:1` lauten.
+  Gibt das Interface-Identifier (IID)-Suffix an, das bei der Konstruktion der delegierten Adresse oder des Präfixes verwendet werden soll. Dieser Wert wird an den delegierten Präfix angehängt, um die vollständige IPv6-Adresse zu bilden. Zum Beispiel würde mit einem delegierten Präfix `2001:db8:1234:567c::/62` und `Token=::1` die resultierende Adresse `2001:db8:1234:567c::1` lauten.
 - SubnetId=0x2 ::
   Gibt eine hexadezimale Subnetz-ID an, die verwendet wird, um ein spezifisches /64-Subnetz aus dem delegierten Präfix auszuwählen. Zum Beispiel würde bei einem delegierten /62 die Einstellung `SubnetId=0x2` das dritte Netzwerk `2001:db8:1234:567e::/64` der Schnittstelle zuweisen.
 - Assign=yes ::

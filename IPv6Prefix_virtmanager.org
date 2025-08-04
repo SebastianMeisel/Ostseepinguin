@@ -323,7 +323,7 @@ In the ~[Network]~ section we need the following options:
 ** Bridge interface configuration
 
 - Token=::1 ::
-  Specifies the interface identifier (~IID~) suffix to be used when constructing the delegated address or prefix. This value is appended to the delegated prefix to form the full IPv6 address. For example, with a delegated prefix ~2001:db8:1234:567c:/62~ and ~Token=::1~, the resulting address might be ~2001:db8:1234:567c::1~.
+  Specifies the interface identifier (~IID~) suffix to be used when constructing the delegated address or prefix. This value is appended to the delegated prefix to form the full IPv6 address. For example, with a delegated prefix ~2001:db8:1234:567c::/62~ and ~Token=::1~, the resulting address might be ~2001:db8:1234:567c::1~.
 - SubnetId=0x2 ::
   Specifies a hexadecimal subnet ID used to select a specific ~/64~ subnet from the delegated prefix. For example, with a delegated ~/62~, setting ~SubnetId=0x2~ would assign the third network ~2001:db8:1234:567e::/64~ to the interface.
 - Assign=yes ::
